@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>M-Mkulima Nyandarua Pro</title>
+    <!-- Custom Design System CSS -->
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+    <div class="app-container">
+        <!-- APP HEADER -->
+        <header class="app-header">
+            <div>
+                <h1>🌾 M-Mkulima Portal</h1>
+                <p>Nyandarua Regulated Framework</p>
+            </div>
+            <span id="badgeLocation" class="location-badge hidden">📍 Nyandarua</span>
+        </header>
+
+        <!-- SCREEN 1: FARMER REGISTRATION -->
+        <main id="screen-register" class="screen">
+            <div class="card">
+                <div class="text-center" style="margin-bottom: 1.25rem;">
+                    <span style="font-size: 2.5rem; display: inline-block; margin-bottom: 0.5rem;">🛡️</span>
+                    <h2 class="card-title">Farmer Sign-Up</h2>
+                    <p class="card-subtitle">Passwords require a CAPITAL letter, a number, and a special character.</p>
+                </div>
+                
+                <form id="registrationForm" onsubmit="processFarmerRegistration(event)">
+                    <div class="form-group">
+                        <label class="form-label">Full Name</label>
+                        <input type="text" id="farmerName" required class="form-input" placeholder="e.g., John Kamau">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Phone Number</label>
+                        <input type="tel" id="farmerPhone" required class="form-input" placeholder="e.g., 0718493313">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Secure Password</label>
+                        <input type="password" id="farmerPass" required class="form-input" placeholder="Min 6 characters (Abc1@)">
+                        <p class="form-hint">Must include uppercase letters, numbers, and at least one special character.</p>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Your Sub-County</label>
+                        <select id="farmerSubCounty" required onchange="handleSubCountyChange('farmerSubCounty', 'farmerWard')" class="form-select">
+                            <option value="">-- Select Region --</option>
+                            <option value="Ol Kalou">Ol Kalou</option>
+                            <option value="Ol Joro Orok">Ol Joro Orok</option>
+                            <option value="Kinangop">Kinangop</option>
+                            <option value="Kipipiri">Kipipiri</option>
+                            <option value="Ndaragwa">Ndaragwa</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Your Ward</label>
+                        <select id="farmerWard" required disabled class="form-select">
+                            <option value="">-- Choose Sub-County First --</option>
+                        </select>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary mt-3">Register Account</button>
+                </form>
+                
+                <div class="text-center mt-4" style="padding-top: 1rem; border-top: 1px solid var(--border-light);">
+                    <button onclick="toggleModal('modalPasswordReset', true)" style="background: none; border: none; color: var(--primary-700); font-weight: 700; font-size: 0.8rem; cursor: pointer;">Forgot Password / Reset PIN?</button>
+                </div>
+            </div>
+        </main>
+
+        <!-- SCREEN 2: FODDER KNOWLEDGE BASE CATALOGUE -->
+        <main id="screen-fodder" class="screen hidden">
+            <!-- Support & Help Desk Banner -->
+            <div class="support-banner">
+                <p>📞 Support & Systems Help Desk:</p>
+                <div class="support-actions">
+                    <a href="tel:+254718493313" class="btn-call">📞 Call Support</a>
+                    <a href="mailto:gnmtech245@gmail.com" class="btn-email">✉️ Email Tech</a>
+                </div>
+            </div>
+
+            <div class="flex-between mb-4" style="margin-bottom: 1rem;">
+                <div>
+                    <h2 class="card-title" style="font-size: 1.25rem;">Fodder Hub</h2>
+                    <p class="card-subtitle">Explore protein or energy feeds capped at 1MB media limit.</p>
+                </div>
+                <button onclick="toggleModal('modalFodderUpload', true)" class="btn btn-primary btn-sm">+ Post Fodder</button>
+            </div>
+
+            <!-- Filter Tabs -->
+            <div class="filter-bar">
+                <button onclick="filterFodderDisplay('all')" id="tab-fodder-all" class="filter-tab active">All</button>
+                <button onclick="filterFodderDisplay('Protein')" id="tab-fodder-protein" class="filter-tab">Proteins</button>
+                <button onclick="filterFodderDisplay('Energy')" id="tab-fodder-energy" class="filter-tab">Energy</button>
+            </div>
+
+            <div id="containerFodderItems" style="display: flex; flex-direction: column; gap: 1rem;">
+                <!-- Dynamic Fodder Cards -->
+            </div>
+        </main>
+
+        <!-- SCREEN 3: VISUAL MARKETPLACE -->
+        <main id="screen-marketplace" class="screen hidden">
+            <div class="flex-between" style="margin-bottom: 1rem;">
+                <div>
+                    <h2 class="card-title" style="font-size: 1.25rem;">Nyandarua Marketplace</h2>
+                    <p class="card-subtitle">Trade farm produce, equipment inputs, and poultry livestock.</p>
+                </div>
+                <button onclick="toggleModal('modalMarketUpload', true)" class="btn btn-accent btn-sm">+ Add Listing</button>
+            </div>
+
+            <div id="containerMarketItems" style="display: flex; flex-direction: column; gap: 1rem;">
+                <!-- Dynamic Market Cards -->
+            </div>
+        </main>
+
+        <!-- SCREEN 4: VERIFIED VETERINARY DIRECTORY -->
+        <main id="screen-vets" class="screen hidden">
+            <div style="margin-bottom: 1rem;">
+                <h2 class="card-title" style="font-size: 1.25rem;">Regulatory Verified Vets</h2>
+                <p class="card-subtitle">Compliant with Kenya Veterinary Board (KVB) guidelines.</p>
+            </div>
+
+            <div id="containerVetsList" style="display: flex; flex-direction: column; gap: 1rem;">
+                <!-- Dynamic Vet Cards -->
+            </div>
+        </main>
+
+        <!-- MODAL 1: SCHEDULE VET VISIT -->
+        <div id="modalVetBooking" class="modal-overlay">
+            <div class="modal-content">
+                <h3 style="font-size: 1.15rem; font-weight: 800; margin-bottom: 0.25rem;">Schedule Vet Visit</h3>
+                <p id="targetVetLabel" style="font-size: 0.78rem; font-weight: 700; color: var(--primary-700); margin-bottom: 1rem;"></p>
+                
+                <div>
+                    <div class="form-group">
+                        <label class="form-label">Livestock Challenge / Symptoms</label>
+                        <textarea id="bookingSymptoms" rows="3" class="form-textarea" placeholder="Describe clinical symptoms or challenge..."></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Preferred Appointment Date</label>
+                        <input type="date" id="bookingDate" class="form-input">
+                    </div>
+
+                    <div style="display: flex; gap: 0.5rem; margin-top: 1rem;">
+                        <button onclick="toggleModal('modalVetBooking', false)" class="btn btn-secondary" style="flex: 1;">Cancel</button>
+                        <button onclick="executeConfirmVetBooking()" class="btn btn-primary" style="flex: 1;">Confirm</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- MODAL 2: FORGOT PASSWORD / SMS OTP RESET -->
+        <div id="modalPasswordReset" class="modal-overlay">
+            <div class="modal-content">
+                <h3 style="font-size: 1.15rem; font-weight: 800; margin-bottom: 0.25rem;">Reset PIN via SMS</h3>
+                <p style="font-size: 0.78rem; color: var(--text-muted); margin-bottom: 1rem;">Integration with Africa's Talking Gateway for automated OTP dispatch.</p>
+                
+                <div class="form-group">
+                    <label class="form-label">Registered Phone Number</label>
+                    <input type="tel" id="resetPhone" class="form-input" placeholder="e.g., 0718493313">
+                </div>
+
+                <div style="display: flex; gap: 0.5rem; margin-top: 1rem;">
+                    <button onclick="toggleModal('modalPasswordReset', false)" class="btn btn-secondary" style="flex: 1;">Cancel</button>
+                    <button onclick="triggerPasswordResetSMS()" class="btn btn-primary" style="flex: 1;">Send SMS OTP</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- MODAL 3: POST FODDER -->
+        <div id="modalFodderUpload" class="modal-overlay">
+            <div class="modal-content">
+                <h3 style="font-size: 1.15rem; font-weight: 800; margin-bottom: 1rem;">Post Fodder Listing</h3>
+                
+                <form onsubmit="processFodderUpload(event)">
+                    <div class="form-group">
+                        <label class="form-label">Fodder Title</label>
+                        <input type="text" id="newFodderTitle" required class="form-input" placeholder="e.g., Rhodes Grass Bales">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Category</label>
+                        <select id="newFodderCategory" required class="form-select">
+                            <option value="Protein">Protein Feed</option>
+                            <option value="Energy">Energy Feed</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Price</label>
+                        <input type="text" id="newFodderPrice" required class="form-input" placeholder="e.g., KSh 350 / bale">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Description</label>
+                        <textarea id="newFodderDesc" required class="form-textarea" rows="2" placeholder="Quality details, moisture level..."></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Attachment Image (Max 1MB)</label>
+                        <input type="file" id="newFodderFile" accept="image/*" class="form-input" style="font-size: 0.8rem;">
+                    </div>
+
+                    <div style="display: flex; gap: 0.5rem; margin-top: 1rem;">
+                        <button type="button" onclick="toggleModal('modalFodderUpload', false)" class="btn btn-secondary" style="flex: 1;">Cancel</button>
+                        <button type="submit" class="btn btn-primary" style="flex: 1;">Publish</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- MODAL 4: ADD MARKET LISTING -->
+        <div id="modalMarketUpload" class="modal-overlay">
+            <div class="modal-content">
+                <h3 style="font-size: 1.15rem; font-weight: 800; margin-bottom: 1rem;">Post Marketplace Item</h3>
+                
+                <form onsubmit="processMarketListing(event)">
+                    <div class="form-group">
+                        <label class="form-label">Item Title</label>
+                        <input type="text" id="newMarketTitle" required class="form-input" placeholder="e.g., Friesian Cow / Potato Seeds">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Category</label>
+                        <select id="newMarketCategory" required class="form-select">
+                            <option value="Livestock">Livestock</option>
+                            <option value="Equipment">Equipment</option>
+                            <option value="Produce">Produce</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Price</label>
+                        <input type="text" id="newMarketPrice" required class="form-input" placeholder="e.g., KSh 45,000">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Phone Contact</label>
+                        <input type="tel" id="newMarketContact" class="form-input" placeholder="e.g., 0718493313">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Description</label>
+                        <textarea id="newMarketDesc" required class="form-textarea" rows="2" placeholder="Details about item..."></textarea>
+                    </div>
+
+                    <div style="display: flex; gap: 0.5rem; margin-top: 1rem;">
+                        <button type="button" onclick="toggleModal('modalMarketUpload', false)" class="btn btn-secondary" style="flex: 1;">Cancel</button>
+                        <button type="submit" class="btn btn-accent" style="flex: 1;">Post Item</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- BOTTOM APP NAVIGATION -->
+        <nav class="bottom-nav">
+            <button id="nav-register" onclick="switchScreen('screen-register')" class="nav-item active">
+                <span class="icon">👤</span>
+                <span>Account</span>
+            </button>
+            <button id="nav-fodder" onclick="switchScreen('screen-fodder')" class="nav-item">
+                <span class="icon">🌾</span>
+                <span>Fodder</span>
+            </button>
+            <button id="nav-market" onclick="switchScreen('screen-marketplace')" class="nav-item">
+                <span class="icon">🛒</span>
+                <span>Market</span>
+            </button>
+            <button id="nav-vets" onclick="switchScreen('screen-vets')" class="nav-item">
+                <span class="icon">🩺</span>
+                <span>Vets</span>
+            </button>
+        </nav>
+    </div>
+
+    <!-- Application Script -->
+    <script src="app.js"></script>
+</body>
+</html>
