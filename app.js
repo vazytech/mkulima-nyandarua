@@ -1,5 +1,5 @@
 /* ==========================================================================
-   M-MKULIMA NYANDARUA PRO - APPLICATION LOGIC & INTERACTIVITY
+   M-MKULIMA NYANDARUA PRO - APPLICATION LOGIC & SUPABASE CLOUD SYNC
    ========================================================================== */
 
 // Sub-County to Ward Mapping Data
@@ -11,23 +11,23 @@ const REGION_WARDS = {
   "Ndaragwa": ["Leshau Pondo", "Kiriita", "Central", "Shamata"]
 };
 
-// Initial Mock Data
-let fodderDatabase = [
+// Fallback Demo Data if database tables are empty
+let fallbackFodder = [
   { id: 1, title: "High-Protein Lucerne (Alfalfa) Bales", category: "Protein", price: "KSh 450 / bale", subcounty: "Ol Kalou", seller: "Wambugu Feeds", phone: "0712345678", desc: "Cured premium green lucerne bales. 22% crude protein content." },
   { id: 2, title: "Silage Bales (Yellow Corn)", category: "Energy", price: "KSh 2,800 / bale", subcounty: "Kinangop", seller: "Kinangop Dairy Coop", phone: "0723456789", desc: "Molasses treated maize silage ready for immediate milk production boost." },
   { id: 3, title: "Desmodium Seedlings & Cuttings", category: "Protein", price: "KSh 150 / bundle", subcounty: "Kipipiri", seller: "Nyandarua Seedlings", phone: "0734567890", desc: "Greenleaf desmodium nitrogen-fixing pasture cuttings." }
 ];
 
-let marketDatabase = [
+let fallbackMarket = [
   { id: 1, title: "Grade Holstein Fresh Heifer", price: "KSh 85,000", category: "Livestock", location: "Ol Joro Orok", contact: "0711223344", desc: "First calving in 2 weeks. Expected 28L/day capacity." },
   { id: 2, title: "Manual Chaff Cutter 3-Blade", price: "KSh 14,500", category: "Equipment", location: "Ol Kalou", contact: "0722334455", desc: "Heavy-duty hardened steel blades for dry and green fodder processing." },
   { id: 3, title: "Organic Certified Potato Seed (Shangi)", price: "KSh 2,200 / 50kg bag", category: "Produce", location: "Ndaragwa", contact: "0733445566", desc: "Clean, high-yield certified seed tubers directly from farm." }
 ];
 
-let vetDatabase = [
-  { id: 1, name: "Dr. James K. Kariuki", reg: "KVB/REG/2019/442", subcounty: "Ol Kalou", phone: "0718493313", spec: "Artificial Insemination & Dairy Herd Health" },
-  { id: 2, name: "Dr. Mary W. Njuguna", reg: "KVB/REG/2021/891", subcounty: "Kinangop", phone: "0720987654", spec: "Mastitis Control & Surgical Interventions" },
-  { id: 3, name: "Dr. Peter M. Mwangi", reg: "KVB/REG/2018/112", subcounty: "Ol Joro Orok", phone: "0733112233", spec: "Calf Rearing & Clinical Nutrition" }
+let fallbackVets = [
+  { id: 1, name: "Dr. James K. Kariuki", reg_number: "KVB/REG/2019/442", subcounty: "Ol Kalou", phone: "0718493313", specialization: "Artificial Insemination & Dairy Herd Health" },
+  { id: 2, name: "Dr. Mary W. Njuguna", reg_number: "KVB/REG/2021/891", subcounty: "Kinangop", phone: "0720987654", specialization: "Mastitis Control & Surgical Interventions" },
+  { id: 3, name: "Dr. Peter M. Mwangi", reg_number: "KVB/REG/2018/112", subcounty: "Ol Joro Orok", phone: "0733112233", specialization: "Calf Rearing & Clinical Nutrition" }
 ];
 
 let registeredFarmer = null;
@@ -86,7 +86,6 @@ function processFarmerRegistration(e) {
 
   registeredFarmer = { name, phone, subcounty, ward };
   
-  // Update UI Badge Header
   const badgeLocation = document.getElementById("badgeLocation");
   if (badgeLocation) {
     badgeLocation.textContent = `📍 ${subcounty} - ${ward}`;
@@ -111,7 +110,6 @@ function switchScreen(screenId) {
     }
   });
 
-  // Highlight active bottom nav tab
   const navMap = {
     "screen-register": "nav-register",
     "screen-fodder": "nav-fodder",
@@ -124,12 +122,29 @@ function switchScreen(screenId) {
   if (activeBtn) activeBtn.classList.add("active");
 }
 
-// Fodder Hub Render Logic
-function renderFodderItems(filter = "all") {
+// Fodder Hub Render Logic (Live Supabase + Fallback)
+async function renderFodderItems(filter = "all") {
   const container = document.getElementById("containerFodderItems");
   if (!container) return;
 
-  const items = filter === "all" ? fodderDatabase : fodderDatabase.filter(item => item.category === filter);
+  container.innerHTML = '<p class="text-center text-slate-400 text-xs py-6">⏳ Loading live fodder catalog from Supabase Cloud...</p>';
+
+  let items = fallbackFodder;
+
+  if (typeof db !== "undefined" && db) {
+    try {
+      let query = db.from("fodder").select("*").order("id", { ascending: false });
+      if (filter !== "all") {
+        query = query.eq("category", filter);
+      }
+      const { data, error } = await query;
+      if (!error && data && data.length > 0) {
+        items = data;
+      }
+    } catch (err) {
+      console.warn("Supabase fetch fallback:", err);
+    }
+  }
 
   if (items.length === 0) {
     container.innerHTML = '<p class="text-center text-slate-400 text-xs py-6">No fodder listings found in this category.</p>';
@@ -144,7 +159,7 @@ function renderFodderItems(filter = "all") {
       </div>
       <div>
         <h3 class="font-extrabold text-slate-900 text-base">${item.title}</h3>
-        <p class="text-xs text-slate-500 mt-1">${item.desc}</p>
+        <p class="text-xs text-slate-500 mt-1">${item.description || item.desc || ''}</p>
       </div>
       <div class="flex-between mt-2 pt-2 border-t text-xs text-slate-600">
         <span>📍 ${item.subcounty}</span>
@@ -161,12 +176,27 @@ function filterFodderDisplay(category) {
   renderFodderItems(category);
 }
 
-// Marketplace Render Logic
-function renderMarketItems() {
+// Marketplace Render Logic (Live Supabase + Fallback)
+async function renderMarketItems() {
   const container = document.getElementById("containerMarketItems");
   if (!container) return;
 
-  container.innerHTML = marketDatabase.map(item => `
+  container.innerHTML = '<p class="text-center text-slate-400 text-xs py-6">⏳ Loading live marketplace listings...</p>';
+
+  let items = fallbackMarket;
+
+  if (typeof db !== "undefined" && db) {
+    try {
+      const { data, error } = await db.from("marketplace").select("*").order("id", { ascending: false });
+      if (!error && data && data.length > 0) {
+        items = data;
+      }
+    } catch (err) {
+      console.warn("Supabase fetch fallback:", err);
+    }
+  }
+
+  container.innerHTML = items.map(item => `
     <div class="item-card">
       <div class="flex-between">
         <span class="item-badge badge-verified">${item.category}</span>
@@ -174,7 +204,7 @@ function renderMarketItems() {
       </div>
       <div>
         <h3 class="font-extrabold text-slate-900 text-base">${item.title}</h3>
-        <p class="text-xs text-slate-500 mt-1">${item.desc}</p>
+        <p class="text-xs text-slate-500 mt-1">${item.description || item.desc || ''}</p>
       </div>
       <div class="flex-between mt-2 pt-2 border-t text-xs text-slate-600">
         <span>📍 Location: ${item.location}</span>
@@ -184,20 +214,33 @@ function renderMarketItems() {
   `).join('');
 }
 
-// Verified Vets Render Logic
-function renderVetList() {
+// Verified Vets Render Logic (Live Supabase + Fallback)
+async function renderVetList() {
   const container = document.getElementById("containerVetsList");
   if (!container) return;
 
-  container.innerHTML = vetDatabase.map(vet => `
+  let items = fallbackVets;
+
+  if (typeof db !== "undefined" && db) {
+    try {
+      const { data, error } = await db.from("vets").select("*").order("id", { ascending: true });
+      if (!error && data && data.length > 0) {
+        items = data;
+      }
+    } catch (err) {
+      console.warn("Supabase fetch fallback:", err);
+    }
+  }
+
+  container.innerHTML = items.map(vet => `
     <div class="item-card">
       <div class="flex-between">
-        <span class="item-badge badge-protein">🛡️ ${vet.reg}</span>
+        <span class="item-badge badge-protein">🛡️ ${vet.reg_number || vet.reg}</span>
         <span class="text-xs font-bold text-emerald-700">📍 ${vet.subcounty}</span>
       </div>
       <div>
         <h3 class="font-extrabold text-slate-900 text-base">${vet.name}</h3>
-        <p class="text-xs text-slate-600 mt-0.5">Specialization: ${vet.spec}</p>
+        <p class="text-xs text-slate-600 mt-0.5">Specialization: ${vet.specialization || vet.spec || ''}</p>
       </div>
       <div class="flex gap-2 mt-2 pt-2 border-t">
         <a href="tel:${vet.phone}" class="btn btn-secondary btn-sm" style="flex:1">📞 Call Vet</a>
@@ -205,6 +248,72 @@ function renderVetList() {
       </div>
     </div>
   `).join('');
+}
+
+// Upload Fodder directly to Supabase Cloud Database
+async function processFodderUpload(e) {
+  e.preventDefault();
+  const title = document.getElementById("newFodderTitle").value.trim();
+  const category = document.getElementById("newFodderCategory").value;
+  const price = document.getElementById("newFodderPrice").value.trim();
+  const description = document.getElementById("newFodderDesc").value.trim();
+
+  const newItem = {
+    title,
+    category,
+    price,
+    subcounty: registeredFarmer ? registeredFarmer.subcounty : "Ol Kalou",
+    seller: registeredFarmer ? registeredFarmer.name : "Local Farmer",
+    phone: registeredFarmer ? registeredFarmer.phone : "0718493313",
+    description
+  };
+
+  if (typeof db !== "undefined" && db) {
+    const { error } = await db.from("fodder").insert([newItem]);
+    if (error) {
+      console.error("Supabase insert error:", error);
+      alert("⚠️ Cloud sync notice: Insert error (Make sure RLS policies are enabled on 'fodder' table).");
+    } else {
+      alert("⚡ Published live to Supabase Cloud!");
+    }
+  }
+
+  fallbackFodder.unshift({ id: Date.now(), ...newItem, desc: description });
+  renderFodderItems("all");
+  toggleModal("modalFodderUpload", false);
+}
+
+// Upload Marketplace Item directly to Supabase Cloud Database
+async function processMarketListing(e) {
+  e.preventDefault();
+  const title = document.getElementById("newMarketTitle").value.trim();
+  const category = document.getElementById("newMarketCategory").value;
+  const price = document.getElementById("newMarketPrice").value.trim();
+  const contact = document.getElementById("newMarketContact").value.trim();
+  const description = document.getElementById("newMarketDesc").value.trim();
+
+  const newItem = {
+    title,
+    category,
+    price,
+    location: registeredFarmer ? registeredFarmer.subcounty : "Nyandarua",
+    contact: contact || (registeredFarmer ? registeredFarmer.phone : "0700000000"),
+    description
+  };
+
+  if (typeof db !== "undefined" && db) {
+    const { error } = await db.from("marketplace").insert([newItem]);
+    if (error) {
+      console.error("Supabase insert error:", error);
+      alert("⚠️ Cloud sync notice: Insert error (Make sure RLS policies are enabled on 'marketplace' table).");
+    } else {
+      alert("⚡ Published live to Supabase Cloud!");
+    }
+  }
+
+  fallbackMarket.unshift({ id: Date.now(), ...newItem, desc: description });
+  renderMarketItems();
+  toggleModal("modalMarketUpload", false);
 }
 
 // Modals Handling
@@ -237,60 +346,6 @@ function executeConfirmVetBooking() {
 
   alert(`✅ Appointment Confirmed!\n\nVet: ${activeTargetVet}\nDate: ${date}\nDetails: ${symptoms || 'General Checkup'}\n\nA confirmation SMS has been dispatched via Africa's Talking Gateway.`);
   toggleModal("modalVetBooking", false);
-}
-
-function processFodderUpload(e) {
-  e.preventDefault();
-  const title = document.getElementById("newFodderTitle").value.trim();
-  const category = document.getElementById("newFodderCategory").value;
-  const price = document.getElementById("newFodderPrice").value.trim();
-  const desc = document.getElementById("newFodderDesc").value.trim();
-  const fileInput = document.getElementById("newFodderFile");
-
-  if (fileInput && fileInput.files.length > 0 && fileInput.files[0].size > 1024 * 1024) {
-    alert("⚠️ File upload error: Media attachment must be capped at 1MB max.");
-    return;
-  }
-
-  const newItem = {
-    id: Date.now(),
-    title,
-    category,
-    price,
-    subcounty: registeredFarmer ? registeredFarmer.subcounty : "Ol Kalou",
-    seller: registeredFarmer ? registeredFarmer.name : "Local Farmer",
-    phone: registeredFarmer ? registeredFarmer.phone : "0718493313",
-    desc
-  };
-
-  fodderDatabase.unshift(newItem);
-  renderFodderItems("all");
-  toggleModal("modalFodderUpload", false);
-  alert("🌾 Fodder listing published successfully!");
-}
-
-function processMarketListing(e) {
-  e.preventDefault();
-  const title = document.getElementById("newMarketTitle").value.trim();
-  const category = document.getElementById("newMarketCategory").value;
-  const price = document.getElementById("newMarketPrice").value.trim();
-  const contact = document.getElementById("newMarketContact").value.trim();
-  const desc = document.getElementById("newMarketDesc").value.trim();
-
-  const newItem = {
-    id: Date.now(),
-    title,
-    category,
-    price,
-    location: registeredFarmer ? registeredFarmer.subcounty : "Nyandarua",
-    contact: contact || (registeredFarmer ? registeredFarmer.phone : "0700000000"),
-    desc
-  };
-
-  marketDatabase.unshift(newItem);
-  renderMarketItems();
-  toggleModal("modalMarketUpload", false);
-  alert("🛒 Listing added to Nyandarua Marketplace!");
 }
 
 function triggerPasswordResetSMS() {
