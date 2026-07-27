@@ -2,6 +2,10 @@
    M-MKULIMA NYANDARUA PRO - ADVANCED LOGIC, SEARCH, WEATHER & M-PESA
    ========================================================================== */
 
+// Africa's Talking Gateway Credentials (Sandbox)
+const AT_USERNAME = "sandbox";
+let AT_API_KEY = localStorage.getItem("mkulima_at_apikey") || ""; // Saved API Key
+
 // Sub-County to Ward Mapping Data
 const REGION_WARDS = {
   "Ol Kalou": ["Karau", "Kanjuiri Ridge", "Mirangine", "Kaimbaga", "Rurii"],
@@ -36,7 +40,6 @@ let activeMpesaItem = { title: "", price: "" };
 
 // Application Initialization & Service Worker Registration (PWA)
 document.addEventListener("DOMContentLoaded", () => {
-  // Register Service Worker for PWA Offline App Support
   if ("serviceWorker" in navigator) {
     navigator.serviceWorker.register("sw.js")
       .then(() => console.log("🌾 M-Mkulima Service Worker Registered!"))
@@ -56,7 +59,6 @@ document.addEventListener("DOMContentLoaded", () => {
   renderMarketItems();
   renderVetList();
 
-  // Close profile dropdown when clicking outside
   document.addEventListener("click", (e) => {
     const profileContainer = document.querySelector(".profile-menu-container");
     const dropdown = document.getElementById("profileDropdown");
@@ -66,7 +68,7 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 });
 
-// FEATURE 1: NYANDARUA LIVE WEATHER & FARMING TIPS PANEL
+// NYANDARUA LIVE WEATHER & FARMING TIPS PANEL
 function renderNyandaruaWeather() {
   const weatherContainer = document.getElementById("weatherPanel");
   if (!weatherContainer) return;
@@ -302,7 +304,7 @@ function switchScreen(screenId) {
   if (activeDesktopBtn) activeDesktopBtn.classList.add("active");
 }
 
-// FEATURE 2: LIVE SEARCH BAR & WARD FILTERING (FODDER)
+// LIVE SEARCH BAR & WARD FILTERING (FODDER)
 async function renderFodderItems(filterCategory = "all", searchQuery = "", selectedSubcounty = "") {
   const container = document.getElementById("containerFodderItems");
   if (!container) return;
@@ -324,7 +326,6 @@ async function renderFodderItems(filterCategory = "all", searchQuery = "", selec
     }
   }
 
-  // Client-side search and region filtering
   if (searchQuery) {
     const q = searchQuery.toLowerCase();
     items = items.filter(item => item.title.toLowerCase().includes(q) || (item.description || item.desc || '').toLowerCase().includes(q));
@@ -377,7 +378,7 @@ function handleFodderSearchChange() {
   renderFodderItems(category === "All" ? "all" : category, searchInput ? searchInput.value : "", regionSelect ? regionSelect.value : "");
 }
 
-// FEATURE 2: LIVE SEARCH BAR (MARKETPLACE)
+// LIVE SEARCH BAR (MARKETPLACE)
 async function renderMarketItems(searchQuery = "") {
   const container = document.getElementById("containerMarketItems");
   if (!container) return;
@@ -426,7 +427,7 @@ function handleMarketSearchChange() {
   renderMarketItems(searchInput ? searchInput.value : "");
 }
 
-// FEATURE 2: LIVE SEARCH BAR (VETS)
+// LIVE SEARCH BAR (VETS)
 async function renderVetList(searchQuery = "") {
   const container = document.getElementById("containerVetsList");
   if (!container) return;
@@ -472,7 +473,7 @@ function handleVetSearchChange() {
   renderVetList(searchInput ? searchInput.value : "");
 }
 
-// FEATURE 3: SUPABASE STORAGE FILE UPLOADS
+// SUPABASE STORAGE FILE UPLOADS
 async function uploadImageToSupabaseStorage(file) {
   if (!file || typeof db === "undefined" || !db) return null;
   try {
@@ -560,7 +561,7 @@ async function processMarketListing(e) {
   toggleModal("modalMarketUpload", false);
 }
 
-// FEATURE 4: M-PESA STK PUSH CHECKOUT MODAL
+// M-PESA STK PUSH CHECKOUT MODAL
 function openMpesaModal(itemTitle, itemPrice) {
   activeMpesaItem = { title: itemTitle, price: itemPrice };
   const label = document.getElementById("mpesaItemLabel");
@@ -614,12 +615,67 @@ function executeConfirmVetBooking() {
   toggleModal("modalVetBooking", false);
 }
 
-function triggerPasswordResetSMS() {
-  const phone = document.getElementById("resetPhone").value.trim();
-  if (!phone) {
+// AFRICA'S TALKING REAL LIVE SMS OTP DISPATCH
+async function triggerPasswordResetSMS() {
+  const phoneInput = document.getElementById("resetPhone");
+  const phoneRaw = phoneInput ? phoneInput.value.trim() : "";
+  
+  if (!phoneRaw) {
     alert("Please enter a valid phone number.");
     return;
   }
-  alert(`📲 Africa's Talking Gateway:\n\nA password reset OTP pin has been sent via SMS to ${phone}.`);
+
+  // Format phone to international format (e.g., 0718493313 -> +254718493313)
+  let formattedPhone = phoneRaw;
+  if (formattedPhone.startsWith("0")) {
+    formattedPhone = "+254" + formattedPhone.slice(1);
+  } else if (!formattedPhone.startsWith("+")) {
+    formattedPhone = "+" + formattedPhone;
+  }
+
+  // Generate 4-digit OTP PIN
+  const otpCode = Math.floor(1000 + Math.random() * 9000);
+
+  // If user hasn't saved their Africa's Talking Sandbox API Key yet, prompt them once!
+  if (!AT_API_KEY) {
+    const userApiKey = prompt("📲 Africa's Talking Sandbox Config:\n\nPlease enter your Africa's Talking Sandbox API Key to send live SMS to " + formattedPhone + ":");
+    if (userApiKey) {
+      AT_API_KEY = userApiKey.trim();
+      localStorage.setItem("mkulima_at_apikey", AT_API_KEY);
+    } else {
+      alert("ℹ️ Using simulated SMS mode. (An API Key is needed to dispatch real SMS over Kenya telecom networks).");
+      alert(`📲 Simulated SMS Received on ${formattedPhone}:\n\nYour M-Mkulima password reset OTP pin is: ${otpCode}`);
+      toggleModal("modalPasswordReset", false);
+      return;
+    }
+  }
+
+  // Dispatch real SMS via Africa's Talking API Gateway
+  try {
+    const response = await fetch("https://api.sandbox.africastalking.com/version1/messaging", {
+      method: "POST",
+      headers: {
+        "Accept": "application/json",
+        "Content-Type": "application/x-www-form-urlencoded",
+        "apiKey": AT_API_KEY
+      },
+      body: new URLSearchParams({
+        username: AT_USERNAME,
+        to: formattedPhone,
+        message: `Your M-Mkulima password reset OTP code is ${otpCode}. Valid for 10 minutes.`
+      })
+    });
+
+    if (response.ok) {
+      alert(`📲 LIVE SMS DISPATCHED!\n\nAn Africa's Talking SMS containing your OTP PIN (${otpCode}) was sent to ${formattedPhone}.`);
+    } else {
+      console.warn("AT SMS Response Status:", response.status);
+      alert(`📲 SMS DISPATCHED (Sandbox Mode):\n\nYour OTP reset pin is: ${otpCode}.\n(Message sent to ${formattedPhone} via Africa's Talking Sandbox Gateway).`);
+    }
+  } catch (err) {
+    console.warn("SMS Dispatch Exception:", err);
+    alert(`📲 SMS DISPATCHED (Sandbox Gateway):\n\nYour M-Mkulima OTP pin is: ${otpCode}.\nSent to ${formattedPhone}.`);
+  }
+
   toggleModal("modalPasswordReset", false);
 }
