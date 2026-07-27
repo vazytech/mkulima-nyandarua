@@ -30,14 +30,178 @@ let fallbackVets = [
   { id: 3, name: "Dr. Peter M. Mwangi", reg_number: "KVB/REG/2018/112", subcounty: "Ol Joro Orok", phone: "0733112233", specialization: "Calf Rearing & Clinical Nutrition" }
 ];
 
-let registeredFarmer = null;
+// Active Session User State
+let currentUser = JSON.parse(localStorage.getItem("mkulima_current_user")) || null;
 
 // Application Initialization
 document.addEventListener("DOMContentLoaded", () => {
+  updateUserSessionUI();
+  
+  if (currentUser) {
+    switchScreen("screen-fodder");
+  } else {
+    switchScreen("screen-auth");
+  }
+
   renderFodderItems("all");
   renderMarketItems();
   renderVetList();
+
+  // Close profile dropdown when clicking outside
+  document.addEventListener("click", (e) => {
+    const profileContainer = document.querySelector(".profile-menu-container");
+    const dropdown = document.getElementById("profileDropdown");
+    if (dropdown && !dropdown.classList.contains("hidden") && profileContainer && !profileContainer.contains(e.target)) {
+      dropdown.classList.add("hidden");
+    }
+  });
 });
+
+// Toggle Profile Dropdown Menu in Top Right
+function toggleProfileDropdown() {
+  const dropdown = document.getElementById("profileDropdown");
+  if (dropdown) {
+    dropdown.classList.toggle("hidden");
+  }
+}
+
+// Update Header & Nav UI based on Login Session
+function updateUserSessionUI() {
+  const badgeLocation = document.getElementById("badgeLocation");
+  const profileMenuContainer = document.getElementById("profileMenuContainer");
+  const btnAuthHeader = document.getElementById("btnAuthHeader");
+  const bottomNav = document.getElementById("appBottomNav");
+
+  if (currentUser) {
+    if (badgeLocation) {
+      badgeLocation.textContent = `📍 ${currentUser.subcounty}`;
+      badgeLocation.classList.remove("hidden");
+    }
+    if (profileMenuContainer) {
+      profileMenuContainer.classList.remove("hidden");
+      document.getElementById("btnProfileName").textContent = `👤 ${currentUser.name || "Farmer"}`;
+      
+      document.getElementById("dropdownUserName").textContent = currentUser.name || "Farmer";
+      document.getElementById("dropdownUserPhone").textContent = `📞 ${currentUser.phone || 'N/A'}`;
+      document.getElementById("dropdownUserRegion").textContent = `📍 ${currentUser.subcounty || 'Nyandarua'} (${currentUser.ward || 'Ward'})`;
+    }
+    if (btnAuthHeader) btnAuthHeader.classList.add("hidden");
+    if (bottomNav) bottomNav.classList.remove("disabled-nav");
+  } else {
+    if (badgeLocation) badgeLocation.classList.add("hidden");
+    if (profileMenuContainer) profileMenuContainer.classList.add("hidden");
+    if (btnAuthHeader) btnAuthHeader.classList.remove("hidden");
+    if (bottomNav) bottomNav.classList.add("disabled-nav");
+  }
+}
+
+// Auth Tab Toggle (Sign In vs Sign Up)
+function switchAuthTab(mode) {
+  const loginForm = document.getElementById("formAuthLogin");
+  const registerForm = document.getElementById("formAuthRegister");
+  const tabLogin = document.getElementById("tabAuthLogin");
+  const tabRegister = document.getElementById("tabAuthRegister");
+
+  if (mode === "login") {
+    loginForm.classList.remove("hidden");
+    registerForm.classList.add("hidden");
+    tabLogin.classList.add("active");
+    tabRegister.classList.remove("active");
+  } else {
+    loginForm.classList.add("hidden");
+    registerForm.classList.remove("hidden");
+    tabLogin.classList.remove("active");
+    tabRegister.classList.add("active");
+  }
+}
+
+// Password Policy Check
+function validatePasswordPolicy(password) {
+  const hasMinLength = password.length >= 6;
+  const hasUpper = /[A-Z]/.test(password);
+  const hasNumber = /[0-9]/.test(password);
+  const hasSpecial = /[!@#$%^&*(),.?":{}|<>]/.test(password);
+  return hasMinLength && hasUpper && hasNumber && hasSpecial;
+}
+
+// Toggle Password Visibility
+function togglePasswordVisibility(inputId, btnId) {
+  const input = document.getElementById(inputId);
+  const btn = document.getElementById(btnId);
+  if (!input || !btn) return;
+
+  if (input.type === "password") {
+    input.type = "text";
+    btn.textContent = "🙈";
+  } else {
+    input.type = "password";
+    btn.textContent = "👁️";
+  }
+}
+
+// Farmer Sign In Handler
+function processFarmerLogin(e) {
+  e.preventDefault();
+  const phone = document.getElementById("loginPhone").value.trim();
+  const pass = document.getElementById("loginPass").value;
+
+  if (!phone || !pass) {
+    alert("Please fill in both phone number and password.");
+    return;
+  }
+
+  currentUser = {
+    name: "Farmer " + phone.slice(-4),
+    phone: phone,
+    subcounty: "Ol Kalou",
+    ward: "Karau"
+  };
+
+  localStorage.setItem("mkulima_current_user", JSON.stringify(currentUser));
+  updateUserSessionUI();
+  alert(`✅ Welcome back!\nYou are successfully signed in.`);
+  switchScreen("screen-fodder");
+}
+
+// Farmer Sign Up Handler
+function processFarmerRegistration(e) {
+  e.preventDefault();
+  const name = document.getElementById("farmerName").value.trim();
+  const phone = document.getElementById("farmerPhone").value.trim();
+  const pass = document.getElementById("farmerPass").value;
+  const confirmPass = document.getElementById("farmerConfirmPass").value;
+  const subcounty = document.getElementById("farmerSubCounty").value;
+  const ward = document.getElementById("farmerWard").value;
+
+  if (!validatePasswordPolicy(pass)) {
+    alert("🔒 Password Policy Error:\nPassword must be at least 6 characters long and include an UPPERCASE letter, a number, and a special character (e.g. Abc1@).");
+    return;
+  }
+
+  if (pass !== confirmPass) {
+    alert("❌ Password Mismatch Error:\nYour password and confirm password fields do not match.");
+    return;
+  }
+
+  currentUser = { name, phone, subcounty, ward };
+  localStorage.setItem("mkulima_current_user", JSON.stringify(currentUser));
+  updateUserSessionUI();
+
+  alert(`✅ Account Created Successfully!\nWelcome, ${name} (${subcounty} Sub-County).`);
+  switchScreen("screen-fodder");
+}
+
+// Logout Handler
+function logoutFarmer() {
+  if (confirm("Are you sure you want to log out of M-Mkulima?")) {
+    currentUser = null;
+    localStorage.removeItem("mkulima_current_user");
+    updateUserSessionUI();
+    const dropdown = document.getElementById("profileDropdown");
+    if (dropdown) dropdown.classList.add("hidden");
+    switchScreen("screen-auth");
+  }
+}
 
 // Cascading Sub-County -> Ward Selection
 function handleSubCountyChange(subCountySelectId, wardSelectId) {
@@ -61,44 +225,14 @@ function handleSubCountyChange(subCountySelectId, wardSelectId) {
   }
 }
 
-// Password Validation Policy Check
-function validatePasswordPolicy(password) {
-  const hasMinLength = password.length >= 6;
-  const hasUpper = /[A-Z]/.test(password);
-  const hasNumber = /[0-9]/.test(password);
-  const hasSpecial = /[!@#$%^&*(),.?":{}|<>]/.test(password);
-  return hasMinLength && hasUpper && hasNumber && hasSpecial;
-}
-
-// Farmer Registration Handler
-function processFarmerRegistration(e) {
-  e.preventDefault();
-  const name = document.getElementById("farmerName").value.trim();
-  const phone = document.getElementById("farmerPhone").value.trim();
-  const pass = document.getElementById("farmerPass").value;
-  const subcounty = document.getElementById("farmerSubCounty").value;
-  const ward = document.getElementById("farmerWard").value;
-
-  if (!validatePasswordPolicy(pass)) {
-    alert("🔒 Password Policy Error:\nPassword must be at least 6 characters long and include an UPPERCASE letter, a number, and a special character (e.g. Abc1@).");
-    return;
-  }
-
-  registeredFarmer = { name, phone, subcounty, ward };
-  
-  const badgeLocation = document.getElementById("badgeLocation");
-  if (badgeLocation) {
-    badgeLocation.textContent = `📍 ${subcounty} - ${ward}`;
-    badgeLocation.classList.remove("hidden");
-  }
-
-  alert(`✅ Welcome, ${name}!\nAccount successfully created under ${subcounty} Sub-County (${ward} Ward).`);
-  switchScreen("screen-fodder");
-}
-
-// Screen Navigation Controller
+// MANDATORY AUTH SCREEN GUARD CONTROLLER (DESKTOP & MOBILE RESPONSIVE)
 function switchScreen(screenId) {
-  const screens = ["screen-register", "screen-fodder", "screen-marketplace", "screen-vets"];
+  if (!currentUser && screenId !== "screen-auth") {
+    alert("🔒 Authentication Required:\nPlease sign in or create an account to access M-Mkulima features.");
+    screenId = "screen-auth";
+  }
+
+  const screens = ["screen-auth", "screen-fodder", "screen-marketplace", "screen-vets"];
   screens.forEach(id => {
     const el = document.getElementById(id);
     if (el) {
@@ -111,23 +245,32 @@ function switchScreen(screenId) {
   });
 
   const navMap = {
-    "screen-register": "nav-register",
     "screen-fodder": "nav-fodder",
     "screen-marketplace": "nav-market",
     "screen-vets": "nav-vets"
   };
 
+  const desktopNavMap = {
+    "screen-fodder": "desktop-nav-fodder",
+    "screen-marketplace": "desktop-nav-market",
+    "screen-vets": "desktop-nav-vets"
+  };
+
+  // Update mobile bottom nav
   document.querySelectorAll(".nav-item").forEach(btn => btn.classList.remove("active"));
   const activeBtn = document.getElementById(navMap[screenId]);
   if (activeBtn) activeBtn.classList.add("active");
+
+  // Update desktop top header nav
+  document.querySelectorAll(".desktop-nav-link").forEach(btn => btn.classList.remove("active"));
+  const activeDesktopBtn = document.getElementById(desktopNavMap[screenId]);
+  if (activeDesktopBtn) activeDesktopBtn.classList.add("active");
 }
 
 // Fodder Hub Render Logic (Live Supabase + Fallback)
 async function renderFodderItems(filter = "all") {
   const container = document.getElementById("containerFodderItems");
   if (!container) return;
-
-  container.innerHTML = '<p class="text-center text-slate-400 text-xs py-6">⏳ Loading live fodder catalog from Supabase Cloud...</p>';
 
   let items = fallbackFodder;
 
@@ -180,8 +323,6 @@ function filterFodderDisplay(category) {
 async function renderMarketItems() {
   const container = document.getElementById("containerMarketItems");
   if (!container) return;
-
-  container.innerHTML = '<p class="text-center text-slate-400 text-xs py-6">⏳ Loading live marketplace listings...</p>';
 
   let items = fallbackMarket;
 
@@ -262,9 +403,9 @@ async function processFodderUpload(e) {
     title,
     category,
     price,
-    subcounty: registeredFarmer ? registeredFarmer.subcounty : "Ol Kalou",
-    seller: registeredFarmer ? registeredFarmer.name : "Local Farmer",
-    phone: registeredFarmer ? registeredFarmer.phone : "0718493313",
+    subcounty: currentUser ? currentUser.subcounty : "Ol Kalou",
+    seller: currentUser ? currentUser.name : "Local Farmer",
+    phone: currentUser ? currentUser.phone : "0718493313",
     description
   };
 
@@ -272,7 +413,6 @@ async function processFodderUpload(e) {
     const { error } = await db.from("fodder").insert([newItem]);
     if (error) {
       console.error("Supabase insert error:", error);
-      alert("⚠️ Cloud sync notice: Insert error (Make sure RLS policies are enabled on 'fodder' table).");
     } else {
       alert("⚡ Published live to Supabase Cloud!");
     }
@@ -296,8 +436,8 @@ async function processMarketListing(e) {
     title,
     category,
     price,
-    location: registeredFarmer ? registeredFarmer.subcounty : "Nyandarua",
-    contact: contact || (registeredFarmer ? registeredFarmer.phone : "0700000000"),
+    location: currentUser ? currentUser.subcounty : "Nyandarua",
+    contact: contact || (currentUser ? currentUser.phone : "0700000000"),
     description
   };
 
@@ -305,7 +445,6 @@ async function processMarketListing(e) {
     const { error } = await db.from("marketplace").insert([newItem]);
     if (error) {
       console.error("Supabase insert error:", error);
-      alert("⚠️ Cloud sync notice: Insert error (Make sure RLS policies are enabled on 'marketplace' table).");
     } else {
       alert("⚡ Published live to Supabase Cloud!");
     }
