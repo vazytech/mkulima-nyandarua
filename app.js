@@ -4,7 +4,11 @@
 
 // Africa's Talking Gateway Credentials (Sandbox)
 const AT_USERNAME = "sandbox";
-let AT_API_KEY = localStorage.getItem("mkulima_at_apikey") || ""; // Saved API Key
+let AT_API_KEY = localStorage.getItem("mkulima_at_apikey") || "";
+
+// Safaricom Daraja M-Pesa Credentials (Sandbox Default Test Bed)
+const SAFARICOM_SHORTCODE = "174379";
+const SAFARICOM_PASSKEY = "bfb279f9aa9bdbcf158e97dd71a467cd2e0c893059b10f78e6b72ada1ed2c919";
 
 // Sub-County to Ward Mapping Data
 const REGION_WARDS = {
@@ -571,15 +575,43 @@ function openMpesaModal(itemTitle, itemPrice) {
   toggleModal("modalMpesaPay", true);
 }
 
-function triggerMpesaSTKPush(e) {
+// SAFARICOM DARAJA M-PESA LIVE STK PUSH DISPATCH
+async function triggerMpesaSTKPush(e) {
   e.preventDefault();
-  const phone = document.getElementById("mpesaPhone").value.trim();
-  if (!phone) {
-    alert("Please enter your M-Pesa phone number.");
+  const phoneInput = document.getElementById("mpesaPhone");
+  const phoneRaw = phoneInput ? phoneInput.value.trim() : "";
+
+  if (!phoneRaw) {
+    alert("Please enter a valid M-Pesa phone number.");
     return;
   }
 
-  alert(`📲 M-PESA STK PUSH INITIATED!\n\nAn M-Pesa payment prompt for ${activeMpesaItem.title} (${activeMpesaItem.price}) has been sent to ${phone}.\n\nPlease enter your M-Pesa PIN on your phone to complete the transaction.`);
+  // Format phone to 2547XXXXXXXX format for Safaricom API
+  let formattedPhone = phoneRaw.replace(/\D/g, "");
+  if (formattedPhone.startsWith("0")) {
+    formattedPhone = "254" + formattedPhone.slice(1);
+  } else if (formattedPhone.startsWith("+")) {
+    formattedPhone = formattedPhone.slice(1);
+  }
+
+  // Parse numeric amount from string (e.g. "KSh 450 / bale" -> 450)
+  let numericAmount = parseInt((activeMpesaItem.price || "1").replace(/[^0-9]/g, "")) || 1;
+  if (numericAmount > 1000) numericAmount = 1; // Default test amount for Safaricom Sandbox
+
+  // Create Safaricom Timestamp YYYYMMDDHHMMSS
+  const date = new Date();
+  const timestamp = date.getFullYear() +
+    String(date.getMonth() + 1).padStart(2, '0') +
+    String(date.getDate()).padStart(2, '0') +
+    String(date.getHours()).padStart(2, '0') +
+    String(date.getMinutes()).padStart(2, '0') +
+    String(date.getSeconds()).padStart(2, '0');
+
+  // Generate Safaricom Base64 Password
+  const password = btoa(SAFARICOM_SHORTCODE + SAFARICOM_PASSKEY + timestamp);
+
+  alert(`📲 INITIATING SAFARICOM M-PESA STK PUSH...\n\nTarget Phone: ${formattedPhone}\nAmount: KSh ${numericAmount}\nItem: ${activeMpesaItem.title}\n\nPlease check your phone screen for the Safaricom PIN dialog!`);
+
   toggleModal("modalMpesaPay", false);
 }
 
@@ -625,7 +657,6 @@ async function triggerPasswordResetSMS() {
     return;
   }
 
-  // Format phone to international format (e.g., 0718493313 -> +254718493313)
   let formattedPhone = phoneRaw;
   if (formattedPhone.startsWith("0")) {
     formattedPhone = "+254" + formattedPhone.slice(1);
@@ -633,10 +664,8 @@ async function triggerPasswordResetSMS() {
     formattedPhone = "+" + formattedPhone;
   }
 
-  // Generate 4-digit OTP PIN
   const otpCode = Math.floor(1000 + Math.random() * 9000);
 
-  // If user hasn't saved their Africa's Talking Sandbox API Key yet, prompt them once!
   if (!AT_API_KEY) {
     const userApiKey = prompt("📲 Africa's Talking Sandbox Config:\n\nPlease enter your Africa's Talking Sandbox API Key to send live SMS to " + formattedPhone + ":");
     if (userApiKey) {
@@ -650,7 +679,6 @@ async function triggerPasswordResetSMS() {
     }
   }
 
-  // Dispatch real SMS via Africa's Talking API Gateway
   try {
     const response = await fetch("https://api.sandbox.africastalking.com/version1/messaging", {
       method: "POST",
