@@ -4,6 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>M-Mkulima Nyandarua Pro</title>
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#047857">
     <!-- Custom Design System CSS -->
     <link rel="stylesheet" href="styles.css">
 </head>
@@ -154,6 +157,9 @@
 
         <!-- SCREEN 2: FODDER KNOWLEDGE BASE CATALOGUE -->
         <main id="screen-fodder" class="screen hidden">
+            <!-- Nyandarua Live Weather & Extension Advisory Panel -->
+            <div id="weatherPanel"></div>
+
             <div class="support-banner">
                 <p>📞 Support & Systems Help Desk:</p>
                 <div class="support-actions">
@@ -168,6 +174,22 @@
                     <p class="card-subtitle">Explore protein or energy feeds capped at 1MB media limit.</p>
                 </div>
                 <button onclick="toggleModal('modalFodderUpload', true)" class="btn btn-primary btn-sm">+ Post Fodder</button>
+            </div>
+
+            <!-- LIVE SEARCH BAR & WARD FILTERING -->
+            <div class="search-filter-wrapper">
+                <div class="search-input-box">
+                    <span class="search-icon">🔍</span>
+                    <input type="text" id="searchFodderInput" oninput="handleFodderSearchChange()" class="form-input" placeholder="Search fodder by title or keyword...">
+                </div>
+                <select id="filterFodderRegion" onchange="handleFodderSearchChange()" class="form-select filter-select">
+                    <option value="">All Regions</option>
+                    <option value="Ol Kalou">Ol Kalou</option>
+                    <option value="Kinangop">Kinangop</option>
+                    <option value="Ol Joro Orok">Ol Joro Orok</option>
+                    <option value="Kipipiri">Kipipiri</option>
+                    <option value="Ndaragwa">Ndaragwa</option>
+                </select>
             </div>
 
             <div class="filter-bar">
@@ -191,6 +213,14 @@
                 <button onclick="toggleModal('modalMarketUpload', true)" class="btn btn-accent btn-sm">+ Add Listing</button>
             </div>
 
+            <!-- MARKETPLACE SEARCH BAR -->
+            <div class="search-filter-wrapper">
+                <div class="search-input-box">
+                    <span class="search-icon">🔍</span>
+                    <input type="text" id="searchMarketInput" oninput="handleMarketSearchChange()" class="form-input" placeholder="Search marketplace items...">
+                </div>
+            </div>
+
             <div id="containerMarketItems" class="items-grid">
                 <!-- Dynamic Market Grid Cards -->
             </div>
@@ -203,12 +233,44 @@
                 <p class="card-subtitle">Compliant with Kenya Veterinary Board (KVB) guidelines.</p>
             </div>
 
+            <!-- VETS SEARCH BAR -->
+            <div class="search-filter-wrapper">
+                <div class="search-input-box">
+                    <span class="search-icon">🔍</span>
+                    <input type="text" id="searchVetInput" oninput="handleVetSearchChange()" class="form-input" placeholder="Search vet by name or region...">
+                </div>
+            </div>
+
             <div id="containerVetsList" class="items-grid">
                 <!-- Dynamic Vet Grid Cards -->
             </div>
         </main>
 
-        <!-- MODAL 1: SCHEDULE VET VISIT -->
+        <!-- MODAL 1: M-PESA EXPRESS PAYMENT MODAL -->
+        <div id="modalMpesaPay" class="modal-overlay">
+            <div class="modal-content">
+                <div style="text-align: center; margin-bottom: 1rem;">
+                    <span style="font-size: 2.2rem; display: inline-block;">📲</span>
+                    <h3 style="font-size: 1.25rem; font-weight: 900; color: var(--mpesa-dark);">M-PESA Express Checkout</h3>
+                    <p id="mpesaItemLabel" style="font-size: 0.8rem; font-weight: 700; color: var(--text-muted); margin-top: 0.2rem;"></p>
+                </div>
+                
+                <form onsubmit="triggerMpesaSTKPush(event)">
+                    <div class="form-group">
+                        <label class="form-label">M-Pesa Phone Number</label>
+                        <input type="tel" id="mpesaPhone" required class="form-input" placeholder="e.g., 0718493313">
+                        <p class="form-hint">An STK Push PIN prompt will pop up on your mobile phone screen.</p>
+                    </div>
+
+                    <div style="display: flex; gap: 0.5rem; margin-top: 1.25rem;">
+                        <button type="button" onclick="toggleModal('modalMpesaPay', false)" class="btn btn-secondary" style="flex: 1;">Cancel</button>
+                        <button type="submit" class="btn btn-mpesa" style="flex: 1.5;">Pay Now 📲</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- MODAL 2: SCHEDULE VET VISIT -->
         <div id="modalVetBooking" class="modal-overlay">
             <div class="modal-content">
                 <h3 style="font-size: 1.15rem; font-weight: 800; margin-bottom: 0.25rem;">Schedule Vet Visit</h3>
@@ -233,7 +295,7 @@
             </div>
         </div>
 
-        <!-- MODAL 2: FORGOT PASSWORD / SMS OTP RESET -->
+        <!-- MODAL 3: FORGOT PASSWORD / SMS OTP RESET -->
         <div id="modalPasswordReset" class="modal-overlay">
             <div class="modal-content">
                 <h3 style="font-size: 1.15rem; font-weight: 800; margin-bottom: 0.25rem;">Reset PIN via SMS</h3>
@@ -251,7 +313,7 @@
             </div>
         </div>
 
-        <!-- MODAL 3: POST FODDER -->
+        <!-- MODAL 4: POST FODDER -->
         <div id="modalFodderUpload" class="modal-overlay">
             <div class="modal-content">
                 <h3 style="font-size: 1.15rem; font-weight: 800; margin-bottom: 1rem;">Post Fodder Listing</h3>
@@ -293,7 +355,7 @@
             </div>
         </div>
 
-        <!-- MODAL 4: ADD MARKET LISTING -->
+        <!-- MODAL 5: ADD MARKET LISTING -->
         <div id="modalMarketUpload" class="modal-overlay">
             <div class="modal-content">
                 <h3 style="font-size: 1.15rem; font-weight: 800; margin-bottom: 1rem;">Post Marketplace Item</h3>
@@ -334,7 +396,7 @@
                     </div>
                 </form>
             </div>
-        </main>
+        </div>
 
         <!-- BOTTOM APP NAVIGATION (MOBILE PHONES) -->
         <nav id="appBottomNav" class="bottom-nav disabled-nav">
