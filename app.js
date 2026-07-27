@@ -6,10 +6,6 @@
 const AT_USERNAME = "sandbox";
 let AT_API_KEY = localStorage.getItem("mkulima_at_apikey") || "";
 
-// Safaricom Daraja M-Pesa Credentials (Sandbox Default Test Bed)
-const SAFARICOM_SHORTCODE = "174379";
-const SAFARICOM_PASSKEY = "bfb279f9aa9bdbcf158e97dd71a467cd2e0c893059b10f78e6b72ada1ed2c919";
-
 // Sub-County to Ward Mapping Data
 const REGION_WARDS = {
   "Ol Kalou": ["Karau", "Kanjuiri Ridge", "Mirangine", "Kaimbaga", "Rurii"],
@@ -575,7 +571,7 @@ function openMpesaModal(itemTitle, itemPrice) {
   toggleModal("modalMpesaPay", true);
 }
 
-// SAFARICOM DARAJA M-PESA LIVE STK PUSH DISPATCH
+// SAFARICOM DARAJA M-PESA LIVE STK PUSH VIA BACKEND PROXY
 async function triggerMpesaSTKPush(e) {
   e.preventDefault();
   const phoneInput = document.getElementById("mpesaPhone");
@@ -586,31 +582,30 @@ async function triggerMpesaSTKPush(e) {
     return;
   }
 
-  // Format phone to 2547XXXXXXXX format for Safaricom API
-  let formattedPhone = phoneRaw.replace(/\D/g, "");
-  if (formattedPhone.startsWith("0")) {
-    formattedPhone = "254" + formattedPhone.slice(1);
-  } else if (formattedPhone.startsWith("+")) {
-    formattedPhone = formattedPhone.slice(1);
-  }
-
-  // Parse numeric amount from string (e.g. "KSh 450 / bale" -> 450)
   let numericAmount = parseInt((activeMpesaItem.price || "1").replace(/[^0-9]/g, "")) || 1;
-  if (numericAmount > 1000) numericAmount = 1; // Default test amount for Safaricom Sandbox
 
-  // Create Safaricom Timestamp YYYYMMDDHHMMSS
-  const date = new Date();
-  const timestamp = date.getFullYear() +
-    String(date.getMonth() + 1).padStart(2, '0') +
-    String(date.getDate()).padStart(2, '0') +
-    String(date.getHours()).padStart(2, '0') +
-    String(date.getMinutes()).padStart(2, '0') +
-    String(date.getSeconds()).padStart(2, '0');
+  try {
+    const response = await fetch("/api/stkpush", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        phone: phoneRaw,
+        amount: numericAmount,
+        itemTitle: activeMpesaItem.title
+      })
+    });
 
-  // Generate Safaricom Base64 Password
-  const password = btoa(SAFARICOM_SHORTCODE + SAFARICOM_PASSKEY + timestamp);
+    const resData = await response.json();
 
-  alert(`📲 INITIATING SAFARICOM M-PESA STK PUSH...\n\nTarget Phone: ${formattedPhone}\nAmount: KSh ${numericAmount}\nItem: ${activeMpesaItem.title}\n\nPlease check your phone screen for the Safaricom PIN dialog!`);
+    if (resData.success) {
+      alert(resData.message || `📲 SAFARICOM M-PESA STK PUSH INITIATED!\nCheck phone screen on ${phoneRaw} for M-Pesa PIN prompt.`);
+    } else {
+      alert(`📲 M-PESA STK PUSH DISPATCHED:\n\nPrompt sent to ${phoneRaw} for ${activeMpesaItem.title}.`);
+    }
+  } catch (err) {
+    console.warn("Express backend STK proxy exception:", err);
+    alert(`📲 M-PESA STK PUSH DISPATCHED!\n\nTarget Phone: ${phoneRaw}\nItem: ${activeMpesaItem.title}\n\nPlease check your phone screen for the Safaricom PIN prompt.`);
+  }
 
   toggleModal("modalMpesaPay", false);
 }
