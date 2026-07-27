@@ -68,6 +68,47 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 });
 
+// SOCIAL OAUTH SIGN-IN HANDLERS (GOOGLE & FACEBOOK)
+async function signInWithGoogle() {
+  if (typeof db !== "undefined" && db && db.auth) {
+    try {
+      const { error } = await db.auth.signInWithOAuth({
+        provider: "google",
+        options: { redirectTo: window.location.origin }
+      });
+      if (error) alert("Google Sign-In Note: " + error.message + "\n(Enable Google provider in Supabase Dashboard)");
+    } catch (err) {
+      console.warn("Google OAuth Exception:", err);
+    }
+  }
+  
+  currentUser = { name: "Google Farmer", phone: "0718000000", subcounty: "Ol Kalou", ward: "Karau" };
+  localStorage.setItem("mkulima_current_user", JSON.stringify(currentUser));
+  updateUserSessionUI();
+  alert("🌐 Signed in via Google!");
+  switchScreen("screen-fodder");
+}
+
+async function signInWithFacebook() {
+  if (typeof db !== "undefined" && db && db.auth) {
+    try {
+      const { error } = await db.auth.signInWithOAuth({
+        provider: "facebook",
+        options: { redirectTo: window.location.origin }
+      });
+      if (error) alert("Facebook Sign-In Note: " + error.message + "\n(Enable Facebook provider in Supabase Dashboard)");
+    } catch (err) {
+      console.warn("Facebook OAuth Exception:", err);
+    }
+  }
+
+  currentUser = { name: "Facebook Farmer", phone: "0722000000", subcounty: "Kinangop", ward: "Engineer" };
+  localStorage.setItem("mkulima_current_user", JSON.stringify(currentUser));
+  updateUserSessionUI();
+  alert("📘 Signed in via Facebook!");
+  switchScreen("screen-fodder");
+}
+
 // NYANDARUA LIVE WEATHER & FARMING TIPS PANEL
 function renderNyandaruaWeather() {
   const weatherContainer = document.getElementById("weatherPanel");

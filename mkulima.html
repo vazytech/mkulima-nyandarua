@@ -73,6 +73,20 @@
                         <p class="card-subtitle">Sign in or create an account to access Nyandarua agricultural tools.</p>
                     </div>
 
+                    <!-- GOOGLE & FACEBOOK SOCIAL OAUTH SIGN-IN -->
+                    <div class="social-auth-group">
+                        <button type="button" onclick="signInWithGoogle()" class="btn btn-google">
+                            <span style="font-size: 1.1rem;">🌐</span> Continue with Google
+                        </button>
+                        <button type="button" onclick="signInWithFacebook()" class="btn btn-facebook">
+                            <span style="font-size: 1.1rem;">📘</span> Continue with Facebook
+                        </button>
+                    </div>
+
+                    <div class="social-divider">
+                        <span>Or continue with phone / password</span>
+                    </div>
+
                     <!-- Auth Mode Switcher Tabs -->
                     <div class="auth-toggle-bar">
                         <button id="tabAuthLogin" onclick="switchAuthTab('login')" class="auth-toggle-btn active">🔑 Sign In</button>
