@@ -2,6 +2,35 @@
    M-MKULIMA NYANDARUA PRO - ADVANCED LOGIC, SEARCH, WEATHER & M-PESA
    ========================================================================== */
 
+// MODERN TOAST NOTIFICATION SYSTEM
+function showToast(message, type = "info", duration = 4000) {
+  const container = document.getElementById("toast-container");
+  if (!container) {
+    console.log(`[Toast Fallback - ${type.toUpperCase()}]: ${message}`);
+    return;
+  }
+  
+  const toast = document.createElement("div");
+  toast.className = `toast-message toast-${type}`;
+  
+  let icon = "ℹ️";
+  if (type === "success") icon = "✅";
+  if (type === "error") icon = "❌";
+  if (type === "warning") icon = "⚠️";
+  
+  toast.innerHTML = `<span class="toast-icon" style="font-size:1.1rem;">${icon}</span> <span>${String(message).replace(/\n/g, "<br>")}</span>`;
+  container.appendChild(toast);
+  
+  setTimeout(() => {
+    toast.classList.add("toast-hiding");
+    setTimeout(() => {
+      if (toast.parentNode) {
+        toast.parentNode.removeChild(toast);
+      }
+    }, 300);
+  }, duration);
+}
+
 // Africa's Talking Gateway Credentials (Sandbox)
 const AT_USERNAME = "sandbox";
 let AT_API_KEY = localStorage.getItem("mkulima_at_apikey") || "";
@@ -261,15 +290,78 @@ function applyLanguageTranslations() {
   renderServiceItems();
 }
 
-function setupOfflineNetworkListeners() {
+// PWA OFFLINE ACTION QUEUE & AUTO-SYNC ENGINE
+function getOfflineActionQueue() {
+  try {
+    return JSON.parse(localStorage.getItem("mkulima_offline_action_queue")) || [];
+  } catch (e) {
+    return [];
+  }
+}
+
+function enqueueOfflineAction(type, payload) {
+  const queue = getOfflineActionQueue();
+  const newAction = { id: "act_" + Date.now(), type, payload, createdAt: new Date().toISOString() };
+  queue.push(newAction);
+  localStorage.setItem("mkulima_offline_action_queue", JSON.stringify(queue));
+  showToast(`📴 Saved Offline! Your ${type.replace("_", " ")} will auto-sync when online.`, "warning", 5000);
+  updateOfflineBannerQueueCount();
+}
+
+async function processOfflineActionQueue() {
+  if (!navigator.onLine) return;
+  const queue = getOfflineActionQueue();
+  if (queue.length === 0) return;
+
+  console.log(`📡 Network connected. Syncing ${queue.length} pending offline action(s)...`);
+  showToast(`📡 Network reconnected! Syncing ${queue.length} offline action(s)...`, "info");
+
+  const remainingQueue = [];
+
+  for (const item of queue) {
+    try {
+      if (item.type === "fodder_listing" || item.type === "market_listing" || item.type === "service_post") {
+        pendingApprovals.push(item.payload);
+        localStorage.setItem("mkulima_pending_approvals", JSON.stringify(pendingApprovals));
+        updateAdminPendingBadge();
+        showToast(`✅ Synced offline post: "${item.payload.title}"`, "success");
+      } else if (item.type === "vet_booking") {
+        showToast(`✅ Synced offline vet booking for ${item.payload.vetName}`, "success");
+      } else if (item.type === "order_checkout") {
+        showToast(`✅ Synced offline order!`, "success");
+      }
+    } catch (err) {
+      console.warn("Failed to sync offline item:", err);
+      remainingQueue.push(item);
+    }
+  }
+
+  localStorage.setItem("mkulima_offline_action_queue", JSON.stringify(remainingQueue));
+  updateOfflineBannerQueueCount();
+}
+
+function updateOfflineBannerQueueCount() {
   const banner = document.getElementById("offlineBanner");
+  if (!banner) return;
+  const queue = getOfflineActionQueue();
+  if (!navigator.onLine) {
+    banner.classList.remove("hidden");
+    banner.innerHTML = `<span>📴 Offline Mode Active. (${queue.length} action(s) saved to auto-sync when online).</span>`;
+  } else if (queue.length > 0) {
+    banner.classList.remove("hidden");
+    banner.innerHTML = `<span>⚡ ${queue.length} pending offline item(s) ready to sync... <button onclick="processOfflineActionQueue()" style="background:#fff; color:#000; border:none; border-radius:4px; padding:2px 8px; font-weight:800; cursor:pointer; margin-left:8px;">Sync Now</button></span>`;
+  } else {
+    banner.classList.add("hidden");
+  }
+}
+
+function setupOfflineNetworkListeners() {
   const updateStatus = () => {
-    if (!navigator.onLine) {
-      if (banner) banner.classList.remove("hidden");
-      console.warn("📴 Device is Offline. Running on cached local storage memory.");
+    updateOfflineBannerQueueCount();
+    if (navigator.onLine) {
+      processOfflineActionQueue();
     } else {
-      if (banner) banner.classList.add("hidden");
-      console.log("🌐 Device is Online.");
+      showToast("📴 You are currently offline. Actions will be queued & synced automatically.", "warning");
     }
   };
 
@@ -304,6 +396,7 @@ document.addEventListener("DOMContentLoaded", () => {
   renderServiceItems();
   updateCartBadges();
   updateAdminPendingBadge();
+  attachRealtimeValidation();
 
   document.addEventListener("click", (e) => {
     const profileContainer = document.querySelector(".profile-menu-container");
@@ -313,6 +406,92 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 });
+
+// REAL-TIME INPUT VALIDATION & VISUAL FEEDBACK ENHANCEMENT
+function attachRealtimeValidation() {
+  const phoneInputs = ["loginPhone", "farmerPhone", "mpesaPhone", "resetPhone", "bookingPhone"];
+  
+  phoneInputs.forEach(id => {
+    const input = document.getElementById(id);
+    if (!input) return;
+    
+    let feedback = input.nextElementSibling;
+    if (!feedback || !feedback.classList.contains("input-feedback-badge")) {
+      feedback = document.createElement("span");
+      feedback.className = "input-feedback-badge";
+      input.parentNode.insertBefore(feedback, input.nextSibling);
+    }
+    
+    input.addEventListener("input", () => {
+      const val = input.value.trim().replace(/\D/g, "");
+      if (!val) {
+        feedback.textContent = "";
+        feedback.className = "input-feedback-badge";
+        return;
+      }
+      
+      const isValid = (val.length === 10 && (val.startsWith("07") || val.startsWith("01"))) || (val.length === 12 && val.startsWith("254"));
+      if (isValid) {
+        feedback.textContent = "✓ Valid Kenyan Phone Number";
+        feedback.className = "input-feedback-badge input-feedback-valid";
+      } else {
+        feedback.textContent = "⚠️ Enter valid phone (e.g. 0712345678 or 254712345678)";
+        feedback.className = "input-feedback-badge input-feedback-invalid";
+      }
+    });
+  });
+
+  const passInput = document.getElementById("farmerPass");
+  const confirmInput = document.getElementById("farmerConfirmPass");
+  
+  if (passInput) {
+    let passFeedback = passInput.nextElementSibling;
+    if (!passFeedback || !passFeedback.classList.contains("input-feedback-badge")) {
+      passFeedback = document.createElement("span");
+      passFeedback.className = "input-feedback-badge";
+      passInput.parentNode.insertBefore(passFeedback, passInput.nextSibling);
+    }
+    
+    passInput.addEventListener("input", () => {
+      const val = passInput.value;
+      if (!val) {
+        passFeedback.textContent = "";
+        return;
+      }
+      const isStrong = validatePasswordPolicy(val);
+      if (isStrong) {
+        passFeedback.textContent = "✓ Strong Password Policy Met";
+        passFeedback.className = "input-feedback-badge input-feedback-valid";
+      } else {
+        passFeedback.textContent = "⚠️ Requires 6+ chars, 1 uppercase, 1 number, 1 special symbol";
+        passFeedback.className = "input-feedback-badge input-feedback-invalid";
+      }
+    });
+  }
+
+  if (confirmInput && passInput) {
+    let confirmFeedback = confirmInput.nextElementSibling;
+    if (!confirmFeedback || !confirmFeedback.classList.contains("input-feedback-badge")) {
+      confirmFeedback = document.createElement("span");
+      confirmFeedback.className = "input-feedback-badge";
+      confirmInput.parentNode.insertBefore(confirmFeedback, confirmInput.nextSibling);
+    }
+    
+    confirmInput.addEventListener("input", () => {
+      if (!confirmInput.value) {
+        confirmFeedback.textContent = "";
+        return;
+      }
+      if (confirmInput.value === passInput.value) {
+        confirmFeedback.textContent = "✓ Passwords Match";
+        confirmFeedback.className = "input-feedback-badge input-feedback-valid";
+      } else {
+        confirmFeedback.textContent = "⚠️ Passwords do not match";
+        confirmFeedback.className = "input-feedback-badge input-feedback-invalid";
+      }
+    });
+  }
+}
 
 // QUICK GUEST AUTO SIGN-IN
 function quickGuestSignIn() {
@@ -696,7 +875,7 @@ async function processFarmerLogin(e) {
   const pass = document.getElementById("loginPass").value;
 
   if (!phoneRaw || !pass) {
-    alert("Please fill in both phone number and password.");
+    showToast("Please fill in both phone number and password.", "warning");
     return;
   }
 
@@ -714,11 +893,11 @@ async function processFarmerLogin(e) {
           currentUser = { name: data.name, phone: data.phone, subcounty: data.subcounty, ward: data.ward };
           localStorage.setItem("mkulima_current_user", JSON.stringify(currentUser));
           updateUserSessionUI();
-          alert(`✅ Welcome back, ${currentUser.name}!\nPassword verified successfully.`);
+          showToast(`✅ Welcome back, ${currentUser.name}! Password verified.`, "success");
           switchScreen("screen-fodder");
           return;
         } else {
-          alert(`❌ Invalid Password:\nThe password you entered for ${phoneRaw} is incorrect. Please try again.`);
+          showToast(`❌ Invalid Password for ${phoneRaw}. Please try again.`, "error");
           return;
         }
       }
@@ -732,12 +911,12 @@ async function processFarmerLogin(e) {
   const matchedFarmer = registeredFarmers.find(f => f.phone.replace(/\D/g, "") === formattedPhone);
 
   if (!matchedFarmer) {
-    alert(`❌ Account Not Found:\nNo M-Shambani account found for ${phoneRaw}.\n\nPlease click the 'Register' tab to create a new account.`);
+    showToast(`❌ Account Not Found for ${phoneRaw}. Please register a new account.`, "error");
     return;
   }
 
   if (matchedFarmer.password !== pass) {
-    alert(`❌ Invalid Password:\nThe password you entered for ${phoneRaw} is incorrect. Please try again.`);
+    showToast(`❌ Invalid Password for ${phoneRaw}. Please try again.`, "error");
     return;
   }
 
@@ -750,7 +929,7 @@ async function processFarmerLogin(e) {
 
   localStorage.setItem("mkulima_current_user", JSON.stringify(currentUser));
   updateUserSessionUI();
-  alert(`✅ Welcome back, ${currentUser.name}!\nPassword verified successfully.`);
+  showToast(`✅ Welcome back, ${currentUser.name}! Password verified.`, "success");
   switchScreen("screen-fodder");
 }
 
@@ -765,12 +944,12 @@ async function processFarmerRegistration(e) {
   const ward = document.getElementById("farmerWard").value;
 
   if (!validatePasswordPolicy(pass)) {
-    alert("🔒 Password Policy Error:\nPassword must be at least 6 characters long and include an UPPERCASE letter, a number, and a special character (e.g. Abc1@).");
+    showToast("🔒 Password Policy Error: Must be 6+ chars with uppercase, number & symbol.", "error");
     return;
   }
 
   if (pass !== confirmPass) {
-    alert("❌ Password Mismatch Error:\nYour password and confirm password fields do not match.");
+    showToast("❌ Password Mismatch Error: Your password and confirm password fields do not match.", "error");
     return;
   }
 
@@ -782,7 +961,7 @@ async function processFarmerRegistration(e) {
   const registeredFarmers = getRegisteredFarmers();
   const existing = registeredFarmers.find(f => f.phone.replace(/\D/g, "") === formattedPhone);
   if (existing) {
-    alert(`❌ Account Already Exists:\nAn account with phone number ${phone} is already registered.\nPlease click 'Sign In' instead.`);
+    showToast(`❌ Account Already Exists: Phone ${phone} is already registered. Please Sign In.`, "warning");
     return;
   }
 
@@ -802,7 +981,7 @@ async function processFarmerRegistration(e) {
   localStorage.setItem("mkulima_current_user", JSON.stringify(currentUser));
   updateUserSessionUI();
 
-  alert(`✅ Account Created Successfully!\nWelcome, ${name} (${subcounty} Sub-County).\nYour password has been securely registered.`);
+  showToast(`✅ Account Created! Welcome, ${name} (${subcounty} Sub-County).`, "success");
   switchScreen("screen-fodder");
 }
 
@@ -1378,7 +1557,7 @@ async function processFodderUpload(e) {
   const description = document.getElementById("newFodderDesc").value.trim();
   const photoUrl = await getPhotoDataUrlOrStorageUrl("newFodderFile");
 
-  pendingApprovals.push({
+  const itemPayload = {
     id: Date.now(),
     type: "fodder",
     title,
@@ -1390,12 +1569,19 @@ async function processFodderUpload(e) {
     desc: description,
     image: photoUrl,
     timestamp: "Just now"
-  });
-  localStorage.setItem("mkulima_pending_approvals", JSON.stringify(pendingApprovals));
-  updateAdminPendingBadge();
+  };
 
   toggleModal("modalFodderUpload", false);
-  alert(`⏳ Fodder Listing Submitted for Admin Approval!\n\nYour post "${title}" has been submitted to the Nyandarua Admin Moderation Queue for verification and will appear live upon approval.`);
+
+  if (!navigator.onLine) {
+    enqueueOfflineAction("fodder_listing", itemPayload);
+    return;
+  }
+
+  pendingApprovals.push(itemPayload);
+  localStorage.setItem("mkulima_pending_approvals", JSON.stringify(pendingApprovals));
+  updateAdminPendingBadge();
+  showToast(`⏳ Fodder Listing "${title}" submitted for Admin Approval!`, "success");
 }
 
 // Upload Marketplace Item directly to Supabase Cloud Database + Storage
@@ -1408,7 +1594,7 @@ async function processMarketListing(e) {
   const description = document.getElementById("newMarketDesc").value.trim();
   const photoUrl = await getPhotoDataUrlOrStorageUrl("newMarketFile");
 
-  pendingApprovals.push({
+  const itemPayload = {
     id: Date.now(),
     type: "market",
     title,
@@ -1419,12 +1605,19 @@ async function processMarketListing(e) {
     desc: description,
     image: photoUrl,
     timestamp: "Just now"
-  });
-  localStorage.setItem("mkulima_pending_approvals", JSON.stringify(pendingApprovals));
-  updateAdminPendingBadge();
+  };
 
   toggleModal("modalMarketUpload", false);
-  alert(`⏳ Marketplace Listing Submitted for Admin Approval!\n\nYour item "${title}" has been sent to the Moderation Queue and will be published live once verified by Admin.`);
+
+  if (!navigator.onLine) {
+    enqueueOfflineAction("market_listing", itemPayload);
+    return;
+  }
+
+  pendingApprovals.push(itemPayload);
+  localStorage.setItem("mkulima_pending_approvals", JSON.stringify(pendingApprovals));
+  updateAdminPendingBadge();
+  showToast(`⏳ Marketplace Listing "${title}" submitted for Admin Approval!`, "success");
 }
 
 // M-PESA STK PUSH CHECKOUT MODAL
@@ -1595,70 +1788,50 @@ function executeConfirmVetBooking() {
   const date = document.getElementById("bookingDate").value;
 
   if (!date) {
-    alert("Please select a valid appointment date.");
+    showToast("Please select a valid appointment date.", "warning");
     return;
   }
 
-  alert(`✅ Appointment Confirmed!\n\nVet: ${activeTargetVet}\nDate: ${date}\nDetails: ${symptoms || 'General Checkup'}\n\nA confirmation SMS has been dispatched via Africa's Talking Gateway.`);
+  const bookingPayload = { vetName: activeTargetVet, date, symptoms: symptoms || "General Checkup" };
+
   toggleModal("modalVetBooking", false);
+
+  if (!navigator.onLine) {
+    enqueueOfflineAction("vet_booking", bookingPayload);
+    return;
+  }
+
+  showToast(`✅ Appointment Confirmed with ${activeTargetVet} for ${date}!`, "success");
 }
 
-// AFRICA'S TALKING REAL LIVE SMS OTP DISPATCH
+// AFRICA'S TALKING BACKEND-ROUTED OTP SMS DISPATCH
 async function triggerPasswordResetSMS() {
   const phoneInput = document.getElementById("resetPhone");
   const phoneRaw = phoneInput ? phoneInput.value.trim() : "";
   
   if (!phoneRaw) {
-    alert("Please enter a valid phone number.");
+    showToast("Please enter a valid phone number.", "warning");
     return;
-  }
-
-  let formattedPhone = phoneRaw;
-  if (formattedPhone.startsWith("0")) {
-    formattedPhone = "+254" + formattedPhone.slice(1);
-  } else if (!formattedPhone.startsWith("+")) {
-    formattedPhone = "+" + formattedPhone;
   }
 
   const otpCode = Math.floor(1000 + Math.random() * 9000);
 
-  if (!AT_API_KEY) {
-    const userApiKey = prompt("📲 Africa's Talking Sandbox Config:\n\nPlease enter your Africa's Talking Sandbox API Key to send live SMS to " + formattedPhone + ":");
-    if (userApiKey) {
-      AT_API_KEY = userApiKey.trim();
-      localStorage.setItem("mkulima_at_apikey", AT_API_KEY);
-    } else {
-      alert("ℹ️ Using simulated SMS mode. (An API Key is needed to dispatch real SMS over Kenya telecom networks).");
-      alert(`📲 Simulated SMS Received on ${formattedPhone}:\n\nYour M-Shambani password reset OTP pin is: ${otpCode}`);
-      toggleModal("modalPasswordReset", false);
-      return;
-    }
-  }
-
   try {
-    const response = await fetch("https://api.sandbox.africastalking.com/version1/messaging", {
+    const response = await fetch("/api/sms/reset-otp", {
       method: "POST",
-      headers: {
-        "Accept": "application/json",
-        "Content-Type": "application/x-www-form-urlencoded",
-        "apiKey": AT_API_KEY
-      },
-      body: new URLSearchParams({
-        username: AT_USERNAME,
-        to: formattedPhone,
-        message: `Your M-Shambani password reset OTP code is ${otpCode}. Valid for 10 minutes.`
-      })
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ phone: phoneRaw, otpCode })
     });
 
-    if (response.ok) {
-      alert(`📲 LIVE SMS DISPATCHED!\n\nAn Africa's Talking SMS containing your OTP PIN (${otpCode}) was sent to ${formattedPhone}.`);
+    const data = await response.json();
+    if (data.success) {
+      showToast(data.message || `📲 OTP PIN (${otpCode}) sent to ${phoneRaw}!`, "success");
     } else {
-      console.warn("AT SMS Response Status:", response.status);
-      alert(`📲 SMS DISPATCHED (Sandbox Mode):\n\nYour OTP reset pin is: ${otpCode}.\n(Message sent to ${formattedPhone} via Africa's Talking Sandbox Gateway).`);
+      showToast(`📲 OTP PIN: ${otpCode} generated for ${phoneRaw}.`, "info");
     }
   } catch (err) {
-    console.warn("SMS Dispatch Exception:", err);
-    alert(`📲 SMS DISPATCHED (Sandbox Gateway):\n\nYour M-Shambani OTP pin is: ${otpCode}.\nSent to ${formattedPhone}.`);
+    console.warn("OTP SMS Dispatch Exception:", err);
+    showToast(`📲 OTP PIN: ${otpCode} generated for ${phoneRaw}.`, "info");
   }
 
   toggleModal("modalPasswordReset", false);

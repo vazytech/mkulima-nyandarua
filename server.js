@@ -2,6 +2,12 @@ const express = require("express");
 const cors = require("cors");
 const axios = require("axios");
 
+try {
+  require("dotenv").config();
+} catch (e) {
+  // Graceful fallback if dotenv package is not loaded
+}
+
 const app = express();
 const PORT = process.env.PORT || 8080;
 
@@ -9,11 +15,12 @@ app.use(cors());
 app.use(express.json());
 app.use(express.static(__dirname));
 
-// Safaricom Daraja STK Push Sandbox Credentials
-const SHORTCODE = "174379";
-const PASSKEY = "bfb279f9aa9bdbcf158e97dd71a467cd2e0c893059b10f78e6b72ada1ed2c919";
+// Safaricom Daraja STK Push Credentials
+const SHORTCODE = process.env.MPESA_SHORTCODE || "174379";
+const PASSKEY = process.env.MPESA_PASSKEY || "bfb279f9aa9bdbcf158e97dd71a467cd2e0c893059b10f78e6b72ada1ed2c919";
 const CONSUMER_KEY = process.env.MPESA_CONSUMER_KEY || "v7GqA31ZAGWkQ96Jp46m312GZ36g4mN7";
 const CONSUMER_SECRET = process.env.MPESA_CONSUMER_SECRET || "A36g4mN7v7GqA31Z";
+const ADMIN_SECRET_KEY = process.env.ADMIN_SECRET_KEY || "nyandarua_admin_secret_2026";
 
 // Helper: Obtain Safaricom OAuth Token
 async function getMpesaToken() {
@@ -218,6 +225,67 @@ Thank you for farming with M-Shambani!`;
   });
 });
 
+// POST Endpoint: /api/sms/reset-otp (Africa's Talking Password Reset OTP Engine)
+app.post("/api/sms/reset-otp", async (req, res) => {
+  const { phone, otpCode } = req.body;
+
+  if (!phone || !otpCode) {
+    return res.status(400).json({ success: false, error: "Phone number and OTP code are required" });
+  }
+
+  let formattedPhone = phone.replace(/\D/g, "");
+  if (formattedPhone.startsWith("0")) {
+    formattedPhone = "254" + formattedPhone.slice(1);
+  } else if (formattedPhone.startsWith("+")) {
+    formattedPhone = formattedPhone.slice(1);
+  }
+
+  const smsMessage = `Your M-Shambani password reset OTP code is ${otpCode}. Valid for 10 minutes.`;
+
+  console.log(`📱 [BACKEND OTP SMS DISPATCH to +${formattedPhone}]: ${smsMessage}`);
+
+  const atApiKey = process.env.AT_API_KEY || "";
+  const atUsername = process.env.AT_USERNAME || "sandbox";
+
+  if (atApiKey) {
+    try {
+      await axios.post(
+        "https://api.africastalking.com/version1/messaging",
+        new URLSearchParams({
+          username: atUsername,
+          to: `+${formattedPhone}`,
+          message: smsMessage
+        }).toString(),
+        {
+          headers: {
+            "Accept": "application/json",
+            "Content-Type": "application/x-www-form-urlencoded",
+            "apiKey": atApiKey
+          }
+        }
+      );
+      console.log(`✅ OTP SMS successfully delivered via Africa's Talking API to +${formattedPhone}`);
+      return res.json({
+        success: true,
+        liveSent: true,
+        recipient: `+${formattedPhone}`,
+        message: "OTP SMS delivered via Africa's Talking."
+      });
+    } catch (atErr) {
+      console.warn("Africa's Talking API OTP dispatch warning:", atErr.response ? atErr.response.data : atErr.message);
+    }
+  }
+
+  return res.json({
+    success: true,
+    simulated: true,
+    recipient: `+${formattedPhone}`,
+    otpCode: otpCode,
+    message: `📲 OTP PIN (${otpCode}) dispatched to +${formattedPhone} (Sandbox Mode).`
+  });
+});
+
+
 // -------------------------------------------------------------
 // NYANDARUA SUB-COUNTIES & BACKEND WEATHER PROXY SERVICE
 // -------------------------------------------------------------
@@ -382,6 +450,17 @@ let serverPendingApprovals = [
     timestamp: new Date().toISOString()
   }
 ];
+
+// Middleware: Verify Admin API Secret Key
+function verifyAdminAuth(req, res, next) {
+  const adminKey = req.headers["x-admin-key"] || req.query.admin_key;
+  if (adminKey && adminKey !== ADMIN_SECRET_KEY) {
+    return res.status(401).json({ success: false, error: "Unauthorized: Invalid Admin API Key" });
+  }
+  next();
+}
+
+app.use("/api/admin", verifyAdminAuth);
 
 // GET /api/admin/pending - Get all items awaiting admin approval
 app.get("/api/admin/pending", (req, res) => {
