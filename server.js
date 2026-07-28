@@ -205,11 +205,14 @@ Thank you for farming with M-Shambani!`;
 
   const atApiKey = process.env.AT_API_KEY || "";
   const atUsername = process.env.AT_USERNAME || "sandbox";
+  const atUrl = atUsername === "sandbox"
+    ? "https://api.sandbox.africastalking.com/version1/messaging"
+    : "https://api.africastalking.com/version1/messaging";
 
   if (atApiKey) {
     try {
       await axios.post(
-        "https://api.africastalking.com/version1/messaging",
+        atUrl,
         new URLSearchParams({
           username: atUsername,
           to: `+${formattedPhone}`,
@@ -223,7 +226,7 @@ Thank you for farming with M-Shambani!`;
           }
         }
       );
-      console.log(`✅ SMS successfully delivered via Africa's Talking API to +${formattedPhone}`);
+      console.log(`✅ SMS successfully delivered via Africa's Talking API (${atUsername}) to +${formattedPhone}`);
     } catch (atErr) {
       console.warn("Africa's Talking API dispatch warning:", atErr.response ? atErr.response.data : atErr.message);
     }
@@ -259,11 +262,14 @@ app.post("/api/sms/reset-otp", async (req, res) => {
 
   const atApiKey = process.env.AT_API_KEY || "";
   const atUsername = process.env.AT_USERNAME || "sandbox";
+  const atUrl = atUsername === "sandbox"
+    ? "https://api.sandbox.africastalking.com/version1/messaging"
+    : "https://api.africastalking.com/version1/messaging";
 
   if (atApiKey) {
     try {
       await axios.post(
-        "https://api.africastalking.com/version1/messaging",
+        atUrl,
         new URLSearchParams({
           username: atUsername,
           to: `+${formattedPhone}`,
@@ -277,7 +283,7 @@ app.post("/api/sms/reset-otp", async (req, res) => {
           }
         }
       );
-      console.log(`✅ OTP SMS successfully delivered via Africa's Talking API to +${formattedPhone}`);
+      console.log(`✅ OTP SMS successfully delivered via Africa's Talking API (${atUsername}) to +${formattedPhone}`);
       return res.json({
         success: true,
         liveSent: true,
