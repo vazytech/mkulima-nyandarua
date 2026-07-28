@@ -952,11 +952,24 @@ async function processFarmerLogin(e) {
   switchScreen("screen-fodder");
 }
 
-// STRICT FARMER SIGN UP & DATABASE PERSISTENCE
+// KENYAN PHONE NUMBER CANONICAL NORMALIZER (07... / 01... / 254... / +254...)
+function normalizeKenyanPhone(phone) {
+  if (!phone) return "";
+  let digits = String(phone).replace(/\D/g, "");
+  if (digits.startsWith("254") && digits.length === 12) {
+    return "0" + digits.slice(3);
+  }
+  if (digits.length === 9 && (digits.startsWith("7") || digits.startsWith("1"))) {
+    return "0" + digits;
+  }
+  return digits;
+}
+
+// STRICT FARMER SIGN UP & DATABASE PERSISTENCE WITH UNIQUE PHONE ENFORCEMENT
 async function processFarmerRegistration(e) {
   e.preventDefault();
   const name = document.getElementById("farmerName").value.trim();
-  const phone = document.getElementById("farmerPhone").value.trim();
+  const phoneRaw = document.getElementById("farmerPhone").value.trim();
   const pass = document.getElementById("farmerPass").value;
   const confirmPass = document.getElementById("farmerConfirmPass").value;
   const subcounty = document.getElementById("farmerSubCounty").value;
@@ -972,16 +985,56 @@ async function processFarmerRegistration(e) {
     return;
   }
 
-  let formattedPhone = phone.replace(/\D/g, "");
-  if (formattedPhone.length === 9 && formattedPhone.startsWith("7")) {
-    formattedPhone = "0" + formattedPhone;
+  const formattedPhone = normalizeKenyanPhone(phoneRaw);
+
+  if (!formattedPhone || formattedPhone.length < 10) {
+    showToast("⚠️ Invalid Phone Number: Please enter a valid Kenyan mobile number.", "warning");
+    return;
   }
 
+  // 1. Check Local Registered Accounts Registry
   const registeredFarmers = getRegisteredFarmers();
-  const existing = registeredFarmers.find(f => f.phone.replace(/\D/g, "") === formattedPhone);
-  if (existing) {
-    showToast(`❌ Account Already Exists: Phone ${phone} is already registered. Please Sign In.`, "warning");
+  const existingLocal = registeredFarmers.find(f => normalizeKenyanPhone(f.phone) === formattedPhone);
+  if (existingLocal) {
+    showToast(`⛔ Security Policy Violation: Phone ${phoneRaw} is already registered. Multiple accounts per phone number are strictly prohibited.`, "error", 6000);
+    switchAuthTab("login");
+    const loginInput = document.getElementById("loginPhone");
+    if (loginInput) loginInput.value = phoneRaw;
     return;
+  }
+
+  // 2. Check Supabase Cloud Database Table 'farmers'
+  if (typeof db !== "undefined" && db) {
+    try {
+      const { data, error } = await db.from("farmers").select("id, phone").eq("phone", formattedPhone);
+      if (!error && data && data.length > 0) {
+        showToast(`⛔ Security Policy Violation: Phone ${phoneRaw} is registered in cloud database. Multiple accounts per phone number are prohibited.`, "error", 6000);
+        switchAuthTab("login");
+        const loginInput = document.getElementById("loginPhone");
+        if (loginInput) loginInput.value = phoneRaw;
+        return;
+      }
+    } catch (err) {
+      console.warn("Supabase unique phone check exception:", err);
+    }
+  }
+
+  // 3. Check Express Backend API Endpoint /api/auth/register
+  try {
+    const apiRes = await fetch("/api/auth/register", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name, phone: formattedPhone, password: pass, subcounty, ward })
+    });
+    if (apiRes.status === 409) {
+      showToast(`⛔ Security Policy Violation: Phone ${phoneRaw} is registered on server. Multiple accounts per phone number are prohibited.`, "error", 6000);
+      switchAuthTab("login");
+      const loginInput = document.getElementById("loginPhone");
+      if (loginInput) loginInput.value = phoneRaw;
+      return;
+    }
+  } catch (apiErr) {
+    console.warn("Backend auth API lookup fallback to local registration:", apiErr);
   }
 
   const newFarmer = { name, phone: formattedPhone, password: pass, subcounty, ward, registeredAt: new Date().toISOString() };

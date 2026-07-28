@@ -451,6 +451,64 @@ let serverPendingApprovals = [
   }
 ];
 
+// =============================================================
+// BACKEND FARMER AUTHENTICATION & UNIQUE PHONE ENFORCEMENT
+// =============================================================
+let serverRegisteredFarmers = [
+  { name: "Nyandarua Farmer", phone: "0718493313", subcounty: "Ol Kalou", ward: "Karau" }
+];
+
+function normalizePhoneServer(p) {
+  if (!p) return "";
+  let digits = String(p).replace(/\D/g, "");
+  if (digits.startsWith("254") && digits.length === 12) {
+    return "0" + digits.slice(3);
+  }
+  if (digits.length === 9 && (digits.startsWith("7") || digits.startsWith("1"))) {
+    return "0" + digits;
+  }
+  return digits;
+}
+
+// GET /api/auth/check-phone - Check if phone number is already registered
+app.get("/api/auth/check-phone", (req, res) => {
+  const reqPhone = normalizePhoneServer(req.query.phone);
+  if (!reqPhone) {
+    return res.status(400).json({ success: false, error: "Phone parameter is required" });
+  }
+
+  const existing = serverRegisteredFarmers.find(f => normalizePhoneServer(f.phone) === reqPhone);
+  if (existing) {
+    return res.json({ registered: true, message: `Phone number ${reqPhone} is already registered.` });
+  }
+  return res.json({ registered: false });
+});
+
+// POST /api/auth/register - Register new account with unique phone enforcement
+app.post("/api/auth/register", (req, res) => {
+  const { name, phone, password, subcounty, ward } = req.body;
+
+  if (!phone || !password || !name) {
+    return res.status(400).json({ success: false, error: "Name, phone, and password are required." });
+  }
+
+  const normPhone = normalizePhoneServer(phone);
+  const existing = serverRegisteredFarmers.find(f => normalizePhoneServer(f.phone) === normPhone);
+
+  if (existing) {
+    return res.status(409).json({
+      success: false,
+      error: `Security Policy Violation: An account already exists for phone number ${normPhone}. Multiple accounts per phone number are strictly prohibited.`
+    });
+  }
+
+  const newFarmer = { name, phone: normPhone, password, subcounty, ward, registeredAt: new Date().toISOString() };
+  serverRegisteredFarmers.push(newFarmer);
+  console.log(`✅ [SERVER AUTH] New farmer registered: ${name} (${normPhone})`);
+
+  return res.json({ success: true, message: `Account created successfully for ${name}!`, farmer: newFarmer });
+});
+
 // Middleware: Verify Admin API Secret Key
 function verifyAdminAuth(req, res, next) {
   const adminKey = req.headers["x-admin-key"] || req.query.admin_key;
