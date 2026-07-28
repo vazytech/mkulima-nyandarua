@@ -110,6 +110,38 @@ app.post("/api/stkpush", async (req, res) => {
   }
 });
 
+// POST Endpoint: /api/mpesa/callback (Safaricom Webhook IPN Callback)
+app.post("/api/mpesa/callback", (req, res) => {
+  console.log("📲 [SAFARICOM M-PESA CALLBACK IPN RECEIVED]:", JSON.stringify(req.body, null, 2));
+
+  try {
+    const callbackData = req.body.Body ? req.body.Body.stkCallback : req.body;
+    const resultCode = callbackData.ResultCode;
+    const resultDesc = callbackData.ResultDesc;
+
+    if (resultCode === 0) {
+      const items = callbackData.CallbackMetadata ? callbackData.CallbackMetadata.Item : [];
+      let mpesaReceipt = "";
+      let amountPaid = 0;
+      let phone = "";
+
+      items.forEach(item => {
+        if (item.Name === "MpesaReceiptNumber") mpesaReceipt = item.Value;
+        if (item.Name === "Amount") amountPaid = item.Value;
+        if (item.Name === "PhoneNumber") phone = item.Value;
+      });
+
+      console.log(`✅ [PAYMENT VERIFIED]: Receipt ${mpesaReceipt} | KSh ${amountPaid} from ${phone}`);
+    } else {
+      console.warn(`❌ [PAYMENT CANCELLED/FAILED]: Code ${resultCode} - ${resultDesc}`);
+    }
+  } catch (err) {
+    console.error("Callback processing exception:", err);
+  }
+
+  res.json({ ResultCode: 0, ResultDesc: "Accepted" });
+});
+
 // Nyandarua Sub-County Pickup Points Mapping
 const NYANDARUA_PICKUP_POINTS = {
   "Ol Kalou": { name: "Ol Kalou Farmers Central Depot", location: "Nyandarua Agribusiness Centre, Ward Office Road", agentPhone: "0718493313" },

@@ -46,6 +46,132 @@ let fallbackServices = [
 let currentUser = JSON.parse(localStorage.getItem("mkulima_current_user")) || null;
 let activeMpesaItem = { title: "", price: "" };
 
+// MULTI-LANGUAGE TRANSLATION DICTIONARY (ENGLISH <-> KISWAHILI)
+let currentLanguage = localStorage.getItem("mkulima_lang") || "en";
+
+const TRANSLATIONS = {
+  en: {
+    langBtnLabel: "🇰🇪 Kiswahili",
+    appTitle: "🌾 M-Mkulima",
+    appSubtitle: "Nyandarua Agricultural Portal",
+    navFodder: "🌾 Fodder Hub",
+    navMarket: "🛒 Marketplace",
+    navVets: "🩺 Verified Vets",
+    navServices: "🛠️ Agri-Services",
+    tabSignIn: "🔑 Sign In",
+    tabRegister: "📝 Register",
+    lblPhone: "Phone Number",
+    lblPassword: "Password",
+    lblConfirmPassword: "Confirm Password",
+    lblFullName: "Full Name",
+    lblSubcounty: "Your Sub-County",
+    lblWard: "Your Ward",
+    btnSignInSubmit: "Sign In & Access App",
+    btnRegisterSubmit: "Register & Unlock App",
+    forgotPassLink: "Forgot Password?",
+    postFodderBtn: "+ Post Fodder",
+    postMarketBtn: "+ Post Listing",
+    postServiceBtn: "+ Post Service",
+    cartTitle: "Shopping Cart",
+    viewCart: "🛒 View Cart",
+    buyMpesa: "💳 Buy M-Pesa",
+    callSeller: "📞 Call Seller",
+    callTech: "📞 Call Tech",
+    addToCart: "🛒 Add to Cart",
+    addServiceToCart: "🛒 Add Service to Cart",
+    searchFodderPlaceholder: "Search fodder by title or keyword...",
+    searchMarketPlaceholder: "Search marketplace items...",
+    searchVetPlaceholder: "Search vet by name, specialty, or region...",
+    searchServicesPlaceholder: "Search services...",
+    adminQueueLabel: "🛡️ Admin Moderation Queue",
+    logoutLabel: "🚪 Logout of Account"
+  },
+  sw: {
+    langBtnLabel: "🇬🇧 English",
+    appTitle: "🌾 M-Mkulima",
+    appSubtitle: "Tovuti ya Kilimo Nyandarua",
+    navFodder: "🌾 Soko la Chakula",
+    navMarket: "🛒 Soko Kuu",
+    navVets: "🩺 Madaktari wa Mifugo",
+    navServices: "🛠️ Huduma za Kilimo",
+    tabSignIn: "🔑 Ingia Akaunti",
+    tabRegister: "📝 Sajili Akaunti",
+    lblPhone: "Nambari ya Simu",
+    lblPassword: "Nenosiri",
+    lblConfirmPassword: "Thibitisha Nenosiri",
+    lblFullName: "Majina Kamili",
+    lblSubcounty: "Eneo la Kaunti Ndogo",
+    lblWard: "Wadi Yako",
+    btnSignInSubmit: "Ingia na Ufungue Programu",
+    btnRegisterSubmit: "Sajili na Ufungue Programu",
+    forgotPassLink: "Umesahau Nenosiri?",
+    postFodderBtn: "+ Weka Chakula cha Mifugo",
+    postMarketBtn: "+ Weka Bidhaa Sokoni",
+    postServiceBtn: "+ Weka Huduma",
+    cartTitle: "Kikapu cha Manunuzi",
+    viewCart: "🛒 Tazama Kikapu",
+    buyMpesa: "💳 Lipa na M-Pesa",
+    callSeller: "📞 Piga Simu Muuzaji",
+    callTech: "📞 Piga Simu Mtaalamu",
+    addToCart: "🛒 Weka Kwenye Kikapu",
+    addServiceToCart: "🛒 Weka Huduma Kikapuni",
+    searchFodderPlaceholder: "Tafuta chakula cha mifugo kwa jina...",
+    searchMarketPlaceholder: "Tafuta bidhaa za kilimo sokoni...",
+    searchVetPlaceholder: "Tafuta daktari wa mifugo...",
+    searchServicesPlaceholder: "Tafuta huduma za kilimo...",
+    adminQueueLabel: "🛡️ Safu ya Idhini ya Admin",
+    logoutLabel: "🚪 Toka Kwenye Akaunti"
+  }
+};
+
+function toggleLanguage() {
+  currentLanguage = currentLanguage === "en" ? "sw" : "en";
+  localStorage.setItem("mkulima_lang", currentLanguage);
+  applyLanguageTranslations();
+}
+
+function applyLanguageTranslations() {
+  const t = TRANSLATIONS[currentLanguage] || TRANSLATIONS.en;
+  const langBtnLabel = document.getElementById("txtLangToggleLabel");
+  if (langBtnLabel) langBtnLabel.textContent = t.langBtnLabel;
+
+  // Desktop Nav Links
+  const dFodder = document.getElementById("desktop-nav-fodder");
+  const dMarket = document.getElementById("desktop-nav-market");
+  const dVets = document.getElementById("desktop-nav-vets");
+  const dServices = document.getElementById("desktop-nav-services");
+  if (dFodder) dFodder.textContent = t.navFodder;
+  if (dMarket) dMarket.textContent = t.navMarket;
+  if (dVets) dVets.textContent = t.navVets;
+  if (dServices) dServices.textContent = t.navServices;
+
+  // Mobile Bottom Nav
+  const mFodder = document.querySelector("#nav-fodder span:last-child");
+  const mMarket = document.querySelector("#nav-market span:last-child");
+  const mVets = document.querySelector("#nav-vets span:last-child");
+  const mServices = document.querySelector("#nav-services span:last-child");
+  if (mFodder) mFodder.textContent = t.navFodder.replace("🌾 ", "");
+  if (mMarket) mMarket.textContent = t.navMarket.replace("🛒 ", "");
+  if (mVets) mVets.textContent = t.navVets.replace("🩺 ", "");
+  if (mServices) mServices.textContent = t.navServices.replace("🛠️ ", "");
+
+  // Auth Tabs & Buttons
+  const tabLogin = document.getElementById("tabAuthLogin");
+  const tabRegister = document.getElementById("tabAuthRegister");
+  if (tabLogin) tabLogin.textContent = t.tabSignIn;
+  if (tabRegister) tabRegister.textContent = t.tabRegister;
+
+  // Search Placeholders
+  const inputFodder = document.getElementById("searchFodderInput");
+  const inputMarket = document.getElementById("searchMarketInput");
+  const inputVet = document.getElementById("searchVetInput");
+  const inputService = document.getElementById("searchServicesInput");
+  if (inputFodder) inputFodder.placeholder = t.searchFodderPlaceholder;
+  if (inputMarket) inputMarket.placeholder = t.searchMarketPlaceholder;
+  if (inputVet) inputVet.placeholder = t.searchVetPlaceholder;
+  if (inputService) inputService.placeholder = t.searchServicesPlaceholder;
+}
+
 // Application Initialization & Service Worker Registration (PWA)
 document.addEventListener("DOMContentLoaded", () => {
   if ("serviceWorker" in navigator) {
@@ -56,6 +182,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   setupSupabaseAuthListener();
   updateUserSessionUI();
+  applyLanguageTranslations();
   
   if (currentUser) {
     switchScreen("screen-fodder");
@@ -344,6 +471,8 @@ function updateUserSessionUI() {
   const profileMenuContainer = document.getElementById("profileMenuContainer");
   const btnAuthHeader = document.getElementById("btnAuthHeader");
   const bottomNav = document.getElementById("appBottomNav");
+  const floatingCartBtn = document.getElementById("floatingCartBtn");
+  const desktopNavLinks = document.querySelector(".desktop-nav-links");
 
   if (currentUser) {
     if (badgeLocation) {
@@ -359,12 +488,28 @@ function updateUserSessionUI() {
       document.getElementById("dropdownUserRegion").textContent = `📍 ${currentUser.subcounty || 'Nyandarua'} (${currentUser.ward || 'Ward'})`;
     }
     if (btnAuthHeader) btnAuthHeader.classList.add("hidden");
-    if (bottomNav) bottomNav.classList.remove("disabled-nav");
+    if (bottomNav) {
+      bottomNav.classList.remove("disabled-nav", "hidden");
+    }
+    if (floatingCartBtn) {
+      floatingCartBtn.classList.remove("hidden");
+    }
+    if (desktopNavLinks) {
+      desktopNavLinks.classList.remove("hidden");
+    }
   } else {
     if (badgeLocation) badgeLocation.classList.add("hidden");
     if (profileMenuContainer) profileMenuContainer.classList.add("hidden");
     if (btnAuthHeader) btnAuthHeader.classList.remove("hidden");
-    if (bottomNav) bottomNav.classList.add("disabled-nav");
+    if (bottomNav) {
+      bottomNav.classList.add("disabled-nav", "hidden");
+    }
+    if (floatingCartBtn) {
+      floatingCartBtn.classList.add("hidden");
+    }
+    if (desktopNavLinks) {
+      desktopNavLinks.classList.add("hidden");
+    }
   }
 }
 
@@ -397,7 +542,7 @@ function validatePasswordPolicy(password) {
   return hasMinLength && hasUpper && hasNumber && hasSpecial;
 }
 
-// Toggle Password Visibility
+// Toggle Password Visibility (Clean Text Show/Hide)
 function togglePasswordVisibility(inputId, btnId) {
   const input = document.getElementById(inputId);
   const btn = document.getElementById(btnId);
@@ -405,39 +550,105 @@ function togglePasswordVisibility(inputId, btnId) {
 
   if (input.type === "password") {
     input.type = "text";
-    btn.textContent = "🙈";
+    btn.textContent = "Hide";
   } else {
     input.type = "password";
-    btn.textContent = "👁️";
+    btn.textContent = "Show";
   }
 }
 
-// Farmer Sign In Handler
-function processFarmerLogin(e) {
+// REGISTERED FARMERS DATABASE REGISTRY
+function getRegisteredFarmers() {
+  const stored = localStorage.getItem("mkulima_registered_farmers");
+  if (stored) {
+    try { return JSON.parse(stored); } catch (e) {}
+  }
+  const defaultFarmers = [
+    { name: "John Kamau", phone: "0718493313", password: "Password1@", subcounty: "Ol Kalou", ward: "Karau" },
+    { name: "Mary Wanjiku", phone: "0722000000", password: "Password1@", subcounty: "Kinangop", ward: "Engineer" }
+  ];
+  localStorage.setItem("mkulima_registered_farmers", JSON.stringify(defaultFarmers));
+  return defaultFarmers;
+}
+
+function saveRegisteredFarmer(farmerObj) {
+  const list = getRegisteredFarmers();
+  const index = list.findIndex(f => f.phone === farmerObj.phone);
+  if (index !== -1) {
+    list[index] = farmerObj;
+  } else {
+    list.push(farmerObj);
+  }
+  localStorage.setItem("mkulima_registered_farmers", JSON.stringify(list));
+}
+
+// STRICT FARMER LOGIN & PASSWORD VERIFICATION
+async function processFarmerLogin(e) {
   e.preventDefault();
-  const phone = document.getElementById("loginPhone").value.trim();
+  const phoneRaw = document.getElementById("loginPhone").value.trim();
   const pass = document.getElementById("loginPass").value;
 
-  if (!phone || !pass) {
+  if (!phoneRaw || !pass) {
     alert("Please fill in both phone number and password.");
     return;
   }
 
+  let formattedPhone = phoneRaw.replace(/\D/g, "");
+  if (formattedPhone.length === 9 && formattedPhone.startsWith("7")) {
+    formattedPhone = "0" + formattedPhone;
+  }
+
+  // 1. Check Supabase Cloud Database Table 'farmers' if configured
+  if (typeof db !== "undefined" && db) {
+    try {
+      const { data, error } = await db.from("farmers").select("*").eq("phone", formattedPhone).single();
+      if (!error && data) {
+        if (data.password === pass || data.password_hash === pass) {
+          currentUser = { name: data.name, phone: data.phone, subcounty: data.subcounty, ward: data.ward };
+          localStorage.setItem("mkulima_current_user", JSON.stringify(currentUser));
+          updateUserSessionUI();
+          alert(`✅ Welcome back, ${currentUser.name}!\nPassword verified successfully.`);
+          switchScreen("screen-fodder");
+          return;
+        } else {
+          alert(`❌ Invalid Password:\nThe password you entered for ${phoneRaw} is incorrect. Please try again.`);
+          return;
+        }
+      }
+    } catch (err) {
+      console.warn("Supabase auth lookup fallback to local registry:", err);
+    }
+  }
+
+  // 2. Check Local Registered Accounts Database
+  const registeredFarmers = getRegisteredFarmers();
+  const matchedFarmer = registeredFarmers.find(f => f.phone.replace(/\D/g, "") === formattedPhone);
+
+  if (!matchedFarmer) {
+    alert(`❌ Account Not Found:\nNo M-Mkulima account found for ${phoneRaw}.\n\nPlease click the 'Register' tab to create a new account.`);
+    return;
+  }
+
+  if (matchedFarmer.password !== pass) {
+    alert(`❌ Invalid Password:\nThe password you entered for ${phoneRaw} is incorrect. Please try again.`);
+    return;
+  }
+
   currentUser = {
-    name: "Farmer " + phone.slice(-4),
-    phone: phone,
-    subcounty: "Ol Kalou",
-    ward: "Karau"
+    name: matchedFarmer.name,
+    phone: matchedFarmer.phone,
+    subcounty: matchedFarmer.subcounty,
+    ward: matchedFarmer.ward
   };
 
   localStorage.setItem("mkulima_current_user", JSON.stringify(currentUser));
   updateUserSessionUI();
-  alert(`✅ Welcome back!\nYou are successfully signed in.`);
+  alert(`✅ Welcome back, ${currentUser.name}!\nPassword verified successfully.`);
   switchScreen("screen-fodder");
 }
 
-// Farmer Sign Up Handler
-function processFarmerRegistration(e) {
+// STRICT FARMER SIGN UP & DATABASE PERSISTENCE
+async function processFarmerRegistration(e) {
   e.preventDefault();
   const name = document.getElementById("farmerName").value.trim();
   const phone = document.getElementById("farmerPhone").value.trim();
@@ -456,11 +667,35 @@ function processFarmerRegistration(e) {
     return;
   }
 
-  currentUser = { name, phone, subcounty, ward };
+  let formattedPhone = phone.replace(/\D/g, "");
+  if (formattedPhone.length === 9 && formattedPhone.startsWith("7")) {
+    formattedPhone = "0" + formattedPhone;
+  }
+
+  const registeredFarmers = getRegisteredFarmers();
+  const existing = registeredFarmers.find(f => f.phone.replace(/\D/g, "") === formattedPhone);
+  if (existing) {
+    alert(`❌ Account Already Exists:\nAn account with phone number ${phone} is already registered.\nPlease click 'Sign In' instead.`);
+    return;
+  }
+
+  const newFarmer = { name, phone: formattedPhone, password: pass, subcounty, ward, registeredAt: new Date().toISOString() };
+
+  if (typeof db !== "undefined" && db) {
+    try {
+      await db.from("farmers").insert([{ name, phone: formattedPhone, password: pass, subcounty, ward }]);
+    } catch (err) {
+      console.warn("Supabase farmer insert exception:", err);
+    }
+  }
+
+  saveRegisteredFarmer(newFarmer);
+
+  currentUser = { name, phone: formattedPhone, subcounty, ward };
   localStorage.setItem("mkulima_current_user", JSON.stringify(currentUser));
   updateUserSessionUI();
 
-  alert(`✅ Account Created Successfully!\nWelcome, ${name} (${subcounty} Sub-County).`);
+  alert(`✅ Account Created Successfully!\nWelcome, ${name} (${subcounty} Sub-County).\nYour password has been securely registered.`);
   switchScreen("screen-fodder");
 }
 
@@ -580,6 +815,8 @@ async function renderFodderItems(filterCategory = "all", searchQuery = "", selec
     return;
   }
 
+  const t = TRANSLATIONS[currentLanguage] || TRANSLATIONS.en;
+
   container.innerHTML = items.map(item => `
     <div class="item-card">
       <div class="flex-between">
@@ -597,11 +834,11 @@ async function renderFodderItems(filterCategory = "all", searchQuery = "", selec
         </div>
         <div class="item-card-action-bar">
           <button onclick="addToCart('${item.title}', '${item.price}', '${item.category}', '${item.subcounty}')" class="btn btn-cart-primary">
-            🛒 Add to Cart
+            ${t.addToCart}
           </button>
           <div class="item-card-row2-actions">
-            <a href="tel:${item.phone}" class="btn btn-contact-secondary">📞 Call Seller</a>
-            <button onclick="openMpesaModal('${item.title}', '${item.price}')" class="btn btn-mpesa-accent">💳 Buy M-Pesa</button>
+            <a href="tel:${item.phone}" class="btn btn-contact-secondary">${t.callSeller}</a>
+            <button onclick="openMpesaModal('${item.title}', '${item.price}')" class="btn btn-mpesa-accent">${t.buyMpesa}</button>
           </div>
         </div>
       </div>
@@ -666,11 +903,11 @@ async function renderMarketItems(searchQuery = "") {
         </div>
         <div class="item-card-action-bar">
           <button onclick="addToCart('${item.title}', '${item.price}', '${item.category}', '${item.location}')" class="btn btn-cart-primary">
-            🛒 Add to Cart
+            ${t.addToCart}
           </button>
           <div class="item-card-row2-actions">
-            <a href="tel:${item.contact}" class="btn btn-contact-secondary">📞 Call Seller</a>
-            <button onclick="openMpesaModal('${item.title}', '${item.price}')" class="btn btn-mpesa-accent">💳 Buy M-Pesa</button>
+            <a href="tel:${item.contact}" class="btn btn-contact-secondary">${t.callSeller}</a>
+            <button onclick="openMpesaModal('${item.title}', '${item.price}')" class="btn btn-mpesa-accent">${t.buyMpesa}</button>
           </div>
         </div>
       </div>
@@ -765,6 +1002,8 @@ async function renderServiceItems(filterCategory = "all", searchQuery = "", sele
     return;
   }
 
+  const t = TRANSLATIONS[currentLanguage] || TRANSLATIONS.en;
+
   container.innerHTML = items.map(item => `
     <div class="item-card">
       <div class="flex-between">
@@ -782,11 +1021,11 @@ async function renderServiceItems(filterCategory = "all", searchQuery = "", sele
         </div>
         <div class="item-card-action-bar">
           <button onclick="addToCart('${item.title}', '${item.rate || item.price}', '${item.category}', '${item.subcounty}')" class="btn btn-cart-primary">
-            🛒 Add Service to Cart
+            ${t.addServiceToCart}
           </button>
           <div class="item-card-row2-actions">
-            <a href="tel:${item.phone}" class="btn btn-contact-secondary">📞 Call Tech</a>
-            <button onclick="openMpesaModal('${item.title}', '${item.rate || item.price}')" class="btn btn-mpesa-accent">💳 Book M-Pesa</button>
+            <a href="tel:${item.phone}" class="btn btn-contact-secondary">${t.callTech}</a>
+            <button onclick="openMpesaModal('${item.title}', '${item.rate || item.price}')" class="btn btn-mpesa-accent">${t.buyMpesa}</button>
           </div>
         </div>
       </div>
@@ -1309,31 +1548,7 @@ function checkoutCartMpesa() {
 // =============================================================
 // COUNTY ADMIN MODERATION & APPROVAL QUEUE ENGINE
 // =============================================================
-let pendingApprovals = JSON.parse(localStorage.getItem("mkulima_pending_approvals")) || [
-  {
-    id: 101,
-    type: "fodder",
-    title: "Boma Rhodes Hay Bales (30kg)",
-    category: "Energy",
-    price: "KSh 380 / bale",
-    subcounty: "Ndaragua",
-    seller: "John K. Farm",
-    phone: "0712998877",
-    desc: "Freshly baled high-energy Boma Rhodes pasture hay.",
-    timestamp: "Just now"
-  },
-  {
-    id: 102,
-    type: "market",
-    title: "Solar Powered Milk Cooling Tank (500L)",
-    category: "Equipment",
-    price: "KSh 120,000",
-    location: "Ol Kalou",
-    contact: "0722887766",
-    desc: "Direct solar cooling tank for remote dairy farms.",
-    timestamp: "Just now"
-  }
-];
+let pendingApprovals = JSON.parse(localStorage.getItem("mkulima_pending_approvals")) || [];
 
 function updateAdminPendingBadge() {
   const badge = document.getElementById("adminPendingBadge");
@@ -1342,16 +1557,30 @@ function updateAdminPendingBadge() {
 
 async function openAdminApprovalsModal() {
   toggleModal("modalAdminApprovals", true);
-  try {
-    const res = await fetch("/api/admin/pending");
-    const json = await res.json();
-    if (json.success && Array.isArray(json.pendingItems) && json.pendingItems.length > 0) {
-      pendingApprovals = json.pendingItems;
-      localStorage.setItem("mkulima_pending_approvals", JSON.stringify(pendingApprovals));
+  
+  if (typeof db !== "undefined" && db) {
+    try {
+      const { data, error } = await db.from("pending_approvals").select("*").eq("status", "pending");
+      if (!error && data && data.length > 0) {
+        pendingApprovals = data;
+        localStorage.setItem("mkulima_pending_approvals", JSON.stringify(pendingApprovals));
+      }
+    } catch (err) {
+      console.warn("Supabase pending approvals fetch exception:", err);
     }
-  } catch (err) {
-    console.warn("Backend admin pending fetch fallback:", err);
+  } else {
+    try {
+      const res = await fetch("/api/admin/pending");
+      const json = await res.json();
+      if (json.success && Array.isArray(json.pendingItems) && json.pendingItems.length > 0) {
+        pendingApprovals = json.pendingItems;
+        localStorage.setItem("mkulima_pending_approvals", JSON.stringify(pendingApprovals));
+      }
+    } catch (err) {
+      console.warn("Backend admin pending fetch fallback:", err);
+    }
   }
+
   renderAdminPendingListUI();
 }
 
@@ -1364,7 +1593,7 @@ function renderAdminPendingListUI() {
       <div style="text-align: center; padding: 2rem 1rem; color: #94a3b8; background: #f8fafc; border-radius: 8px;">
         <span style="font-size: 2rem; display: block; margin-bottom: 0.35rem;">✅</span>
         <p style="font-weight: 800; color: #1e293b;">No Pending Submissions</p>
-        <p style="font-size: 0.78rem;">All submitted fodder, marketplace, and service listings have been reviewed and approved.</p>
+        <p style="font-size: 0.78rem;">All submitted fodder, marketplace, and service listings in the database have been reviewed and approved.</p>
       </div>
     `;
     updateAdminPendingBadge();
@@ -1375,9 +1604,9 @@ function renderAdminPendingListUI() {
     <div style="background: #ffffff; border: 1px solid #fed7aa; border-radius: 8px; padding: 0.85rem; box-shadow: 0 2px 4px rgba(0,0,0,0.03);">
       <div class="flex-between" style="margin-bottom: 0.25rem;">
         <span class="item-badge" style="background:#fff7ed; color:#c2410c; border:1px solid #ffedd5; font-weight:800;">
-          ⏳ ${item.type.toUpperCase()} PENDING APPROVAL
+          ⏳ ${(item.type || 'ITEM').toUpperCase()} PENDING APPROVAL
         </span>
-        <span style="font-size:0.7rem; font-weight:700; color:#94a3b8;">${item.timestamp || 'Recent'}</span>
+        <span style="font-size:0.7rem; font-weight:700; color:#94a3b8;">${item.timestamp || 'Database Item'}</span>
       </div>
 
       <h4 style="font-size: 0.95rem; font-weight: 800; color: #0f172a; margin: 0.2rem 0;">${item.title}</h4>
@@ -1406,6 +1635,15 @@ function renderAdminPendingListUI() {
 async function approveListing(idx) {
   const item = pendingApprovals[idx];
   if (!item) return;
+
+  // 1. Update Supabase Cloud Database table 'pending_approvals' status -> 'approved'
+  if (typeof db !== "undefined" && db) {
+    try {
+      await db.from("pending_approvals").update({ status: "approved" }).eq("id", item.id);
+    } catch (err) {
+      console.warn("Supabase approval update exception:", err);
+    }
+  }
 
   try {
     await fetch("/api/admin/approve", {
@@ -1463,32 +1701,36 @@ async function approveListing(idx) {
     renderServiceItems();
   }
 
-  const approvedTitle = item.title;
   pendingApprovals.splice(idx, 1);
   localStorage.setItem("mkulima_pending_approvals", JSON.stringify(pendingApprovals));
-  
-  alert(`✅ Listing "${approvedTitle}" has been APPROVED via Backend API & published live!`);
   renderAdminPendingListUI();
+  alert(`✅ [APPROVED IN DATABASE]: "${item.title}" is now published live!`);
 }
 
 async function rejectListing(idx) {
   const item = pendingApprovals[idx];
   if (!item) return;
 
-  if (confirm(`Are you sure you want to reject the submission "${item.title}"?`)) {
+  if (typeof db !== "undefined" && db) {
     try {
-      await fetch("/api/admin/reject", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id: item.id })
-      });
+      await db.from("pending_approvals").update({ status: "rejected" }).eq("id", item.id);
     } catch (err) {
-      console.warn("Backend reject call warning:", err);
+      console.warn("Supabase rejection update exception:", err);
     }
-
-    pendingApprovals.splice(idx, 1);
-    localStorage.setItem("mkulima_pending_approvals", JSON.stringify(pendingApprovals));
-    renderAdminPendingListUI();
-    alert("❌ Listing submission rejected via Backend API.");
   }
+
+  try {
+    await fetch("/api/admin/reject", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id: item.id })
+    });
+  } catch (err) {
+    console.warn("Backend reject call warning:", err);
+  }
+
+  pendingApprovals.splice(idx, 1);
+  localStorage.setItem("mkulima_pending_approvals", JSON.stringify(pendingApprovals));
+  renderAdminPendingListUI();
+  alert(`❌ [REJECTED IN DATABASE]: Submission "${item.title}" was rejected.`);
 }

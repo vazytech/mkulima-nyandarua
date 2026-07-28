@@ -493,26 +493,30 @@ body {
 }
 
 .password-input-wrapper .form-input {
-  padding-right: 2.75rem;
+  padding-right: 4.2rem;
 }
 
-.toggle-password-btn {
+.toggle-password-btn,
+.toggle-password-text-btn {
   position: absolute;
-  right: 0.75rem;
+  right: 0.6rem;
   background: none;
   border: none;
-  font-size: 1.15rem;
+  font-size: 0.78rem;
+  font-weight: 800;
   cursor: pointer;
-  color: var(--text-muted);
+  color: var(--primary-700);
   user-select: none;
-  padding: 0.2rem 0.4rem;
-  border-radius: var(--radius-sm);
+  padding: 0.25rem 0.45rem;
+  border-radius: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
   transition: var(--transition-fast);
 }
 
-.toggle-password-btn:hover {
-  color: var(--primary-700);
-  transform: scale(1.1);
+.toggle-password-btn:hover,
+.toggle-password-text-btn:hover {
+  background: rgba(4, 120, 87, 0.08);
 }
 
 /* Buttons */
