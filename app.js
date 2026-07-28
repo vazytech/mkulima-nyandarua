@@ -595,10 +595,14 @@ async function renderFodderItems(filterCategory = "all", searchQuery = "", selec
           <span>📍 ${item.subcounty}</span>
           <span style="font-weight:700; color:var(--primary-700);">Verified Feed</span>
         </div>
-        <div class="item-card-buttons-stack">
-          <a href="tel:${item.phone}" class="btn btn-secondary" style="width:100%; justify-content:center;">📞 Contact Seller (${item.phone || 'Call'})</a>
-          <button onclick="addToCart('${item.title}', '${item.price}', '${item.category}', '${item.subcounty}')" class="btn btn-primary" style="width:100%; justify-content:center; background:#10b981; border-color:#059669; color:#ffffff;">🛒 Add to Cart</button>
-          <button onclick="openMpesaModal('${item.title}', '${item.price}')" class="btn btn-mpesa" style="width:100%; justify-content:center;">💳 Buy Now via M-Pesa</button>
+        <div class="item-card-action-bar">
+          <button onclick="addToCart('${item.title}', '${item.price}', '${item.category}', '${item.subcounty}')" class="btn btn-cart-primary">
+            🛒 Add to Cart
+          </button>
+          <div class="item-card-row2-actions">
+            <a href="tel:${item.phone}" class="btn btn-contact-secondary">📞 Call Seller</a>
+            <button onclick="openMpesaModal('${item.title}', '${item.price}')" class="btn btn-mpesa-accent">💳 Buy M-Pesa</button>
+          </div>
         </div>
       </div>
     </div>
@@ -660,10 +664,14 @@ async function renderMarketItems(searchQuery = "") {
           <span>📍 ${item.location}</span>
           <span style="font-weight:700; color:var(--accent-700);">Direct Trade</span>
         </div>
-        <div class="item-card-buttons-stack">
-          <a href="tel:${item.contact}" class="btn btn-accent" style="width:100%; justify-content:center;">📞 Contact Seller (${item.contact || 'Call'})</a>
-          <button onclick="addToCart('${item.title}', '${item.price}', '${item.category}', '${item.location}')" class="btn btn-primary" style="width:100%; justify-content:center; background:#10b981; border-color:#059669; color:#ffffff;">🛒 Add to Cart</button>
-          <button onclick="openMpesaModal('${item.title}', '${item.price}')" class="btn btn-mpesa" style="width:100%; justify-content:center;">💳 Buy Now via M-Pesa</button>
+        <div class="item-card-action-bar">
+          <button onclick="addToCart('${item.title}', '${item.price}', '${item.category}', '${item.location}')" class="btn btn-cart-primary">
+            🛒 Add to Cart
+          </button>
+          <div class="item-card-row2-actions">
+            <a href="tel:${item.contact}" class="btn btn-contact-secondary">📞 Call Seller</a>
+            <button onclick="openMpesaModal('${item.title}', '${item.price}')" class="btn btn-mpesa-accent">💳 Buy M-Pesa</button>
+          </div>
         </div>
       </div>
     </div>
@@ -772,10 +780,14 @@ async function renderServiceItems(filterCategory = "all", searchQuery = "", sele
           <span>📍 ${item.subcounty} • ${item.provider || 'Verified Specialist'}</span>
           <span style="font-weight:700; color:var(--primary-700);">⭐ Certified Service</span>
         </div>
-        <div class="item-card-buttons-stack">
-          <a href="tel:${item.phone}" class="btn btn-secondary" style="width:100%; justify-content:center;">📞 Call Technician (${item.phone || 'Direct Call'})</a>
-          <button onclick="addToCart('${item.title}', '${item.rate || item.price}', '${item.category}', '${item.subcounty}')" class="btn btn-primary" style="width:100%; justify-content:center; background:#10b981; border-color:#059669; color:#ffffff;">🛒 Add Service to Cart</button>
-          <button onclick="openMpesaModal('${item.title}', '${item.rate || item.price}')" class="btn btn-mpesa" style="width:100%; justify-content:center;">💳 Book & Pay via M-Pesa</button>
+        <div class="item-card-action-bar">
+          <button onclick="addToCart('${item.title}', '${item.rate || item.price}', '${item.category}', '${item.subcounty}')" class="btn btn-cart-primary">
+            🛒 Add Service to Cart
+          </button>
+          <div class="item-card-row2-actions">
+            <a href="tel:${item.phone}" class="btn btn-contact-secondary">📞 Call Tech</a>
+            <button onclick="openMpesaModal('${item.title}', '${item.rate || item.price}')" class="btn btn-mpesa-accent">💳 Book M-Pesa</button>
+          </div>
         </div>
       </div>
     </div>
