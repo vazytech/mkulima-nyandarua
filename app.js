@@ -718,26 +718,45 @@ async function renderNyandaruaWeather(targetSubcounty = null) {
 
   weatherContainer.innerHTML = `
     <div class="weather-card">
-      <div style="flex:1;">
-        <div class="weather-header" style="display:flex; align-items:center; justify-content:space-between; gap:0.5rem; margin-bottom:0.25rem;">
-          <h4 style="margin:0; font-size:1.05rem; font-weight:800; display:flex; align-items:center; gap:0.3rem;">
-            📍 ${data.subcounty} Climate ${data.icon || '⛅'}
-          </h4>
-          <select class="weather-select" onchange="renderNyandaruaWeather(this.value)" style="background:rgba(255,255,255,0.22); color:#fff; border:1px solid rgba(255,255,255,0.4); border-radius:6px; padding:0.2rem 0.4rem; font-size:0.75rem; font-weight:700; cursor:pointer;">
-            ${selectOptions}
-          </select>
+      <div class="weather-card-top">
+        <div class="weather-location-title">
+          📍 ${data.subcounty} Climate
         </div>
-        <p style="font-size:0.78rem; color:#e0f2fe; margin-top:0.2rem;">
-          ${data.condition} • Humidity: ${data.humidity} • Rain Prob: ${data.rainProb} • Wind: ${data.windSpeed}
-        </p>
-        <p style="font-size:0.73rem; margin-top:0.35rem; color:#fef08a; font-weight:700; background:rgba(0,0,0,0.18); padding:0.35rem 0.55rem; border-radius:6px; border-left:3px solid #fde047;">
-          ${data.tip}
-        </p>
+        <select class="weather-select-subcounty" onchange="renderNyandaruaWeather(this.value)">
+          ${selectOptions}
+        </select>
       </div>
-      <div class="weather-stats" style="text-align:right; flex-shrink:0;">
-        <div class="weather-temp" style="font-size:1.8rem; font-weight:900; line-height:1;">${data.temp}</div>
-        <div class="weather-desc" style="font-size:0.7rem; font-weight:700; color:#bae6fd; margin-top:0.25rem;">${data.alt}</div>
-        <button onclick="renderNyandaruaWeather('${currentSelectedSubcounty}')" style="margin-top:0.4rem; background:rgba(255,255,255,0.25); color:#fff; border:none; padding:0.2rem 0.45rem; border-radius:4px; font-size:0.68rem; font-weight:700; cursor:pointer;">🔄 Refresh</button>
+
+      <div class="weather-main-row">
+        <div class="weather-temp-badge">
+          <span class="weather-icon-big">${data.icon || '⛅'}</span>
+          <div>
+            <div class="weather-temp-big">${data.temp}</div>
+            <div class="weather-cond-text">${data.condition}</div>
+          </div>
+        </div>
+        <button onclick="renderNyandaruaWeather('${currentSelectedSubcounty}')" class="btn-weather-refresh">
+          🔄 Refresh
+        </button>
+      </div>
+
+      <div class="weather-metrics-grid">
+        <div class="weather-metric-pill">
+          <div class="weather-metric-label">💧 Humidity</div>
+          <div class="weather-metric-val">${data.humidity}</div>
+        </div>
+        <div class="weather-metric-pill">
+          <div class="weather-metric-label">🌧️ Rain Risk</div>
+          <div class="weather-metric-val">${data.rainProb}</div>
+        </div>
+        <div class="weather-metric-pill">
+          <div class="weather-metric-label">💨 Wind Speed</div>
+          <div class="weather-metric-val">${data.windSpeed}</div>
+        </div>
+      </div>
+
+      <div class="weather-advisory-box">
+        ${data.tip}
       </div>
     </div>
   `;
