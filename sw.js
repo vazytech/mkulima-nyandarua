@@ -1,11 +1,13 @@
-const CACHE_NAME = "mshambani-v21";
+const CACHE_NAME = "mshambani-v22";
 const ASSETS_TO_CACHE = [
   "./",
   "./index.html",
   "./styles.css",
   "./app.js",
   "./supabase-config.js",
-  "./manifest.json"
+  "./manifest.json",
+  "./favicon.png",
+  "./logo.png"
 ];
 
 self.addEventListener("install", (event) => {
