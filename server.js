@@ -1,11 +1,24 @@
 const express = require("express");
 const cors = require("cors");
 const axios = require("axios");
+const fs = require("fs");
+const path = require("path");
 
-try {
-  require("dotenv").config();
-} catch (e) {
-  // Graceful fallback if dotenv package is not loaded
+// Load .env file natively if present
+const envPath = path.join(__dirname, ".env");
+if (fs.existsSync(envPath)) {
+  const envContent = fs.readFileSync(envPath, "utf8");
+  envContent.split(/\r?\n/).forEach(line => {
+    const trimmed = line.trim();
+    if (trimmed && !trimmed.startsWith("#") && trimmed.includes("=")) {
+      const idx = trimmed.indexOf("=");
+      const key = trimmed.slice(0, idx).trim();
+      const val = trimmed.slice(idx + 1).trim();
+      if (key && val && !process.env[key]) {
+        process.env[key] = val;
+      }
+    }
+  });
 }
 
 const app = express();
@@ -526,7 +539,7 @@ STRICT RULE 2: If the user asks ANY question outside agriculture, farming, or Ny
 STRICT RULE 3: Keep your responses practical, concise, encouraging, and formatted with emojis and bullet points for easy reading on mobile phones.`;
 
   try {
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${geminiApiKey}`;
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${geminiApiKey}`;
     const response = await axios.post(url, {
       systemInstruction: {
         parts: [{ text: systemInstruction }]
