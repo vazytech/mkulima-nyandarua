@@ -84,7 +84,18 @@ const TRANSLATIONS = {
     searchVetPlaceholder: "Search vet by name, specialty, or region...",
     searchServicesPlaceholder: "Search services...",
     adminQueueLabel: "🛡️ Admin Moderation Queue",
-    logoutLabel: "🚪 Logout of Account"
+    logoutLabel: "🚪 Logout of Account",
+    fodderTitle: "Fodder Hub",
+    fodderSubtitle: "Explore protein or energy feeds capped at 1MB media limit.",
+    marketTitle: "Marketplace",
+    marketSubtitle: "Buy and sell farm equipment, potato seeds, and livestock directly.",
+    vetsTitle: "Verified Vets",
+    vetsSubtitle: "Connect with licensed Nyandarua County veterinary officers.",
+    servicesTitle: "Agricultural Services Hub",
+    servicesSubtitle: "Book professional silage making, biogas installation, manure slurry & machinery.",
+    supportDesk: "📞 Support & Systems Help Desk:",
+    callSupportBtn: "📞 Call Support",
+    emailTechBtn: "✉️ Email Tech"
   },
   sw: {
     langBtnLabel: "🇬🇧 English",
@@ -120,7 +131,18 @@ const TRANSLATIONS = {
     searchVetPlaceholder: "Tafuta daktari wa mifugo...",
     searchServicesPlaceholder: "Tafuta huduma za kilimo...",
     adminQueueLabel: "🛡️ Safu ya Idhini ya Admin",
-    logoutLabel: "🚪 Toka Kwenye Akaunti"
+    logoutLabel: "🚪 Toka Kwenye Akaunti",
+    fodderTitle: "Soko la Chakula cha Mifugo",
+    fodderSubtitle: "Tafuta chakula cha mifugo chenye protini au nguvu.",
+    marketTitle: "Soko Kuu la Bidhaa za Kilimo",
+    marketSubtitle: "Nunua na uuze vifaa vya kilimo, mbegu za viazi, na mifugo moja kwa moja.",
+    vetsTitle: "Madaktari wa Mifugo Waliosajiliwa",
+    vetsSubtitle: "Wasiliana na madaktari wa mifugo waliohitimu Kaunti ya Nyandarua.",
+    servicesTitle: "Kituo cha Huduma za Kilimo",
+    servicesSubtitle: "Kodi utengenezaji wa silage, majengo ya biogas, mbolea na mashine za shamba.",
+    supportDesk: "📞 Dawati la Msaada na Mfumo:",
+    callSupportBtn: "📞 Piga Simu Msaada",
+    emailTechBtn: "✉️ Tuma Barua Pepe"
   }
 };
 
@@ -134,6 +156,10 @@ function applyLanguageTranslations() {
   const t = TRANSLATIONS[currentLanguage] || TRANSLATIONS.en;
   const langBtnLabel = document.getElementById("txtLangToggleLabel");
   if (langBtnLabel) langBtnLabel.textContent = t.langBtnLabel;
+
+  // Header Subtitle
+  const appSub = document.querySelector(".header-title p");
+  if (appSub) appSub.textContent = t.appSubtitle;
 
   // Desktop Nav Links
   const dFodder = document.getElementById("desktop-nav-fodder");
@@ -170,6 +196,57 @@ function applyLanguageTranslations() {
   if (inputMarket) inputMarket.placeholder = t.searchMarketPlaceholder;
   if (inputVet) inputVet.placeholder = t.searchVetPlaceholder;
   if (inputService) inputService.placeholder = t.searchServicesPlaceholder;
+
+  // Screen Titles & Subtitles
+  const fTitle = document.querySelector("#screen-fodder .card-title");
+  const fSub = document.querySelector("#screen-fodder .card-subtitle");
+  if (fTitle) fTitle.textContent = t.fodderTitle;
+  if (fSub) fSub.textContent = t.fodderSubtitle;
+
+  const mTitle = document.querySelector("#screen-marketplace .card-title");
+  const mSub = document.querySelector("#screen-marketplace .card-subtitle");
+  if (mTitle) mTitle.textContent = t.marketTitle;
+  if (mSub) mSub.textContent = t.marketSubtitle;
+
+  const vTitle = document.querySelector("#screen-vets .card-title");
+  const vSub = document.querySelector("#screen-vets .card-subtitle");
+  if (vTitle) vTitle.textContent = t.vetsTitle;
+  if (vSub) vSub.textContent = t.vetsSubtitle;
+
+  const sTitle = document.querySelector("#screen-services .card-title");
+  const sSub = document.querySelector("#screen-services .card-subtitle");
+  if (sTitle) sTitle.textContent = t.servicesTitle;
+  if (sSub) sSub.textContent = t.servicesSubtitle;
+
+  // Post Buttons
+  const btnPostFodder = document.querySelector("#screen-fodder button.btn-primary");
+  const btnPostMarket = document.querySelector("#screen-marketplace button.btn-primary");
+  const btnPostService = document.querySelector("#screen-services button.btn-primary");
+  if (btnPostFodder) btnPostFodder.textContent = t.postFodderBtn;
+  if (btnPostMarket) btnPostMarket.textContent = t.postMarketBtn;
+  if (btnPostService) btnPostService.textContent = t.postServiceBtn;
+
+  // Support Banner
+  const suppP = document.querySelector(".support-banner p");
+  const suppCall = document.querySelector(".support-banner .btn-call");
+  const suppEmail = document.querySelector(".support-banner .btn-email");
+  if (suppP) suppP.textContent = t.supportDesk;
+  if (suppCall) suppCall.textContent = t.callSupportBtn;
+  if (suppEmail) suppEmail.textContent = t.emailTechBtn;
+
+  // Floating Cart Button
+  const floatCartText = document.querySelector("#floatingCartBtn span:first-child");
+  if (floatCartText) floatCartText.textContent = t.viewCart;
+
+  // Profile Dropdown
+  const btnAdminQueue = document.querySelector("#profileDropdown button[onclick*='modalAdminApprovals']");
+  const btnLogoutAcc = document.querySelector("#profileDropdown button[onclick*='logoutFarmer']");
+  if (btnAdminQueue) btnAdminQueue.childNodes[0].textContent = t.adminQueueLabel + " ";
+  if (btnLogoutAcc) btnLogoutAcc.textContent = t.logoutLabel;
+
+  renderFodderItems("all");
+  renderMarketItems();
+  renderServiceItems();
 }
 
 // Application Initialization & Service Worker Registration (PWA)
