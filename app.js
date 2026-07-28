@@ -17,29 +17,29 @@ const REGION_WARDS = {
 
 // Fallback Demo Data if database tables are empty
 let fallbackFodder = [
-  { id: 1, title: "High-Protein Lucerne (Alfalfa) Bales", category: "Protein", price: "KSh 450 / bale", subcounty: "Ol Kalou", seller: "Wambugu Feeds", phone: "0712345678", desc: "Cured premium green lucerne bales. 22% crude protein content." },
-  { id: 2, title: "Silage Bales (Yellow Corn)", category: "Energy", price: "KSh 2,800 / bale", subcounty: "Kinangop", seller: "Kinangop Dairy Coop", phone: "0723456789", desc: "Molasses treated maize silage ready for immediate milk production boost." },
-  { id: 3, title: "Desmodium Seedlings & Cuttings", category: "Protein", price: "KSh 150 / bundle", subcounty: "Kipipiri", seller: "Nyandarua Seedlings", phone: "0734567890", desc: "Greenleaf desmodium nitrogen-fixing pasture cuttings." }
+  { id: 1, title: "High-Protein Lucerne (Alfalfa) Bales", title_sw: "Bale za Lucerne (Alfalfa) yenye Protini Nyingi", category: "Protein", category_sw: "Protini", price: "KSh 450 / bale", subcounty: "Ol Kalou", seller: "Wambugu Feeds", phone: "0712345678", desc: "Cured premium green lucerne bales. 22% crude protein content.", desc_sw: "Lucerne kijani kibichi yenye protini ya 22%. Chakula bora cha kuongeza maziwa." },
+  { id: 2, title: "Silage Bales (Yellow Corn)", title_sw: "Bale za Silage ya Mahindi ya Njano", category: "Energy", category_sw: "Nguvu", price: "KSh 2,800 / bale", subcounty: "Kinangop", seller: "Kinangop Dairy Coop", phone: "0723456789", desc: "Molasses treated maize silage ready for immediate milk production boost.", desc_sw: "Silage ya mahindi iliyochanganywa na molasi tayari kuongeza maziwa mara moja." },
+  { id: 3, title: "Desmodium Seedlings & Cuttings", title_sw: "Mimea na Vipande vya Desmodium", category: "Protein", category_sw: "Protini", price: "KSh 150 / bundle", subcounty: "Kipipiri", seller: "Nyandarua Seedlings", phone: "0734567890", desc: "Greenleaf desmodium nitrogen-fixing pasture cuttings.", desc_sw: "Vipande vya desmodium ya majani mabichi ya kuongeza nitrojeni udongoni." }
 ];
 
 let fallbackMarket = [
-  { id: 1, title: "Grade Holstein Fresh Heifer", price: "KSh 85,000", category: "Livestock", location: "Ol Joro Orok", contact: "0711223344", desc: "First calving in 2 weeks. Expected 28L/day capacity." },
-  { id: 2, title: "Manual Chaff Cutter 3-Blade", price: "KSh 14,500", category: "Equipment", location: "Ol Kalou", contact: "0722334455", desc: "Heavy-duty hardened steel blades for dry and green fodder processing." },
-  { id: 3, title: "Organic Certified Potato Seed (Shangi)", price: "KSh 2,200 / 50kg bag", category: "Produce", location: "Ndaragwa", contact: "0733445566", desc: "Clean, high-yield certified seed tubers directly from farm." }
+  { id: 1, title: "Grade Holstein Fresh Heifer", title_sw: "Mtamba Mjamzito wa Gredi Holstein", price: "KSh 85,000", category: "Livestock", category_sw: "Mifugo", location: "Ol Joro Orok", contact: "0711223344", desc: "First calving in 2 weeks. Expected 28L/day capacity.", desc_sw: "Atazaa baada ya wiki 2. Uwezo wa maziwa lita 28 kwa siku." },
+  { id: 2, title: "Manual Chaff Cutter 3-Blade", title_sw: "Mashine ya Kukata Chakula cha Mifugo (Blades 3)", price: "KSh 14,500", category: "Equipment", category_sw: "Vifaa", location: "Ol Kalou", contact: "0722334455", desc: "Heavy-duty hardened steel blades for dry and green fodder processing.", desc_sw: "Bora ya chuma thabiti ya kusaga chakula kikavu na kibichi cha mifugo." },
+  { id: 3, title: "Organic Certified Potato Seed (Shangi)", title_sw: "Mbegu Bora za Viazi zilizoidhinishwa (Shangi)", price: "KSh 2,200 / 50kg bag", category: "Produce", category_sw: "Mavuno", location: "Ndaragwa", contact: "0733445566", desc: "Clean, high-yield certified seed tubers directly from farm.", desc_sw: "Mbegu safi za viazi vya Shangi zenye mavuno mengi kutoka shambani." }
 ];
 
 let fallbackVets = [
-  { id: 1, name: "Dr. James K. Kariuki", reg_number: "KVB/REG/2019/442", subcounty: "Ol Kalou", phone: "0718493313", specialization: "Artificial Insemination & Dairy Herd Health" },
-  { id: 2, name: "Dr. Mary W. Njuguna", reg_number: "KVB/REG/2021/891", subcounty: "Kinangop", phone: "0720987654", specialization: "Mastitis Control & Surgical Interventions" },
-  { id: 3, name: "Dr. Peter M. Mwangi", reg_number: "KVB/REG/2018/112", subcounty: "Ol Joro Orok", phone: "0733112233", specialization: "Calf Rearing & Clinical Nutrition" }
+  { id: 1, name: "Dr. James K. Kariuki", reg_number: "KVB/REG/2019/442", subcounty: "Ol Kalou", phone: "0718493313", specialization: "Artificial Insemination & Dairy Herd Health", spec_sw: "Panda ya Mbegu (AI) na Afya ya Ng'ombe wa Maziwa" },
+  { id: 2, name: "Dr. Mary W. Njuguna", reg_number: "KVB/REG/2021/891", subcounty: "Kinangop", phone: "0720987654", specialization: "Mastitis Control & Surgical Interventions", spec_sw: "Matibabu ya Maziwa (Mastitis) na Upasuaji wa Mifugo" },
+  { id: 3, name: "Dr. Peter M. Mwangi", reg_number: "KVB/REG/2018/112", subcounty: "Ol Joro Orok", phone: "0733112233", specialization: "Calf Rearing & Clinical Nutrition", spec_sw: "Ufugaji wa Ndama na Lishe Bora ya Mifugo" }
 ];
 
 let fallbackServices = [
-  { id: 1, title: "Maize & Rhodes Grass Silage Compaction", category: "Silage", rate: "KSh 1,800 / acre", subcounty: "Ol Kalou", provider: "Nyandarua Forage Pros", phone: "0718493313", desc: "Motorized silage chopper, compaction tractor, and high-density bale wrapping." },
-  { id: 2, title: "Biogas Plant Installation & Dung Digester", category: "Biogas", rate: "KSh 45,000 / system", subcounty: "Kinangop", provider: "BioEnergy Nyandarua Techs", phone: "0722112233", desc: "Fixed-dome 10m³ biogas construction, cow dung digester, and gas piping setup." },
-  { id: 3, title: "Organic Manure Treatment & Slurry Application", category: "Manure", rate: "KSh 3,500 / ton", subcounty: "Kipipiri", provider: "SoilEnrich Organics", phone: "0733445566", desc: "Decomposed cow dung & poultry manure slurry treatment for high potato yields." },
-  { id: 4, title: "High-Grade AI Breeding & Sexed Semen Straws", category: "AI", rate: "KSh 2,500 / straw", subcounty: "Ol Joro Orok", provider: "Nyandarua AI Breeders", phone: "0720998877", desc: "Sexed Friesian & Ayrshire semen straws with pregnancy detection tracking." },
-  { id: 5, title: "Tractor Tillage & Potato Harvester Rental", category: "Machinery", rate: "KSh 3,200 / acre", subcounty: "Ndaragwa", provider: "Kinangop Tractor Services", phone: "0712345678", desc: "Disc plowing, harrowing, and potato ridge harvester machinery rental." }
+  { id: 1, title: "Maize & Rhodes Grass Silage Compaction", title_sw: "Shindilio na Utengenezaji wa Silage ya Mahindi", category: "Silage", category_sw: "Silage", rate: "KSh 1,800 / acre", subcounty: "Ol Kalou", provider: "Nyandarua Forage Pros", phone: "0718493313", desc: "Motorized silage chopper, compaction tractor, and high-density bale wrapping.", desc_sw: "Kukata mahindi kwa mashine, kushindilia kwa trakta na kufunga bale kwa plasiya." },
+  { id: 2, title: "Biogas Plant Installation & Dung Digester", title_sw: "Ujenzi na Ufungaji wa Mtambo wa Biogas", category: "Biogas", category_sw: "Biogas", rate: "KSh 45,000 / system", subcounty: "Kinangop", provider: "BioEnergy Nyandarua Techs", phone: "0722112233", desc: "Fixed-dome 10m³ biogas construction, cow dung digester, and gas piping setup.", desc_sw: "Ujenzi wa mtambo wa biogas mita 10³, digester ya samadi, na mabomba ya gesi." },
+  { id: 3, title: "Organic Manure Treatment & Slurry Application", title_sw: "Uchakataji wa Mbolea ya Samadi na Kupanda", category: "Manure", category_sw: "Samadi", rate: "KSh 3,500 / ton", subcounty: "Kipipiri", provider: "SoilEnrich Organics", phone: "0733445566", desc: "Decomposed cow dung & poultry manure slurry treatment for high potato yields.", desc_sw: "Samadi ya ng'ombe na kuku iliyooza vizuri kwa ajili ya mavuno mengi ya viazi." },
+  { id: 4, title: "High-Grade AI Breeding & Sexed Semen Straws", title_sw: "Huduma ya AI ya Mbegu za Jinsia (Sexed Straws)", category: "AI", category_sw: "Mbegu AI", rate: "KSh 2,500 / straw", subcounty: "Ol Joro Orok", provider: "Nyandarua AI Breeders", phone: "0720998877", desc: "Sexed Friesian & Ayrshire semen straws with pregnancy detection tracking.", desc_sw: "Mbegu za jinsia ya kike za Friesian na Ayrshire na upimaji wa mimba." },
+  { id: 5, title: "Tractor Tillage & Potato Harvester Rental", title_sw: "Kukodi Trakta ya Kulima na Kuvuna Viazi", category: "Machinery", category_sw: "Mashine", rate: "KSh 3,200 / acre", subcounty: "Ndaragwa", provider: "Kinangop Tractor Services", phone: "0712345678", desc: "Disc plowing, harrowing, and potato ridge harvester machinery rental.", desc_sw: "Kulima, kurutubisha na kuvuna viazi kwa kutumia mashine za trakta." }
 ];
 
 // Active Session User State
@@ -894,33 +894,39 @@ async function renderFodderItems(filterCategory = "all", searchQuery = "", selec
 
   const t = TRANSLATIONS[currentLanguage] || TRANSLATIONS.en;
 
-  container.innerHTML = items.map(item => `
-    <div class="item-card">
-      <div class="flex-between">
-        <span class="item-badge ${item.category === 'Protein' ? 'badge-protein' : 'badge-energy'}">${item.category} Feed</span>
-        <span class="price-tag">${item.price}</span>
-      </div>
-      <div>
-        <h3 class="font-extrabold text-slate-900 text-base">${item.title}</h3>
-        <p class="text-xs text-slate-500 mt-1">${item.description || item.desc || ''}</p>
-      </div>
-      <div class="mt-2 pt-2 border-t text-xs text-slate-600">
-        <div class="flex-between mb-2">
-          <span>📍 ${item.subcounty}</span>
-          <span style="font-weight:700; color:var(--primary-700);">Verified Feed</span>
+  container.innerHTML = items.map(item => {
+    const displayTitle = (currentLanguage === "sw" && item.title_sw) ? item.title_sw : item.title;
+    const displayDesc = (currentLanguage === "sw" && item.desc_sw) ? item.desc_sw : (item.description || item.desc || '');
+    const displayCategory = (currentLanguage === "sw" && item.category_sw) ? item.category_sw : item.category;
+
+    return `
+      <div class="item-card">
+        <div class="flex-between">
+          <span class="item-badge ${item.category === 'Protein' ? 'badge-protein' : 'badge-energy'}">${displayCategory} Feed</span>
+          <span class="price-tag">${item.price}</span>
         </div>
-        <div class="item-card-action-bar">
-          <button onclick="addToCart('${item.title}', '${item.price}', '${item.category}', '${item.subcounty}')" class="btn btn-cart-primary">
-            ${t.addToCart}
-          </button>
-          <div class="item-card-row2-actions">
-            <a href="tel:${item.phone}" class="btn btn-contact-secondary">${t.callSeller}</a>
-            <button onclick="openMpesaModal('${item.title}', '${item.price}')" class="btn btn-mpesa-accent">${t.buyMpesa}</button>
+        <div>
+          <h3 class="font-extrabold text-slate-900 text-base">${displayTitle}</h3>
+          <p class="text-xs text-slate-500 mt-1">${displayDesc}</p>
+        </div>
+        <div class="mt-2 pt-2 border-t text-xs text-slate-600">
+          <div class="flex-between mb-2">
+            <span>📍 ${item.subcounty}</span>
+            <span style="font-weight:700; color:var(--primary-700);">Verified Feed</span>
+          </div>
+          <div class="item-card-action-bar">
+            <button onclick="addToCart('${item.title}', '${item.price}', '${item.category}', '${item.subcounty}')" class="btn btn-cart-primary">
+              ${t.addToCart}
+            </button>
+            <div class="item-card-row2-actions">
+              <a href="tel:${item.phone}" class="btn btn-contact-secondary">${t.callSeller}</a>
+              <button onclick="openMpesaModal('${item.title}', '${item.price}')" class="btn btn-mpesa-accent">${t.buyMpesa}</button>
+            </div>
           </div>
         </div>
       </div>
-    </div>
-  `).join('');
+    `;
+  }).join('');
 }
 
 function filterFodderDisplay(category) {
@@ -963,33 +969,41 @@ async function renderMarketItems(searchQuery = "") {
     items = items.filter(item => item.title.toLowerCase().includes(q) || (item.description || item.desc || '').toLowerCase().includes(q));
   }
 
-  container.innerHTML = items.map(item => `
-    <div class="item-card">
-      <div class="flex-between">
-        <span class="item-badge badge-verified">${item.category}</span>
-        <span class="price-tag">${item.price}</span>
-      </div>
-      <div>
-        <h3 class="font-extrabold text-slate-900 text-base">${item.title}</h3>
-        <p class="text-xs text-slate-500 mt-1">${item.description || item.desc || ''}</p>
-      </div>
-      <div class="mt-2 pt-2 border-t text-xs text-slate-600">
-        <div class="flex-between mb-2">
-          <span>📍 ${item.location}</span>
-          <span style="font-weight:700; color:var(--accent-700);">Direct Trade</span>
+  const t = TRANSLATIONS[currentLanguage] || TRANSLATIONS.en;
+
+  container.innerHTML = items.map(item => {
+    const displayTitle = (currentLanguage === "sw" && item.title_sw) ? item.title_sw : item.title;
+    const displayDesc = (currentLanguage === "sw" && item.desc_sw) ? item.desc_sw : (item.description || item.desc || '');
+    const displayCategory = (currentLanguage === "sw" && item.category_sw) ? item.category_sw : item.category;
+
+    return `
+      <div class="item-card">
+        <div class="flex-between">
+          <span class="item-badge badge-verified">${displayCategory}</span>
+          <span class="price-tag">${item.price}</span>
         </div>
-        <div class="item-card-action-bar">
-          <button onclick="addToCart('${item.title}', '${item.price}', '${item.category}', '${item.location}')" class="btn btn-cart-primary">
-            ${t.addToCart}
-          </button>
-          <div class="item-card-row2-actions">
-            <a href="tel:${item.contact}" class="btn btn-contact-secondary">${t.callSeller}</a>
-            <button onclick="openMpesaModal('${item.title}', '${item.price}')" class="btn btn-mpesa-accent">${t.buyMpesa}</button>
+        <div>
+          <h3 class="font-extrabold text-slate-900 text-base">${displayTitle}</h3>
+          <p class="text-xs text-slate-500 mt-1">${displayDesc}</p>
+        </div>
+        <div class="mt-2 pt-2 border-t text-xs text-slate-600">
+          <div class="flex-between mb-2">
+            <span>📍 ${item.location}</span>
+            <span style="font-weight:700; color:var(--accent-700);">Direct Trade</span>
+          </div>
+          <div class="item-card-action-bar">
+            <button onclick="addToCart('${item.title}', '${item.price}', '${item.category}', '${item.location}')" class="btn btn-cart-primary">
+              ${t.addToCart}
+            </button>
+            <div class="item-card-row2-actions">
+              <a href="tel:${item.contact}" class="btn btn-contact-secondary">${t.callSeller}</a>
+              <button onclick="openMpesaModal('${item.title}', '${item.price}')" class="btn btn-mpesa-accent">${t.buyMpesa}</button>
+            </div>
           </div>
         </div>
       </div>
-    </div>
-  `).join('');
+    `;
+  }).join('');
 }
 
 function handleMarketSearchChange() {
@@ -1020,22 +1034,26 @@ async function renderVetList(searchQuery = "") {
     items = items.filter(vet => vet.name.toLowerCase().includes(q) || vet.subcounty.toLowerCase().includes(q) || (vet.specialization || vet.spec || '').toLowerCase().includes(q));
   }
 
-  container.innerHTML = items.map(vet => `
-    <div class="item-card">
-      <div class="flex-between">
-        <span class="item-badge badge-protein">🛡️ ${vet.reg_number || vet.reg}</span>
-        <span class="text-xs font-bold text-emerald-700">📍 ${vet.subcounty}</span>
+  container.innerHTML = items.map(vet => {
+    const displaySpec = (currentLanguage === "sw" && vet.spec_sw) ? vet.spec_sw : (vet.specialization || vet.spec || '');
+
+    return `
+      <div class="item-card">
+        <div class="flex-between">
+          <span class="item-badge badge-protein">🛡️ ${vet.reg_number || vet.reg}</span>
+          <span class="text-xs font-bold text-emerald-700">📍 ${vet.subcounty}</span>
+        </div>
+        <div>
+          <h3 class="font-extrabold text-slate-900 text-base">${vet.name}</h3>
+          <p class="text-xs text-slate-600 mt-0.5">Utaalamu: ${displaySpec}</p>
+        </div>
+        <div class="flex gap-2 mt-2 pt-2 border-t">
+          <a href="tel:${vet.phone}" class="btn btn-secondary btn-sm" style="flex:1">📞 Call Vet</a>
+          <button onclick="openBookingModal('${vet.name}')" class="btn btn-primary btn-sm" style="flex:1">📅 Schedule Visit</button>
+        </div>
       </div>
-      <div>
-        <h3 class="font-extrabold text-slate-900 text-base">${vet.name}</h3>
-        <p class="text-xs text-slate-600 mt-0.5">Specialization: ${vet.specialization || vet.spec || ''}</p>
-      </div>
-      <div class="flex gap-2 mt-2 pt-2 border-t">
-        <a href="tel:${vet.phone}" class="btn btn-secondary btn-sm" style="flex:1">📞 Call Vet</a>
-        <button onclick="openBookingModal('${vet.name}')" class="btn btn-primary btn-sm" style="flex:1">📅 Schedule Visit</button>
-      </div>
-    </div>
-  `).join('');
+    `;
+  }).join('');
 }
 
 function handleVetSearchChange() {
@@ -1081,33 +1099,39 @@ async function renderServiceItems(filterCategory = "all", searchQuery = "", sele
 
   const t = TRANSLATIONS[currentLanguage] || TRANSLATIONS.en;
 
-  container.innerHTML = items.map(item => `
-    <div class="item-card">
-      <div class="flex-between">
-        <span class="item-badge badge-protein">🛠️ ${item.category}</span>
-        <span class="price-tag">${item.rate || item.price}</span>
-      </div>
-      <div>
-        <h3 class="font-extrabold text-slate-900 text-base">${item.title}</h3>
-        <p class="text-xs text-slate-500 mt-1">${item.description || item.desc || ''}</p>
-      </div>
-      <div class="mt-2 pt-2 border-t text-xs text-slate-600">
-        <div class="flex-between mb-2">
-          <span>📍 ${item.subcounty} • ${item.provider || 'Verified Specialist'}</span>
-          <span style="font-weight:700; color:var(--primary-700);">⭐ Certified Service</span>
+  container.innerHTML = items.map(item => {
+    const displayTitle = (currentLanguage === "sw" && item.title_sw) ? item.title_sw : item.title;
+    const displayDesc = (currentLanguage === "sw" && item.desc_sw) ? item.desc_sw : (item.description || item.desc || '');
+    const displayCategory = (currentLanguage === "sw" && item.category_sw) ? item.category_sw : item.category;
+
+    return `
+      <div class="item-card">
+        <div class="flex-between">
+          <span class="item-badge badge-protein">🛠️ ${displayCategory}</span>
+          <span class="price-tag">${item.rate || item.price}</span>
         </div>
-        <div class="item-card-action-bar">
-          <button onclick="addToCart('${item.title}', '${item.rate || item.price}', '${item.category}', '${item.subcounty}')" class="btn btn-cart-primary">
-            ${t.addServiceToCart}
-          </button>
-          <div class="item-card-row2-actions">
-            <a href="tel:${item.phone}" class="btn btn-contact-secondary">${t.callTech}</a>
-            <button onclick="openMpesaModal('${item.title}', '${item.rate || item.price}')" class="btn btn-mpesa-accent">${t.buyMpesa}</button>
+        <div>
+          <h3 class="font-extrabold text-slate-900 text-base">${displayTitle}</h3>
+          <p class="text-xs text-slate-500 mt-1">${displayDesc}</p>
+        </div>
+        <div class="mt-2 pt-2 border-t text-xs text-slate-600">
+          <div class="flex-between mb-2">
+            <span>📍 ${item.subcounty} • ${item.provider || 'Verified Specialist'}</span>
+            <span style="font-weight:700; color:var(--primary-700);">⭐ Certified Service</span>
+          </div>
+          <div class="item-card-action-bar">
+            <button onclick="addToCart('${item.title}', '${item.rate || item.price}', '${item.category}', '${item.subcounty}')" class="btn btn-cart-primary">
+              ${t.addServiceToCart}
+            </button>
+            <div class="item-card-row2-actions">
+              <a href="tel:${item.phone}" class="btn btn-contact-secondary">${t.callTech}</a>
+              <button onclick="openMpesaModal('${item.title}', '${item.rate || item.price}')" class="btn btn-mpesa-accent">${t.buyMpesa}</button>
+            </div>
           </div>
         </div>
       </div>
-    </div>
-  `).join('');
+    `;
+  }).join('');
 }
 
 function filterServicesDisplay(category) {
