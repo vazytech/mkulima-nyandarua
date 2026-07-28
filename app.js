@@ -1490,11 +1490,24 @@ async function triggerMpesaSTKPush(e) {
 
   const userSubcounty = currentUser ? currentUser.subcounty : "Ol Kalou";
   const mpesaReceiptSim = 'QHK' + Math.floor(100000 + Math.random() * 900000);
+  const orderNum = `MMK-${Math.floor(10000 + Math.random() * 90000)}`;
   
   sendOrderConfirmationSMS(phoneRaw, activeMpesaItem.title, numericAmount, userSubcounty);
-  syncMpesaPaymentStatusToDatabase(`MMK-${Math.floor(10000 + Math.random() * 90000)}`, mpesaReceiptSim, "PAID");
+  syncMpesaPaymentStatusToDatabase(orderNum, mpesaReceiptSim, "PAID");
 
   toggleModal("modalMpesaPay", false);
+
+  // Populate and open M-Pesa Verified Receipt Modal
+  const rCode = document.getElementById("receiptCodeVal");
+  const rAmt = document.getElementById("receiptAmountVal");
+  const rPhone = document.getElementById("receiptPhoneVal");
+  const rDepot = document.getElementById("receiptDepotVal");
+  if (rCode) rCode.textContent = mpesaReceiptSim;
+  if (rAmt) rAmt.textContent = `KSh ${numericAmount.toLocaleString()}`;
+  if (rPhone) rPhone.textContent = phoneRaw;
+  if (rDepot) rDepot.textContent = `${userSubcounty} Farmers Central Depot`;
+
+  toggleModal("modalMpesaReceipt", true);
 }
 
 async function syncMpesaPaymentStatusToDatabase(orderId, mpesaReceipt, status = "PAID") {

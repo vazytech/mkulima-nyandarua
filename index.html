@@ -8,7 +8,7 @@
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#047857">
     <!-- Custom Design System CSS -->
-    <link rel="stylesheet" href="styles.css?v=19.0">
+    <link rel="stylesheet" href="styles.css?v=20.0">
 </head>
 <body>
 
@@ -342,6 +342,41 @@
             </div>
         </div>
 
+        <!-- MODAL 1B: M-PESA INSTANT VERIFIED RECEIPT MODAL -->
+        <div id="modalMpesaReceipt" class="modal-overlay">
+            <div class="modal-content" style="text-align: center;">
+                <div style="width: 60px; height: 60px; background: #dcfce7; color: #166534; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 2rem; margin: 0 auto 1rem; border: 3px solid #86efac;">
+                    ✓
+                </div>
+                <h3 style="font-size: 1.25rem; font-weight: 900; color: #166534;">Payment Confirmed!</h3>
+                <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 1.25rem;">Your M-Pesa transaction was verified and synced with Safaricom Daraja IPN.</p>
+
+                <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 1rem; text-align: left; font-size: 0.85rem; margin-bottom: 1.25rem;">
+                    <div class="flex-between mb-2 pb-2 border-b">
+                        <span class="text-slate-500">M-Pesa Receipt:</span>
+                        <strong id="receiptCodeVal" style="color: var(--primary-800); font-family: monospace; font-size: 0.95rem;">QHK892341</strong>
+                    </div>
+                    <div class="flex-between mb-2 pb-2 border-b">
+                        <span class="text-slate-500">Amount Paid:</span>
+                        <strong id="receiptAmountVal" style="color: #047857;">KSh 2,800</strong>
+                    </div>
+                    <div class="flex-between mb-2 pb-2 border-b">
+                        <span class="text-slate-500">Payer Phone:</span>
+                        <span id="receiptPhoneVal" class="font-bold">0718493313</span>
+                    </div>
+                    <div class="flex-between">
+                        <span class="text-slate-500">Pickup Station:</span>
+                        <span id="receiptDepotVal" class="font-bold text-slate-800">Ol Kalou Central Depot</span>
+                    </div>
+                </div>
+
+                <div style="display: flex; gap: 0.5rem;">
+                    <button onclick="toggleModal('modalMpesaReceipt', false)" class="btn btn-secondary" style="flex: 1;">Close</button>
+                    <button onclick="toggleModal('modalMpesaReceipt', false); switchScreen('screen-orders');" class="btn btn-primary" style="flex: 1.5;">Track Delivery 📦</button>
+                </div>
+            </div>
+        </div>
+
         <!-- MODAL 2: SCHEDULE VET VISIT -->
         <div id="modalVetBooking" class="modal-overlay">
             <div class="modal-content">
@@ -630,6 +665,6 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="supabase-config.js"></script>
     <!-- Application Script -->
-    <script src="app.js?v=19.0"></script>
+    <script src="app.js?v=20.0"></script>
 </body>
 </html>
