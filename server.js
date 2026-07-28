@@ -528,10 +528,13 @@ STRICT RULE 3: Keep your responses practical, concise, encouraging, and formatte
   try {
     const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${geminiApiKey}`;
     const response = await axios.post(url, {
+      systemInstruction: {
+        parts: [{ text: systemInstruction }]
+      },
       contents: [
         {
           role: "user",
-          parts: [{ text: `${systemInstruction}\n\nFarmer Location: ${subcounty || "Ol Kalou"}, Nyandarua County.\nFarmer Question: ${query}` }]
+          parts: [{ text: `Farmer Location: ${subcounty || "Ol Kalou"}, Nyandarua County.\nFarmer Question: ${query}` }]
         }
       ]
     });
