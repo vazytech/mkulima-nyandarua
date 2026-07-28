@@ -261,6 +261,23 @@ function applyLanguageTranslations() {
   renderServiceItems();
 }
 
+function setupOfflineNetworkListeners() {
+  const banner = document.getElementById("offlineBanner");
+  const updateStatus = () => {
+    if (!navigator.onLine) {
+      if (banner) banner.classList.remove("hidden");
+      console.warn("📴 Device is Offline. Running on cached local storage memory.");
+    } else {
+      if (banner) banner.classList.add("hidden");
+      console.log("🌐 Device is Online.");
+    }
+  };
+
+  window.addEventListener("online", updateStatus);
+  window.addEventListener("offline", updateStatus);
+  updateStatus();
+}
+
 // Application Initialization & Service Worker Registration (PWA)
 document.addEventListener("DOMContentLoaded", () => {
   if ("serviceWorker" in navigator) {
@@ -270,6 +287,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   setupSupabaseAuthListener();
+  setupOfflineNetworkListeners();
   updateUserSessionUI();
   applyLanguageTranslations();
   
@@ -987,10 +1005,14 @@ async function renderFodderItems(filterCategory = "all", searchQuery = "", selec
       const { data, error } = await query;
       if (!error && data && data.length > 0) {
         items = data;
+        localStorage.setItem("mkulima_cached_fodder", JSON.stringify(items));
       }
     } catch (err) {
       console.warn("Supabase fetch fallback:", err);
+      items = JSON.parse(localStorage.getItem("mkulima_cached_fodder")) || fallbackFodder;
     }
+  } else {
+    items = JSON.parse(localStorage.getItem("mkulima_cached_fodder")) || fallbackFodder;
   }
 
   if (searchQuery) {
@@ -1074,10 +1096,14 @@ async function renderMarketItems(searchQuery = "") {
       const { data, error } = await db.from("marketplace").select("*").order("id", { ascending: false });
       if (!error && data && data.length > 0) {
         items = data;
+        localStorage.setItem("mkulima_cached_market", JSON.stringify(items));
       }
     } catch (err) {
       console.warn("Supabase fetch fallback:", err);
+      items = JSON.parse(localStorage.getItem("mkulima_cached_market")) || fallbackMarket;
     }
+  } else {
+    items = JSON.parse(localStorage.getItem("mkulima_cached_market")) || fallbackMarket;
   }
 
   if (searchQuery) {
@@ -1194,10 +1220,14 @@ async function renderServiceItems(filterCategory = "all", searchQuery = "", sele
       const { data, error } = await query;
       if (!error && data && data.length > 0) {
         items = data;
+        localStorage.setItem("mkulima_cached_services", JSON.stringify(items));
       }
     } catch (err) {
       console.warn("Supabase services fetch fallback:", err);
+      items = JSON.parse(localStorage.getItem("mkulima_cached_services")) || fallbackServices;
     }
+  } else {
+    items = JSON.parse(localStorage.getItem("mkulima_cached_services")) || fallbackServices;
   }
 
   if (searchQuery) {

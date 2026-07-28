@@ -8,9 +8,14 @@
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#047857">
     <!-- Custom Design System CSS -->
-    <link rel="stylesheet" href="styles.css?v=21.0">
+    <link rel="stylesheet" href="styles.css?v=22.0">
 </head>
 <body>
+
+    <!-- OFFLINE NETWORK STATUS BANNER -->
+    <div id="offlineBanner" class="offline-banner hidden">
+        <span>📴 You are currently offline. Showing cached catalog & seller contact numbers.</span>
+    </div>
 
     <div class="app-container">
         <!-- RESPONSIVE HEADER WITH DESKTOP NAV & PROFILE DROPDOWN -->
@@ -665,6 +670,6 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="supabase-config.js"></script>
     <!-- Application Script -->
-    <script src="app.js?v=21.0"></script>
+    <script src="app.js?v=22.0"></script>
 </body>
 </html>

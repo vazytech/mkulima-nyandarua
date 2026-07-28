@@ -4,6 +4,20 @@
 
 @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
 
+/* Offline Network Status Banner Styling */
+.offline-banner {
+  background: #334155;
+  color: #f8fafc;
+  text-align: center;
+  padding: 0.5rem 1rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+  position: sticky;
+  top: 0;
+  z-index: 9999;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
 :root {
   /* Brand Color Tokens */
   --primary-50: #ecfdf5;
