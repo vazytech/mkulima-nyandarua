@@ -1374,8 +1374,8 @@ body {
 /* AGRIBOT FLOATING BUTTON & CHAT MODAL STYLES */
 .floating-agribot-btn {
   position: fixed;
-  bottom: 5.5rem;
-  left: 1.25rem;
+  bottom: 5.25rem;
+  right: 1.25rem;
   z-index: 99;
   background: linear-gradient(135deg, #047857 0%, #065f46 100%);
   color: #ffffff;
