@@ -6,6 +6,18 @@
 const AT_USERNAME = "sandbox";
 let AT_API_KEY = localStorage.getItem("mkulima_at_apikey") || "";
 
+// SUB-COUNTY ABBREVIATION HELPER (OLK, KIN, KIP, OJ, ND)
+function formatSubcountyAbbr(subcounty) {
+  if (!subcounty) return "";
+  const s = String(subcounty).trim().toLowerCase();
+  if (s.includes("joro") || s === "oj" || s.includes("ol joro")) return "OJ";
+  if (s.includes("kalou") || s === "olk" || s.includes("ol kalou")) return "OLK";
+  if (s.includes("kipipiri") || s === "kip") return "KIP";
+  if (s.includes("kinangop") || s === "kin") return "KIN";
+  if (s.includes("ndaragua") || s.includes("ndaragwa") || s === "nd") return "ND";
+  return subcounty.toUpperCase();
+}
+
 // Sub-County to Ward Mapping Data
 const REGION_WARDS = {
   "Ol Kalou": ["Karau", "Kanjuiri Ridge", "Mirangine", "Kaimbaga", "Rurii"],
@@ -553,7 +565,7 @@ function updateUserSessionUI() {
 
   if (currentUser) {
     if (badgeLocation) {
-      badgeLocation.textContent = `📍 ${currentUser.subcounty}`;
+      badgeLocation.textContent = `📍 ${formatSubcountyAbbr(currentUser.subcounty)}`;
       badgeLocation.classList.remove("hidden");
     }
     if (profileMenuContainer) {
@@ -562,7 +574,7 @@ function updateUserSessionUI() {
       
       document.getElementById("dropdownUserName").textContent = currentUser.name || "Farmer";
       document.getElementById("dropdownUserPhone").textContent = `📞 ${currentUser.phone || 'N/A'}`;
-      document.getElementById("dropdownUserRegion").textContent = `📍 ${currentUser.subcounty || 'Nyandarua'} (${currentUser.ward || 'Ward'})`;
+      document.getElementById("dropdownUserRegion").textContent = `📍 ${formatSubcountyAbbr(currentUser.subcounty || 'Nyandarua')} (${currentUser.ward || 'Ward'})`;
     }
     if (btnAuthHeader) btnAuthHeader.classList.add("hidden");
     if (bottomNav) {
@@ -1015,7 +1027,7 @@ async function renderFodderItems(filterCategory = "all", searchQuery = "", selec
         </div>
         <div class="mt-2 pt-2 border-t text-xs text-slate-600">
           <div class="flex-between mb-2">
-            <span>📍 ${item.subcounty}</span>
+            <span>📍 ${formatSubcountyAbbr(item.subcounty)}</span>
             <span style="font-weight:700; color:var(--primary-700);">Verified Feed</span>
           </div>
           <div class="item-card-action-bar">
@@ -1093,7 +1105,7 @@ async function renderMarketItems(searchQuery = "") {
         </div>
         <div class="mt-2 pt-2 border-t text-xs text-slate-600">
           <div class="flex-between mb-2">
-            <span>📍 ${item.location}</span>
+            <span>📍 ${formatSubcountyAbbr(item.location)}</span>
             <span style="font-weight:700; color:var(--accent-700);">Direct Trade</span>
           </div>
           <div class="item-card-action-bar">
@@ -1146,7 +1158,7 @@ async function renderVetList(searchQuery = "") {
       <div class="item-card">
         <div class="flex-between">
           <span class="item-badge badge-protein">🛡️ ${vet.reg_number || vet.reg}</span>
-          <span class="text-xs font-bold text-emerald-700">📍 ${vet.subcounty}</span>
+          <span class="text-xs font-bold text-emerald-700">📍 ${formatSubcountyAbbr(vet.subcounty)}</span>
         </div>
         <div>
           <h3 class="font-extrabold text-slate-900 text-base">${vet.name}</h3>
@@ -1222,7 +1234,7 @@ async function renderServiceItems(filterCategory = "all", searchQuery = "", sele
         </div>
         <div class="mt-2 pt-2 border-t text-xs text-slate-600">
           <div class="flex-between mb-2">
-            <span>📍 ${item.subcounty} • ${item.provider || 'Verified Specialist'}</span>
+            <span>📍 ${formatSubcountyAbbr(item.subcounty)} • ${item.provider || 'Verified Specialist'}</span>
             <span style="font-weight:700; color:var(--primary-700);">⭐ Certified Service</span>
           </div>
           <div class="item-card-action-bar">
