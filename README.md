@@ -1,8 +1,8 @@
-# 🌾 M-Mkulima Nyandarua Pro
+# 🌾 M-Shambani Nyandarua Pro
 
 > **Regulated Agricultural Knowledge & Commercial Trading Platform for Nyandarua County, Kenya.**
 
-M-Mkulima is a modern, mobile-first and desktop-responsive web application designed to connect dairy and crop farmers in Nyandarua County with high-protein fodder suppliers, verified agricultural inputs, veterinary services, and seamless mobile money transactions.
+M-Shambani is a modern, mobile-first and desktop-responsive web application designed to connect dairy and crop farmers in Nyandarua County with high-protein fodder suppliers, verified agricultural inputs, veterinary services, and seamless mobile money transactions.
 
 ---
 

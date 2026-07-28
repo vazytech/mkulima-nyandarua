@@ -52,7 +52,7 @@ let currentLanguage = localStorage.getItem("mkulima_lang") || "en";
 const TRANSLATIONS = {
   en: {
     langBtnLabel: "🇰🇪 Kiswahili",
-    appTitle: "🌾 M-Mkulima",
+    appTitle: "🌾 M-Shambani",
     appSubtitle: "Nyandarua Agricultural Portal",
     navFodder: "🌾 Fodder Hub",
     navMarket: "🛒 Marketplace",
@@ -99,7 +99,7 @@ const TRANSLATIONS = {
   },
   sw: {
     langBtnLabel: "🇬🇧 English",
-    appTitle: "🌾 M-Mkulima",
+    appTitle: "🌾 M-Shambani",
     appSubtitle: "Tovuti ya Kilimo Nyandarua",
     navFodder: "🌾 Soko la Chakula",
     navMarket: "🛒 Soko Kuu",
@@ -253,7 +253,7 @@ function applyLanguageTranslations() {
 document.addEventListener("DOMContentLoaded", () => {
   if ("serviceWorker" in navigator) {
     navigator.serviceWorker.register("sw.js")
-      .then(() => console.log("🌾 M-Mkulima Service Worker Registered!"))
+      .then(() => console.log("🌾 M-Shambani Service Worker Registered!"))
       .catch(err => console.warn("SW Registration Failed:", err));
   }
 
@@ -294,7 +294,7 @@ function quickGuestSignIn() {
   };
   localStorage.setItem("mkulima_current_user", JSON.stringify(currentUser));
   updateUserSessionUI();
-  alert("✅ Welcome to M-Mkulima!\nYou are signed in as Nyandarua Farmer.");
+  alert("✅ Welcome to M-Shambani!\nYou are signed in as Nyandarua Farmer.");
   switchScreen("screen-fodder");
 }
 
@@ -702,7 +702,7 @@ async function processFarmerLogin(e) {
   const matchedFarmer = registeredFarmers.find(f => f.phone.replace(/\D/g, "") === formattedPhone);
 
   if (!matchedFarmer) {
-    alert(`❌ Account Not Found:\nNo M-Mkulima account found for ${phoneRaw}.\n\nPlease click the 'Register' tab to create a new account.`);
+    alert(`❌ Account Not Found:\nNo M-Shambani account found for ${phoneRaw}.\n\nPlease click the 'Register' tab to create a new account.`);
     return;
   }
 
@@ -778,7 +778,7 @@ async function processFarmerRegistration(e) {
 
 // Logout Handler
 function logoutFarmer() {
-  if (confirm("Are you sure you want to log out of M-Mkulima?")) {
+  if (confirm("Are you sure you want to log out of M-Shambani?")) {
     currentUser = null;
     localStorage.removeItem("mkulima_current_user");
     updateUserSessionUI();
@@ -813,7 +813,7 @@ function handleSubCountyChange(subCountySelectId, wardSelectId) {
 // MANDATORY AUTH SCREEN GUARD CONTROLLER
 function switchScreen(screenId) {
   if (!currentUser && screenId !== "screen-auth") {
-    alert("🔒 Authentication Required:\nPlease sign in or create an account to access M-Mkulima features.");
+    alert("🔒 Authentication Required:\nPlease sign in or create an account to access M-Shambani features.");
     screenId = "screen-auth";
   }
 
@@ -1587,7 +1587,7 @@ async function triggerPasswordResetSMS() {
       localStorage.setItem("mkulima_at_apikey", AT_API_KEY);
     } else {
       alert("ℹ️ Using simulated SMS mode. (An API Key is needed to dispatch real SMS over Kenya telecom networks).");
-      alert(`📲 Simulated SMS Received on ${formattedPhone}:\n\nYour M-Mkulima password reset OTP pin is: ${otpCode}`);
+      alert(`📲 Simulated SMS Received on ${formattedPhone}:\n\nYour M-Shambani password reset OTP pin is: ${otpCode}`);
       toggleModal("modalPasswordReset", false);
       return;
     }
@@ -1604,7 +1604,7 @@ async function triggerPasswordResetSMS() {
       body: new URLSearchParams({
         username: AT_USERNAME,
         to: formattedPhone,
-        message: `Your M-Mkulima password reset OTP code is ${otpCode}. Valid for 10 minutes.`
+        message: `Your M-Shambani password reset OTP code is ${otpCode}. Valid for 10 minutes.`
       })
     });
 
@@ -1616,7 +1616,7 @@ async function triggerPasswordResetSMS() {
     }
   } catch (err) {
     console.warn("SMS Dispatch Exception:", err);
-    alert(`📲 SMS DISPATCHED (Sandbox Gateway):\n\nYour M-Mkulima OTP pin is: ${otpCode}.\nSent to ${formattedPhone}.`);
+    alert(`📲 SMS DISPATCHED (Sandbox Gateway):\n\nYour M-Shambani OTP pin is: ${otpCode}.\nSent to ${formattedPhone}.`);
   }
 
   toggleModal("modalPasswordReset", false);

@@ -85,7 +85,7 @@ app.post("/api/stkpush", async (req, res) => {
         PartyB: SHORTCODE,
         PhoneNumber: formattedPhone,
         CallBackURL: "https://mydomain.com/api/callback",
-        AccountReference: "M-Mkulima",
+        AccountReference: "M-Shambani",
         TransactionDesc: `Payment for ${itemTitle.slice(0, 12)}`
       },
       {
@@ -169,8 +169,8 @@ app.post("/api/sms/order-confirmation", async (req, res) => {
   const selectedSub = subcounty && NYANDARUA_PICKUP_POINTS[subcounty] ? subcounty : "Ol Kalou";
   const pickup = NYANDARUA_PICKUP_POINTS[selectedSub];
 
-  const smsMessage = `M-MKULIMA ORDER CONFIRMED!
-Order #: ${orderId || 'MMK-' + Math.floor(10000 + Math.random() * 90000)}
+  const smsMessage = `M-SHAMBANI ORDER CONFIRMED!
+Order #: ${orderId || 'MSH-' + Math.floor(10000 + Math.random() * 90000)}
 Items: ${itemSummary || 'Fodder Feed Order'}
 Total Paid: KSh ${totalAmount || '0'} via M-Pesa
 
@@ -179,7 +179,7 @@ ${pickup.name}
 ${pickup.location}
 📞 Station Agent: ${pickup.agentPhone}
 
-Thank you for farming with M-Mkulima!`;
+Thank you for farming with M-Shambani!`;
 
   console.log(`📱 [AFRICA'S TALKING SMS DISPATCHED to +${formattedPhone}]:\n${smsMessage}\n----------------------------------`);
 
