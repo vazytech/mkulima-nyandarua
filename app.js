@@ -54,6 +54,7 @@ document.addEventListener("DOMContentLoaded", () => {
       .catch(err => console.warn("SW Registration Failed:", err));
   }
 
+  setupSupabaseAuthListener();
   updateUserSessionUI();
   
   if (currentUser) {
@@ -93,20 +94,65 @@ function quickGuestSignIn() {
   switchScreen("screen-fodder");
 }
 
-// SOCIAL OAUTH SIGN-IN HANDLERS (GOOGLE & FACEBOOK)
+// REAL SUPABASE GOOGLE & FACEBOOK OAUTH LISTENERS & AUTH
+async function setupSupabaseAuthListener() {
+  if (typeof db !== "undefined" && db && db.auth) {
+    try {
+      const { data: { session } } = await db.auth.getSession();
+      if (session && session.user) {
+        syncOAuthUserSession(session.user);
+      }
+    } catch (err) {
+      console.warn("Supabase auth session fetch exception:", err);
+    }
+
+    db.auth.onAuthStateChange((event, session) => {
+      if (session && session.user && (event === "SIGNED_IN" || event === "INITIAL_SESSION")) {
+        syncOAuthUserSession(session.user);
+      }
+    });
+  }
+}
+
+function syncOAuthUserSession(user) {
+  const metadata = user.user_metadata || {};
+  const name = metadata.full_name || metadata.name || user.email.split('@')[0];
+  const phone = user.phone || metadata.phone || user.email || "OAuth Verified";
+
+  currentUser = {
+    name: name,
+    email: user.email,
+    phone: phone,
+    avatar: metadata.avatar_url || metadata.picture || null,
+    subcounty: "Ol Kalou",
+    ward: "Karau",
+    oauthProvider: user.app_metadata ? user.app_metadata.provider : "social"
+  };
+
+  localStorage.setItem("mkulima_current_user", JSON.stringify(currentUser));
+  updateUserSessionUI();
+  switchScreen("screen-fodder");
+}
+
+// REAL GOOGLE OAUTH SIGN IN
 async function signInWithGoogle() {
   if (typeof db !== "undefined" && db && db.auth) {
     try {
       const { error } = await db.auth.signInWithOAuth({
         provider: "google",
-        options: { redirectTo: window.location.origin }
+        options: {
+          redirectTo: window.location.href.split('#')[0]
+        }
       });
-      if (error) alert("Google Sign-In Note: " + error.message + "\n(Enable Google provider in Supabase Dashboard)");
+      if (error) {
+        alert("🔒 Supabase OAuth Configuration Required:\n\n" + error.message + "\n\nPlease enable Google Provider in your Supabase Dashboard under Authentication -> Providers.");
+      }
+      return;
     } catch (err) {
       console.warn("Google OAuth Exception:", err);
     }
   }
-  
+
   currentUser = { name: "Google Farmer", phone: "0718000000", subcounty: "Ol Kalou", ward: "Karau" };
   localStorage.setItem("mkulima_current_user", JSON.stringify(currentUser));
   updateUserSessionUI();
@@ -114,14 +160,20 @@ async function signInWithGoogle() {
   switchScreen("screen-fodder");
 }
 
+// REAL FACEBOOK OAUTH SIGN IN
 async function signInWithFacebook() {
   if (typeof db !== "undefined" && db && db.auth) {
     try {
       const { error } = await db.auth.signInWithOAuth({
         provider: "facebook",
-        options: { redirectTo: window.location.origin }
+        options: {
+          redirectTo: window.location.href.split('#')[0]
+        }
       });
-      if (error) alert("Facebook Sign-In Note: " + error.message + "\n(Enable Facebook provider in Supabase Dashboard)");
+      if (error) {
+        alert("🔒 Supabase OAuth Configuration Required:\n\n" + error.message + "\n\nPlease enable Facebook Provider in your Supabase Dashboard under Authentication -> Providers.");
+      }
+      return;
     } catch (err) {
       console.warn("Facebook OAuth Exception:", err);
     }
