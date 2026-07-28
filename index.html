@@ -641,6 +641,53 @@
             </div>
         </div>
 
+        <!-- Floating AgriBot Assistant Button -->
+        <button id="floatingAgriBotBtn" onclick="toggleModal('modalAgriBot', true)" class="floating-agribot-btn">
+            <span>🤖 AgriBot</span>
+        </button>
+
+        <!-- AGRIBOT FARMING ASSISTANT MODAL -->
+        <div id="modalAgriBot" class="modal-overlay">
+            <div class="modal-content agribot-modal-content">
+                <div class="modal-header flex-between" style="border-bottom: 1px solid #e2e8f0; padding-bottom: 0.75rem; margin-bottom: 0.75rem;">
+                    <div>
+                        <h3 style="font-size: 1.1rem; font-weight: 900; color: #047857; margin: 0; display: flex; align-items: center; gap: 0.35rem;">
+                            🌾 Nyandarua AgriBot
+                        </h3>
+                        <p style="font-size: 0.7rem; color: #64748b; margin: 0.15rem 0 0 0; font-weight: 700;">
+                            Strictly Dedicated Agricultural & Livestock Assistant
+                        </p>
+                    </div>
+                    <button onclick="toggleModal('modalAgriBot', false)" class="btn-close" style="background:none; border:none; font-size:1.2rem; cursor:pointer;">✕</button>
+                </div>
+
+                <!-- Quick Prompts Chips -->
+                <div class="agribot-quick-chips">
+                    <button onclick="sendAgriBotQuickQuery('How do I make high protein maize silage?')" class="agribot-chip">🌽 Silage Curing</button>
+                    <button onclick="sendAgriBotQuickQuery('Best potato seed varieties for Nyandarua?')" class="agribot-chip">🥔 Potato Seeds</button>
+                    <button onclick="sendAgriBotQuickQuery('How to boost dairy milk yield?')" class="agribot-chip">🐄 Milk Yield</button>
+                    <button onclick="sendAgriBotQuickQuery('When should I contact a KVB certified vet?')" class="agribot-chip">🩺 Vet Help</button>
+                </div>
+
+                <!-- Chat Messages Stream -->
+                <div id="agriBotMessages" class="agribot-messages-box">
+                    <div class="agribot-msg bot-msg">
+                        <span class="bot-avatar">🤖</span>
+                        <div class="msg-bubble">
+                            Jambo! I am your <strong>Nyandarua Agricultural Assistant</strong>. 🌾<br><br>
+                            I can only answer questions related to <strong>crops, fodder, dairy feeding, weather advisories, KVB vets, and farming in Nyandarua County</strong>. How can I help your farm today?
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Input Form -->
+                <form onsubmit="handleAgriBotSubmit(event)" class="agribot-input-form">
+                    <input type="text" id="agriBotInput" class="form-input" placeholder="Ask about crops, fodder, livestock or vets..." autocomplete="off">
+                    <button type="submit" class="btn btn-primary btn-sm" style="padding: 0.6rem 1rem;">Ask</button>
+                </form>
+            </div>
+        </div>
+
         <!-- Floating Mobile Cart Button -->
         <button id="floatingCartBtn" onclick="openCartModal()" class="floating-cart-btn">
             <span>🛒 View Cart</span>

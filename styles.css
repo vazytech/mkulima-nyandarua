@@ -1371,3 +1371,120 @@ body {
   color: #ef4444;
 }
 
+/* AGRIBOT FLOATING BUTTON & CHAT MODAL STYLES */
+.floating-agribot-btn {
+  position: fixed;
+  bottom: 5.5rem;
+  left: 1.25rem;
+  z-index: 99;
+  background: linear-gradient(135deg, #047857 0%, #065f46 100%);
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  padding: 0.7rem 1.1rem;
+  border-radius: 9999px;
+  font-weight: 800;
+  font-size: 0.88rem;
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  box-shadow: 0 10px 25px -5px rgba(4, 120, 87, 0.5);
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.floating-agribot-btn:hover {
+  transform: scale(1.06);
+  box-shadow: 0 14px 30px -5px rgba(4, 120, 87, 0.65);
+}
+
+.agribot-modal-content {
+  max-width: 480px;
+  display: flex;
+  flex-direction: column;
+  height: 520px;
+  max-height: 85vh;
+  padding: 1.25rem;
+}
+
+.agribot-quick-chips {
+  display: flex;
+  gap: 0.4rem;
+  overflow-x: auto;
+  padding-bottom: 0.5rem;
+  margin-bottom: 0.5rem;
+  scrollbar-width: none;
+}
+
+.agribot-quick-chips::-webkit-scrollbar {
+  display: none;
+}
+
+.agribot-chip {
+  background: #f1f5f9;
+  color: #334155;
+  border: 1px solid #cbd5e1;
+  border-radius: 9999px;
+  padding: 0.3rem 0.65rem;
+  font-size: 0.72rem;
+  font-weight: 800;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.agribot-chip:hover {
+  background: #047857;
+  color: #ffffff;
+  border-color: #047857;
+}
+
+.agribot-messages-box {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 0.5rem;
+  background: #f8fafc;
+  border-radius: 10px;
+  border: 1px solid #e2e8f0;
+  margin-bottom: 0.75rem;
+}
+
+.agribot-msg {
+  display: flex;
+  gap: 0.5rem;
+  align-items: flex-start;
+}
+
+.agribot-msg.user-msg {
+  flex-direction: row-reverse;
+}
+
+.bot-avatar, .user-avatar {
+  font-size: 1.1rem;
+}
+
+.msg-bubble {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 0.65rem 0.85rem;
+  font-size: 0.82rem;
+  line-height: 1.45;
+  color: #1e293b;
+  max-width: 82%;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+}
+
+.user-msg .msg-bubble {
+  background: #047857;
+  color: #ffffff;
+  border: none;
+}
+
+.agribot-input-form {
+  display: flex;
+  gap: 0.5rem;
+}
+

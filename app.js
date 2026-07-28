@@ -2338,5 +2338,127 @@ async function rejectListing(idx) {
   pendingApprovals.splice(idx, 1);
   localStorage.setItem("mkulima_pending_approvals", JSON.stringify(pendingApprovals));
   renderAdminPendingListUI();
-  alert(`❌ [REJECTED IN DATABASE]: Submission "${item.title}" was rejected.`);
+  showToast(`❌ Submission "${item.title}" was rejected.`, "info");
+}
+
+// =============================================================
+// NYANDARUA AGRIBOT - DEDICATED FARMING AI ASSISTANT LOGIC
+// =============================================================
+
+function appendAgriBotMessage(sender, text) {
+  const container = document.getElementById("agriBotMessages");
+  if (!container) return;
+
+  const msgDiv = document.createElement("div");
+  msgDiv.className = `agribot-msg ${sender === "user" ? "user-msg" : "bot-msg"}`;
+
+  const avatar = sender === "user" ? "👨‍🌾" : "🤖";
+  msgDiv.innerHTML = `
+    <span class="${sender === "user" ? "user-avatar" : "bot-avatar"}">${avatar}</span>
+    <div class="msg-bubble">${text.replace(/\n/g, "<br>")}</div>
+  `;
+
+  container.appendChild(msgDiv);
+  container.scrollTop = container.scrollHeight;
+}
+
+function handleAgriBotSubmit(e) {
+  if (e) e.preventDefault();
+  const input = document.getElementById("agriBotInput");
+  if (!input) return;
+  const query = input.value.trim();
+  if (!query) return;
+
+  appendAgriBotMessage("user", query);
+  input.value = "";
+
+  // Simulated AI response delay
+  setTimeout(() => {
+    const response = generateAgriBotResponse(query);
+    appendAgriBotMessage("bot", response);
+  }, 400);
+}
+
+function sendAgriBotQuickQuery(queryText) {
+  const input = document.getElementById("agriBotInput");
+  if (input) input.value = queryText;
+  handleAgriBotSubmit();
+}
+
+function generateAgriBotResponse(query) {
+  const q = query.toLowerCase().trim();
+
+  // 1. STRICT DOMAIN SCOPE GUARD: Reject non-farming / out-of-scope topics
+  const nonAgriKeywords = [
+    "politics", "president", "election", "mp", "governor", "football", "soccer", "movie", "song",
+    "bitcoin", "crypto", "coding", "python", "javascript", "gaming", "playstation", "celebrity",
+    "dating", "fashion", "relationship", "car", "sports", "betting"
+  ];
+
+  const containsOutofScope = nonAgriKeywords.some(keyword => q.includes(keyword));
+  if (containsOutofScope) {
+    return `🌾 <strong>M-Shambani Security Policy:</strong><br><br>Jambo! I am the M-Shambani Nyandarua Agricultural Assistant. I am strictly programmed to assist <strong>ONLY</strong> with farming, livestock management, crops, fodder, weather advisories, KVB vets, and agricultural trading in Nyandarua County.<br><br>Please ask a question related to your farm, dairy cows, potatoes, hay, or vets!`;
+  }
+
+  // 2. AGRICULTURAL DOMAIN KNOWLEDGE BASE ENGINE
+
+  // Silage & Fodder
+  if (q.includes("silage") || q.includes("fodder") || q.includes("hay") || q.includes("lucerne") || q.includes("desmodium") || q.includes("boma rhodes")) {
+    return `🌾 <strong>Nyandarua Fodder Guidance:</strong><br><br>
+    • <strong>High-Protein Feed:</strong> Lucerne (Alfalfa) contains 22% crude protein. Feed 3-5 kg/day per dairy cow for maximum milk yield.<br>
+    • <strong>Energy Feed:</strong> Maize Silage (yellow corn with molasses) boosts milk volume rapidly.<br>
+    • <strong>Pasture:</strong> Boma Rhodes grass is ideal for high altitude hay baling in Ol Kalou & Ndaragwa.<br>
+    • <strong>Silage Curing Tip:</strong> Compact tightly in polythene silage bags to exclude oxygen and prevent mold formation.`;
+  }
+
+  // Potato Farming & Crops
+  if (q.includes("potato") || q.includes("viazi") || q.includes("shangi") || q.includes("seed") || q.includes("crop") || q.includes("blight")) {
+    return `🥔 <strong>Nyandarua Potato Crop Guidance:</strong><br><br>
+    • <strong>Certified Seed Varieties:</strong> <em>Shangi</em> (fast maturing, high yield), <em>Unica</em> (blight resistant), and <em>Dutch Rijn</em>.<br>
+    • <strong>Late Blight Defense:</strong> Nyandarua high humidity (>85%) increases late blight fungal risk. Spray copper-based fungicides before heavy rains.<br>
+    • <strong>Fertilization:</strong> Apply DAP at planting (50kg/acre) and top-dress with CAN or NPK 17:17:17 at earthing up.`;
+  }
+
+  // Dairy Cows & Milk Yield
+  if (q.includes("cow") || q.includes("dairy") || q.includes("milk") || q.includes("heifer") || q.includes("maziwa") || q.includes("holstein") || q.includes("feed")) {
+    return `🐄 <strong>Dairy Cattle Management:</strong><br><br>
+    • <strong>Balanced Feeding Ratio:</strong> Combine 70% Energy (Maize Silage/Boma Rhodes) + 30% Protein (Lucerne/Desmodium) + Dairy Meal.<br>
+    • <strong>Water Requirement:</strong> A high-yielding Holstein Friesian producing 25L/day requires at least 60-80 Liters of clean water daily.<br>
+    • <strong>Calf Health:</strong> Ensure calves receive colostrum within 2 hours of birth to build immune resistance.`;
+  }
+
+  // KVB Vets & Animal Diseases
+  if (q.includes("vet") || q.includes("daktari") || q.includes("disease") || q.includes("sick") || q.includes("kvb") || q.includes("appointment") || q.includes("bloat") || q.includes("mastitis")) {
+    return `🩺 <strong>KVB Certified Vet Guidance:</strong><br><br>
+    • <strong>Emergency Signs:</strong> High fever, refusal to feed, severe bloat, or swollen udder (Mastitis) require immediate clinical attention.<br>
+    • <strong>KVB Compliance:</strong> Only consult KVB-registered veterinary surgeons listed under our <strong>Verified Vets</strong> directory.<br>
+    • <strong>Booking:</strong> You can book a clinical checkup directly under the <em>Verified Vets</em> tab for sub-county station dispatch.`;
+  }
+
+  // Weather & Sub-County Advisory
+  if (q.includes("weather") || q.includes("rain") || q.includes("climate") || q.includes("ol kalou") || q.includes("kinangop") || q.includes("kipipiri") || q.includes("ndaragwa")) {
+    return `⛅ <strong>Nyandarua Agro-Climate Advisory:</strong><br><br>
+    • Nyandarua ranges from 2,200m to 2,600m altitude.<br>
+    • High rain/humidity periods require covering stored hay and delaying pesticide spraying.<br>
+    • Clear dry periods (temp > 18°C) are optimal for cutting Rhodes grass and compaction. Check our live <strong>Climate Widget</strong> on the Fodder Hub!`;
+  }
+
+  // Marketplace, Orders & M-Pesa
+  if (q.includes("buy") || q.includes("sell") || q.includes("order") || q.includes("mpesa") || q.includes("m-pesa") || q.includes("cart") || q.includes("price") || q.includes("payment")) {
+    return `🛒 <strong>M-Shambani Trading & M-Pesa:</strong><br><br>
+    • You can purchase fodder bales, machinery, potato seeds, and livestock directly via <strong>M-Pesa STK Push</strong>.<br>
+    • Orders include pickup dispatch to your local Sub-County Central Depot (Ol Kalou, Kinangop, Kipipiri, Ol Joro Orok, Ndaragwa).<br>
+    • To post farm produce for sale, click <strong>+ Post Fodder</strong> or <strong>+ Post Item</strong>.`;
+  }
+
+  // Default Agricultural Guidance
+  return `🌾 <strong>M-Shambani Farming Assistant:</strong><br><br>
+  I can assist you with:<br>
+  1. 🌽 <strong>Fodder & Silage Curing</strong> (Lucerne, Boma Rhodes, Maize Silage)<br>
+  2. 🥔 <strong>Certified Potato Seeds & Crop Protection</strong><br>
+  3. 🐄 <strong>Dairy Cow Rations & Milk Volume Boosts</strong><br>
+  4. 🩺 <strong>KVB Vet Clinical Checkups & Appointments</strong><br>
+  5. ⛅ <strong>Nyandarua Agro-Weather Extension Advisories</strong><br>
+  6. 🛒 <strong>M-Pesa Checkout & Depot Pickup Points</strong><br><br>
+  Please type your specific farming question above!`;
 }
