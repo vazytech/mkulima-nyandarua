@@ -509,6 +509,46 @@ app.post("/api/auth/register", (req, res) => {
   return res.json({ success: true, message: `Account created successfully for ${name}!`, farmer: newFarmer });
 });
 
+// POST /api/agribot/query - Gemini AI Integration for Farmers with Strict System Instructions
+app.post("/api/agribot/query", async (req, res) => {
+  const { query, subcounty } = req.body;
+  if (!query) return res.status(400).json({ success: false, error: "Query is required" });
+
+  const geminiApiKey = process.env.GEMINI_API_KEY;
+
+  if (!geminiApiKey) {
+    return res.json({ success: false, useOfflineFallback: true, message: "GEMINI_API_KEY not configured." });
+  }
+
+  const systemInstruction = `You are Nyandarua AgriBot, an expert agricultural extension AI assistant for farmers in Nyandarua County, Kenya.
+STRICT RULE 1: You MUST ONLY answer questions directly related to agriculture, farming, crops (potatoes, maize, vegetables), fodder feeds (Lucerne, Boma Rhodes, Silage), dairy cattle management, animal diseases, KVB certified vets, weather advisories, and farming trade in Nyandarua County.
+STRICT RULE 2: If the user asks ANY question outside agriculture, farming, or Nyandarua county trade (e.g. politics, coding, sports, movies, general trivia), you MUST politely refuse with: "🌾 Jambo! I am the M-Shambani Nyandarua Agricultural Assistant. I am strictly programmed to assist ONLY with farming, livestock management, crops, fodder, weather advisories, KVB vets, and agricultural trading in Nyandarua County."
+STRICT RULE 3: Keep your responses practical, concise, encouraging, and formatted with emojis and bullet points for easy reading on mobile phones.`;
+
+  try {
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${geminiApiKey}`;
+    const response = await axios.post(url, {
+      contents: [
+        {
+          role: "user",
+          parts: [{ text: `${systemInstruction}\n\nFarmer Location: ${subcounty || "Ol Kalou"}, Nyandarua County.\nFarmer Question: ${query}` }]
+        }
+      ]
+    });
+
+    const candidate = response.data?.candidates?.[0];
+    const replyText = candidate?.content?.parts?.[0]?.text;
+
+    if (replyText) {
+      return res.json({ success: true, reply: replyText });
+    }
+  } catch (err) {
+    console.warn("Gemini API dispatch exception:", err.response ? err.response.data : err.message);
+  }
+
+  return res.json({ success: false, useOfflineFallback: true });
+});
+
 // Middleware: Verify Admin API Secret Key
 function verifyAdminAuth(req, res, next) {
   const adminKey = req.headers["x-admin-key"] || req.query.admin_key;

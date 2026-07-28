@@ -2362,7 +2362,7 @@ function appendAgriBotMessage(sender, text) {
   container.scrollTop = container.scrollHeight;
 }
 
-function handleAgriBotSubmit(e) {
+async function handleAgriBotSubmit(e) {
   if (e) e.preventDefault();
   const input = document.getElementById("agriBotInput");
   if (!input) return;
@@ -2372,11 +2372,29 @@ function handleAgriBotSubmit(e) {
   appendAgriBotMessage("user", query);
   input.value = "";
 
-  // Simulated AI response delay
+  // Try calling Gemini API via Express Backend Endpoint (/api/agribot/query)
+  try {
+    const res = await fetch("/api/agribot/query", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ query, subcounty: currentUser ? currentUser.subcounty : "Ol Kalou" })
+    });
+    if (res.ok) {
+      const data = await res.json();
+      if (data.success && data.reply) {
+        appendAgriBotMessage("bot", data.reply);
+        return;
+      }
+    }
+  } catch (err) {
+    console.warn("AgriBot Gemini API fetch exception, using offline engine:", err);
+  }
+
+  // Fallback to Built-in Offline Agricultural Knowledge Engine
   setTimeout(() => {
     const response = generateAgriBotResponse(query);
     appendAgriBotMessage("bot", response);
-  }, 400);
+  }, 300);
 }
 
 function sendAgriBotQuickQuery(queryText) {
