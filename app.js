@@ -1010,6 +1010,7 @@ async function renderFodderItems(filterCategory = "all", searchQuery = "", selec
         </div>
         <div>
           <h3 class="font-extrabold text-slate-900 text-base">${displayTitle}</h3>
+          ${item.image ? `<img src="${item.image}" style="width:100%; height:130px; object-fit:cover; border-radius:8px; margin-top:0.35rem; border:1px solid #e2e8f0;">` : ''}
           <p class="text-xs text-slate-500 mt-1">${displayDesc}</p>
         </div>
         <div class="mt-2 pt-2 border-t text-xs text-slate-600">
@@ -1087,6 +1088,7 @@ async function renderMarketItems(searchQuery = "") {
         </div>
         <div>
           <h3 class="font-extrabold text-slate-900 text-base">${displayTitle}</h3>
+          ${item.image ? `<img src="${item.image}" style="width:100%; height:130px; object-fit:cover; border-radius:8px; margin-top:0.35rem; border:1px solid #e2e8f0;">` : ''}
           <p class="text-xs text-slate-500 mt-1">${displayDesc}</p>
         </div>
         <div class="mt-2 pt-2 border-t text-xs text-slate-600">
@@ -1215,6 +1217,7 @@ async function renderServiceItems(filterCategory = "all", searchQuery = "", sele
         </div>
         <div>
           <h3 class="font-extrabold text-slate-900 text-base">${displayTitle}</h3>
+          ${item.image ? `<img src="${item.image}" style="width:100%; height:130px; object-fit:cover; border-radius:8px; margin-top:0.35rem; border:1px solid #e2e8f0;">` : ''}
           <p class="text-xs text-slate-500 mt-1">${displayDesc}</p>
         </div>
         <div class="mt-2 pt-2 border-t text-xs text-slate-600">
@@ -1262,6 +1265,7 @@ async function handlePostService(event) {
   const rate = document.getElementById("newServiceRate").value;
   const phone = document.getElementById("newServicePhone").value;
   const desc = document.getElementById("newServiceDesc").value;
+  const photoUrl = await getPhotoDataUrlOrStorageUrl("newServiceFile");
 
   pendingApprovals.push({
     id: Date.now(),
@@ -1273,6 +1277,7 @@ async function handlePostService(event) {
     provider: currentUser ? currentUser.name : "Local Specialist",
     phone,
     desc,
+    image: photoUrl,
     timestamp: "Just now"
   });
   localStorage.setItem("mkulima_pending_approvals", JSON.stringify(pendingApprovals));
@@ -1282,6 +1287,46 @@ async function handlePostService(event) {
   alert(`⏳ Service Submitted for Admin Approval!\n\nYour agricultural service "${title}" has been sent to the Nyandarua Admin Moderation Queue and will be published live upon approval.`);
 }
 
+// CAMERA PHOTO PREVIEW & SUPABASE STORAGE UPLOAD HELPER
+function previewUploadImage(event, previewImgId) {
+  const file = event.target.files[0];
+  const imgEl = document.getElementById(previewImgId);
+  if (file && imgEl) {
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      imgEl.src = e.target.result;
+      imgEl.classList.remove("hidden");
+    };
+    reader.readAsDataURL(file);
+  }
+}
+
+async function getPhotoDataUrlOrStorageUrl(fileInputId) {
+  const fileInput = document.getElementById(fileInputId);
+  if (!fileInput || !fileInput.files || fileInput.files.length === 0) return null;
+
+  const file = fileInput.files[0];
+
+  if (typeof db !== "undefined" && db && db.storage) {
+    try {
+      const fileName = `photo_${Date.now()}_${Math.floor(Math.random() * 1000)}.jpg`;
+      const { data, error } = await db.storage.from("item-photos").upload(fileName, file);
+      if (!error && data) {
+        const publicUrl = db.storage.from("item-photos").getPublicUrl(fileName).data.publicUrl;
+        return publicUrl;
+      }
+    } catch (err) {
+      console.warn("Supabase Storage upload fallback to Base64:", err);
+    }
+  }
+
+  return new Promise((resolve) => {
+    const reader = new FileReader();
+    reader.onload = (e) => resolve(e.target.result);
+    reader.readAsDataURL(file);
+  });
+}
+
 // Upload Fodder directly to Supabase Cloud Database + Storage
 async function processFodderUpload(e) {
   e.preventDefault();
@@ -1289,6 +1334,7 @@ async function processFodderUpload(e) {
   const category = document.getElementById("newFodderCategory").value;
   const price = document.getElementById("newFodderPrice").value.trim();
   const description = document.getElementById("newFodderDesc").value.trim();
+  const photoUrl = await getPhotoDataUrlOrStorageUrl("newFodderFile");
 
   pendingApprovals.push({
     id: Date.now(),
@@ -1300,6 +1346,7 @@ async function processFodderUpload(e) {
     seller: currentUser ? currentUser.name : "Local Farmer",
     phone: currentUser ? currentUser.phone : "0718493313",
     desc: description,
+    image: photoUrl,
     timestamp: "Just now"
   });
   localStorage.setItem("mkulima_pending_approvals", JSON.stringify(pendingApprovals));
@@ -1317,6 +1364,7 @@ async function processMarketListing(e) {
   const price = document.getElementById("newMarketPrice").value.trim();
   const contact = document.getElementById("newMarketContact").value.trim();
   const description = document.getElementById("newMarketDesc").value.trim();
+  const photoUrl = await getPhotoDataUrlOrStorageUrl("newMarketFile");
 
   pendingApprovals.push({
     id: Date.now(),
@@ -1327,6 +1375,7 @@ async function processMarketListing(e) {
     location: currentUser ? currentUser.subcounty : "Nyandarua",
     contact: contact || (currentUser ? currentUser.phone : "0700000000"),
     desc: description,
+    image: photoUrl,
     timestamp: "Just now"
   });
   localStorage.setItem("mkulima_pending_approvals", JSON.stringify(pendingApprovals));
@@ -1440,9 +1489,31 @@ async function triggerMpesaSTKPush(e) {
   }
 
   const userSubcounty = currentUser ? currentUser.subcounty : "Ol Kalou";
+  const mpesaReceiptSim = 'QHK' + Math.floor(100000 + Math.random() * 900000);
+  
   sendOrderConfirmationSMS(phoneRaw, activeMpesaItem.title, numericAmount, userSubcounty);
+  syncMpesaPaymentStatusToDatabase(`MMK-${Math.floor(10000 + Math.random() * 90000)}`, mpesaReceiptSim, "PAID");
 
   toggleModal("modalMpesaPay", false);
+}
+
+async function syncMpesaPaymentStatusToDatabase(orderId, mpesaReceipt, status = "PAID") {
+  if (typeof db !== "undefined" && db) {
+    try {
+      await db.from("orders").insert([
+        {
+          order_id: orderId,
+          mpesa_receipt: mpesaReceipt,
+          status: status,
+          user_phone: currentUser ? currentUser.phone : "0700000000",
+          created_at: new Date().toISOString()
+        }
+      ]);
+      console.log(`✅ M-Pesa Payment Status Synced to Supabase DB: ${orderId} -> ${status}`);
+    } catch (err) {
+      console.warn("Supabase M-Pesa order sync warning:", err);
+    }
+  }
 }
 
 // Modals Handling
