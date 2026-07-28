@@ -34,6 +34,14 @@ let fallbackVets = [
   { id: 3, name: "Dr. Peter M. Mwangi", reg_number: "KVB/REG/2018/112", subcounty: "Ol Joro Orok", phone: "0733112233", specialization: "Calf Rearing & Clinical Nutrition" }
 ];
 
+let fallbackServices = [
+  { id: 1, title: "Maize & Rhodes Grass Silage Compaction", category: "Silage", rate: "KSh 1,800 / acre", subcounty: "Ol Kalou", provider: "Nyandarua Forage Pros", phone: "0718493313", desc: "Motorized silage chopper, compaction tractor, and high-density bale wrapping." },
+  { id: 2, title: "Biogas Plant Installation & Dung Digester", category: "Biogas", rate: "KSh 45,000 / system", subcounty: "Kinangop", provider: "BioEnergy Nyandarua Techs", phone: "0722112233", desc: "Fixed-dome 10m³ biogas construction, cow dung digester, and gas piping setup." },
+  { id: 3, title: "Organic Manure Treatment & Slurry Application", category: "Manure", rate: "KSh 3,500 / ton", subcounty: "Kipipiri", provider: "SoilEnrich Organics", phone: "0733445566", desc: "Decomposed cow dung & poultry manure slurry treatment for high potato yields." },
+  { id: 4, title: "High-Grade AI Breeding & Sexed Semen Straws", category: "AI", rate: "KSh 2,500 / straw", subcounty: "Ol Joro Orok", provider: "Nyandarua AI Breeders", phone: "0720998877", desc: "Sexed Friesian & Ayrshire semen straws with pregnancy detection tracking." },
+  { id: 5, title: "Tractor Tillage & Potato Harvester Rental", category: "Machinery", rate: "KSh 3,200 / acre", subcounty: "Ndaragwa", provider: "Kinangop Tractor Services", phone: "0712345678", desc: "Disc plowing, harrowing, and potato ridge harvester machinery rental." }
+];
+
 // Active Session User State
 let currentUser = JSON.parse(localStorage.getItem("mkulima_current_user")) || null;
 let activeMpesaItem = { title: "", price: "" };
@@ -58,6 +66,9 @@ document.addEventListener("DOMContentLoaded", () => {
   renderFodderItems("all");
   renderMarketItems();
   renderVetList();
+  renderServiceItems();
+  updateCartBadges();
+  updateAdminPendingBadge();
 
   document.addEventListener("click", (e) => {
     const profileContainer = document.querySelector(".profile-menu-container");
@@ -109,32 +120,69 @@ async function signInWithFacebook() {
   switchScreen("screen-fodder");
 }
 
-// NYANDARUA LIVE WEATHER & FARMING TIPS PANEL
-function renderNyandaruaWeather() {
+let currentSelectedSubcounty = "Ol Kalou";
+
+// NYANDARUA LIVE WEATHER & FARMING TIPS PANEL (Backend Proxy Service)
+async function renderNyandaruaWeather(targetSubcounty = null) {
   const weatherContainer = document.getElementById("weatherPanel");
   if (!weatherContainer) return;
 
-  const weatherData = {
-    temp: "19°C",
-    condition: "⛅ Partly Cloudy",
-    humidity: "74%",
-    rainProb: "20%",
-    tip: "💡 Extension Advisory: Ideal conditions for harvesting Rhodes grass & silage compaction in Ol Kalou & Kinangop."
-  };
+  if (targetSubcounty) {
+    currentSelectedSubcounty = targetSubcounty;
+  } else if (currentUser && currentUser.subcounty) {
+    currentSelectedSubcounty = currentUser.subcounty;
+  }
 
-  weatherContainer.innerHTML = `
-    <div class="weather-card">
-      <div class="weather-info">
-        <h4>📍 Nyandarua Agro-Climate ⛅</h4>
-        <p>${weatherData.condition} • Humidity: ${weatherData.humidity} • Rain: ${weatherData.rainProb}</p>
-        <p style="font-size:0.72rem; margin-top:0.35rem; color:#fef08a; font-weight:700;">${weatherData.tip}</p>
+  try {
+    const res = await fetch(`/api/weather?subcounty=${encodeURIComponent(currentSelectedSubcounty)}`);
+    const data = await res.json();
+
+    const subList = data.subcountiesList || ["Ol Kalou", "Kinangop", "Kipipiri", "Ol Joro Orok", "Ndaragua"];
+    const selectOptions = subList.map(sub => 
+      `<option value="${sub}" ${sub === currentSelectedSubcounty ? "selected" : ""}>📍 ${sub}</option>`
+    ).join("");
+
+    weatherContainer.innerHTML = `
+      <div class="weather-card">
+        <div style="flex:1;">
+          <div class="weather-header" style="display:flex; align-items:center; justify-content:space-between; gap:0.5rem; margin-bottom:0.25rem;">
+            <h4 style="margin:0; font-size:1.05rem; font-weight:800; display:flex; align-items:center; gap:0.3rem;">
+              📍 ${data.subcounty} Climate ${data.icon || '⛅'}
+            </h4>
+            <select class="weather-select" onchange="renderNyandaruaWeather(this.value)" style="background:rgba(255,255,255,0.22); color:#fff; border:1px solid rgba(255,255,255,0.4); border-radius:6px; padding:0.2rem 0.4rem; font-size:0.75rem; font-weight:700; cursor:pointer;">
+              ${selectOptions}
+            </select>
+          </div>
+          <p style="font-size:0.78rem; color:#e0f2fe; margin-top:0.2rem;">
+            ${data.condition} • Humidity: ${data.humidity} • Rain Prob: ${data.rainProb} • Wind: ${data.windSpeed}
+          </p>
+          <p style="font-size:0.73rem; margin-top:0.35rem; color:#fef08a; font-weight:700; background:rgba(0,0,0,0.18); padding:0.35rem 0.55rem; border-radius:6px; border-left:3px solid #fde047;">
+            ${data.tip}
+          </p>
+        </div>
+        <div class="weather-stats" style="text-align:right; flex-shrink:0;">
+          <div class="weather-temp" style="font-size:1.8rem; font-weight:900; line-height:1;">${data.temp}</div>
+          <div class="weather-desc" style="font-size:0.7rem; font-weight:700; color:#bae6fd; margin-top:0.25rem;">${data.alt}</div>
+          <button onclick="renderNyandaruaWeather('${currentSelectedSubcounty}')" style="margin-top:0.4rem; background:rgba(255,255,255,0.25); color:#fff; border:none; padding:0.2rem 0.45rem; border-radius:4px; font-size:0.68rem; font-weight:700; cursor:pointer;">🔄 Refresh</button>
+        </div>
       </div>
-      <div class="weather-stats">
-        <div class="weather-temp">${weatherData.temp}</div>
-        <div class="weather-desc">Ol Kalou Altitude</div>
+    `;
+  } catch (err) {
+    console.warn("⚠️ Backend weather fetch error:", err);
+    weatherContainer.innerHTML = `
+      <div class="weather-card">
+        <div class="weather-info">
+          <h4>📍 Nyandarua Agro-Climate ⛅</h4>
+          <p>⛅ Partly Cloudy • Humidity: 74% • Rain: 20%</p>
+          <p style="font-size:0.72rem; margin-top:0.35rem; color:#fef08a; font-weight:700;">💡 Extension Advisory: Ideal conditions for harvesting Rhodes grass & silage compaction in Ol Kalou.</p>
+        </div>
+        <div class="weather-stats">
+          <div class="weather-temp">19°C</div>
+          <div class="weather-desc">Ol Kalou Altitude</div>
+        </div>
       </div>
-    </div>
-  `;
+    `;
+  }
 }
 
 // Toggle Profile Dropdown Menu in Top Right
@@ -312,7 +360,7 @@ function switchScreen(screenId) {
     screenId = "screen-auth";
   }
 
-  const screens = ["screen-auth", "screen-fodder", "screen-marketplace", "screen-vets"];
+  const screens = ["screen-auth", "screen-fodder", "screen-marketplace", "screen-vets", "screen-services"];
   screens.forEach(id => {
     const el = document.getElementById(id);
     if (el) {
@@ -327,13 +375,15 @@ function switchScreen(screenId) {
   const navMap = {
     "screen-fodder": "nav-fodder",
     "screen-marketplace": "nav-market",
-    "screen-vets": "nav-vets"
+    "screen-vets": "nav-vets",
+    "screen-services": "nav-services"
   };
 
   const desktopNavMap = {
     "screen-fodder": "desktop-nav-fodder",
     "screen-marketplace": "desktop-nav-market",
-    "screen-vets": "desktop-nav-vets"
+    "screen-vets": "desktop-nav-vets",
+    "screen-services": "desktop-nav-services"
   };
 
   document.querySelectorAll(".nav-item").forEach(btn => btn.classList.remove("active"));
@@ -343,6 +393,10 @@ function switchScreen(screenId) {
   document.querySelectorAll(".desktop-nav-link").forEach(btn => btn.classList.remove("active"));
   const activeDesktopBtn = document.getElementById(desktopNavMap[screenId]);
   if (activeDesktopBtn) activeDesktopBtn.classList.add("active");
+
+  if (screenId === "screen-services") {
+    renderServiceItems();
+  }
 }
 
 // LIVE SEARCH BAR & WARD FILTERING (FODDER)
@@ -391,11 +445,15 @@ async function renderFodderItems(filterCategory = "all", searchQuery = "", selec
         <h3 class="font-extrabold text-slate-900 text-base">${item.title}</h3>
         <p class="text-xs text-slate-500 mt-1">${item.description || item.desc || ''}</p>
       </div>
-      <div class="flex-between mt-2 pt-2 border-t text-xs text-slate-600">
-        <span>📍 ${item.subcounty}</span>
-        <div style="display:flex; gap:0.4rem;">
-          <a href="tel:${item.phone}" class="btn btn-secondary btn-sm">📞 Call</a>
-          <button onclick="openMpesaModal('${item.title}', '${item.price}')" class="btn btn-mpesa btn-sm">💳 Buy M-Pesa</button>
+      <div class="mt-2 pt-2 border-t text-xs text-slate-600">
+        <div class="flex-between mb-2">
+          <span>📍 ${item.subcounty}</span>
+          <span style="font-weight:700; color:var(--primary-700);">Verified Feed</span>
+        </div>
+        <div class="item-card-buttons-stack">
+          <a href="tel:${item.phone}" class="btn btn-secondary" style="width:100%; justify-content:center;">📞 Contact Seller (${item.phone || 'Call'})</a>
+          <button onclick="addToCart('${item.title}', '${item.price}', '${item.category}', '${item.subcounty}')" class="btn btn-primary" style="width:100%; justify-content:center; background:#10b981; border-color:#059669; color:#ffffff;">🛒 Add to Cart</button>
+          <button onclick="openMpesaModal('${item.title}', '${item.price}')" class="btn btn-mpesa" style="width:100%; justify-content:center;">💳 Buy Now via M-Pesa</button>
         </div>
       </div>
     </div>
@@ -452,11 +510,15 @@ async function renderMarketItems(searchQuery = "") {
         <h3 class="font-extrabold text-slate-900 text-base">${item.title}</h3>
         <p class="text-xs text-slate-500 mt-1">${item.description || item.desc || ''}</p>
       </div>
-      <div class="flex-between mt-2 pt-2 border-t text-xs text-slate-600">
-        <span>📍 ${item.location}</span>
-        <div style="display:flex; gap:0.4rem;">
-          <a href="tel:${item.contact}" class="btn btn-accent btn-sm">🛒 Contact</a>
-          <button onclick="openMpesaModal('${item.title}', '${item.price}')" class="btn btn-mpesa btn-sm">💳 M-Pesa</button>
+      <div class="mt-2 pt-2 border-t text-xs text-slate-600">
+        <div class="flex-between mb-2">
+          <span>📍 ${item.location}</span>
+          <span style="font-weight:700; color:var(--accent-700);">Direct Trade</span>
+        </div>
+        <div class="item-card-buttons-stack">
+          <a href="tel:${item.contact}" class="btn btn-accent" style="width:100%; justify-content:center;">📞 Contact Seller (${item.contact || 'Call'})</a>
+          <button onclick="addToCart('${item.title}', '${item.price}', '${item.category}', '${item.location}')" class="btn btn-primary" style="width:100%; justify-content:center; background:#10b981; border-color:#059669; color:#ffffff;">🛒 Add to Cart</button>
+          <button onclick="openMpesaModal('${item.title}', '${item.price}')" class="btn btn-mpesa" style="width:100%; justify-content:center;">💳 Buy Now via M-Pesa</button>
         </div>
       </div>
     </div>
@@ -514,22 +576,110 @@ function handleVetSearchChange() {
   renderVetList(searchInput ? searchInput.value : "");
 }
 
-// SUPABASE STORAGE FILE UPLOADS
-async function uploadImageToSupabaseStorage(file) {
-  if (!file || typeof db === "undefined" || !db) return null;
-  try {
-    const fileName = `item_${Date.now()}_${file.name.replace(/[^a-zA-Z0-9.]/g, '_')}`;
-    const { data, error } = await db.storage.from("product-photos").upload(fileName, file);
-    if (error) {
-      console.warn("Supabase storage upload fallback:", error.message);
-      return null;
+// AGRICULTURAL SERVICES HUB FUNCTIONS
+async function renderServiceItems(filterCategory = "all", searchQuery = "", selectedSubcounty = "") {
+  const container = document.getElementById("containerServicesList");
+  if (!container) return;
+
+  let items = fallbackServices;
+
+  if (typeof db !== "undefined" && db) {
+    try {
+      let query = db.from("services").select("*").order("id", { ascending: false });
+      if (filterCategory !== "all") {
+        query = query.eq("category", filterCategory);
+      }
+      const { data, error } = await query;
+      if (!error && data && data.length > 0) {
+        items = data;
+      }
+    } catch (err) {
+      console.warn("Supabase services fetch fallback:", err);
     }
-    const { data: publicUrlData } = db.storage.from("product-photos").getPublicUrl(fileName);
-    return publicUrlData ? publicUrlData.publicUrl : null;
-  } catch (err) {
-    console.warn("Storage upload exception:", err);
-    return null;
   }
+
+  if (searchQuery) {
+    const q = searchQuery.toLowerCase();
+    items = items.filter(item => item.title.toLowerCase().includes(q) || (item.description || item.desc || '').toLowerCase().includes(q) || item.category.toLowerCase().includes(q));
+  }
+
+  if (selectedSubcounty) {
+    items = items.filter(item => item.subcounty === selectedSubcounty);
+  }
+
+  if (items.length === 0) {
+    container.innerHTML = '<p class="text-center text-slate-400 text-xs py-8" style="grid-column:1/-1;">No agricultural services found matching your search.</p>';
+    return;
+  }
+
+  container.innerHTML = items.map(item => `
+    <div class="item-card">
+      <div class="flex-between">
+        <span class="item-badge badge-protein">🛠️ ${item.category}</span>
+        <span class="price-tag">${item.rate || item.price}</span>
+      </div>
+      <div>
+        <h3 class="font-extrabold text-slate-900 text-base">${item.title}</h3>
+        <p class="text-xs text-slate-500 mt-1">${item.description || item.desc || ''}</p>
+      </div>
+      <div class="mt-2 pt-2 border-t text-xs text-slate-600">
+        <div class="flex-between mb-2">
+          <span>📍 ${item.subcounty} • ${item.provider || 'Verified Specialist'}</span>
+          <span style="font-weight:700; color:var(--primary-700);">⭐ Certified Service</span>
+        </div>
+        <div class="item-card-buttons-stack">
+          <a href="tel:${item.phone}" class="btn btn-secondary" style="width:100%; justify-content:center;">📞 Call Technician (${item.phone || 'Direct Call'})</a>
+          <button onclick="addToCart('${item.title}', '${item.rate || item.price}', '${item.category}', '${item.subcounty}')" class="btn btn-primary" style="width:100%; justify-content:center; background:#10b981; border-color:#059669; color:#ffffff;">🛒 Add Service to Cart</button>
+          <button onclick="openMpesaModal('${item.title}', '${item.rate || item.price}')" class="btn btn-mpesa" style="width:100%; justify-content:center;">💳 Book & Pay via M-Pesa</button>
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function filterServicesDisplay(category) {
+  document.querySelectorAll(".filter-bar .filter-tab").forEach(tab => tab.classList.remove("active"));
+  const activeTab = document.getElementById(`tab-service-${category.toLowerCase()}`);
+  if (activeTab) activeTab.classList.add("active");
+  const searchInput = document.getElementById("searchServiceInput");
+  const regionSelect = document.getElementById("filterServiceRegion");
+  renderServiceItems(category, searchInput ? searchInput.value : "", regionSelect ? regionSelect.value : "");
+}
+
+function handleServiceSearchChange() {
+  const activeTab = document.querySelector(".filter-bar .filter-tab.active");
+  const category = activeTab ? activeTab.textContent.split(' ')[0] : "all";
+  const searchInput = document.getElementById("searchServiceInput");
+  const regionSelect = document.getElementById("filterServiceRegion");
+  renderServiceItems(category === "All" ? "all" : category, searchInput ? searchInput.value : "", regionSelect ? regionSelect.value : "");
+}
+
+async function handlePostService(event) {
+  event.preventDefault();
+  const title = document.getElementById("newServiceTitle").value;
+  const category = document.getElementById("newServiceCategory").value;
+  const subcounty = document.getElementById("newServiceSubCounty").value;
+  const rate = document.getElementById("newServiceRate").value;
+  const phone = document.getElementById("newServicePhone").value;
+  const desc = document.getElementById("newServiceDesc").value;
+
+  pendingApprovals.push({
+    id: Date.now(),
+    type: "service",
+    title,
+    category,
+    subcounty,
+    rate,
+    provider: currentUser ? currentUser.name : "Local Specialist",
+    phone,
+    desc,
+    timestamp: "Just now"
+  });
+  localStorage.setItem("mkulima_pending_approvals", JSON.stringify(pendingApprovals));
+  updateAdminPendingBadge();
+
+  toggleModal("modalServiceUpload", false);
+  alert(`⏳ Service Submitted for Admin Approval!\n\nYour agricultural service "${title}" has been sent to the Nyandarua Admin Moderation Queue and will be published live upon approval.`);
 }
 
 // Upload Fodder directly to Supabase Cloud Database + Storage
@@ -539,35 +689,24 @@ async function processFodderUpload(e) {
   const category = document.getElementById("newFodderCategory").value;
   const price = document.getElementById("newFodderPrice").value.trim();
   const description = document.getElementById("newFodderDesc").value.trim();
-  const fileInput = document.getElementById("newFodderFile");
 
-  let imageUrl = null;
-  if (fileInput && fileInput.files.length > 0) {
-    imageUrl = await uploadImageToSupabaseStorage(fileInput.files[0]);
-  }
-
-  const newItem = {
+  pendingApprovals.push({
+    id: Date.now(),
+    type: "fodder",
     title,
     category,
     price,
     subcounty: currentUser ? currentUser.subcounty : "Ol Kalou",
     seller: currentUser ? currentUser.name : "Local Farmer",
     phone: currentUser ? currentUser.phone : "0718493313",
-    description
-  };
+    desc: description,
+    timestamp: "Just now"
+  });
+  localStorage.setItem("mkulima_pending_approvals", JSON.stringify(pendingApprovals));
+  updateAdminPendingBadge();
 
-  if (typeof db !== "undefined" && db) {
-    const { error } = await db.from("fodder").insert([newItem]);
-    if (error) {
-      console.error("Supabase insert error:", error);
-    } else {
-      alert("⚡ Published live to Supabase Cloud Database!");
-    }
-  }
-
-  fallbackFodder.unshift({ id: Date.now(), ...newItem, desc: description });
-  renderFodderItems("all");
   toggleModal("modalFodderUpload", false);
+  alert(`⏳ Fodder Listing Submitted for Admin Approval!\n\nYour post "${title}" has been submitted to the Nyandarua Admin Moderation Queue for verification and will appear live upon approval.`);
 }
 
 // Upload Marketplace Item directly to Supabase Cloud Database + Storage
@@ -579,27 +718,22 @@ async function processMarketListing(e) {
   const contact = document.getElementById("newMarketContact").value.trim();
   const description = document.getElementById("newMarketDesc").value.trim();
 
-  const newItem = {
+  pendingApprovals.push({
+    id: Date.now(),
+    type: "market",
     title,
     category,
     price,
     location: currentUser ? currentUser.subcounty : "Nyandarua",
     contact: contact || (currentUser ? currentUser.phone : "0700000000"),
-    description
-  };
+    desc: description,
+    timestamp: "Just now"
+  });
+  localStorage.setItem("mkulima_pending_approvals", JSON.stringify(pendingApprovals));
+  updateAdminPendingBadge();
 
-  if (typeof db !== "undefined" && db) {
-    const { error } = await db.from("marketplace").insert([newItem]);
-    if (error) {
-      console.error("Supabase insert error:", error);
-    } else {
-      alert("⚡ Published live to Supabase Cloud Database!");
-    }
-  }
-
-  fallbackMarket.unshift({ id: Date.now(), ...newItem, desc: description });
-  renderMarketItems();
   toggleModal("modalMarketUpload", false);
+  alert(`⏳ Marketplace Listing Submitted for Admin Approval!\n\nYour item "${title}" has been sent to the Moderation Queue and will be published live once verified by Admin.`);
 }
 
 // M-PESA STK PUSH CHECKOUT MODAL
@@ -742,4 +876,433 @@ async function triggerPasswordResetSMS() {
   }
 
   toggleModal("modalPasswordReset", false);
+}
+
+// ==========================================
+// ==========================================
+// SHOPPING CART MANAGEMENT & PERSISTENCE
+// ==========================================
+let cart = JSON.parse(localStorage.getItem("mkulima_cart") || "[]");
+
+function updateCartBadges() {
+  const totalCount = cart.reduce((sum, item) => sum + item.quantity, 0);
+  const badgeNav = document.getElementById("cartCountBadge");
+  const badgeNavPage = document.getElementById("cartCountBadgeNav");
+  const badgeFloating = document.getElementById("floatingCartBadge");
+  if (badgeNav) badgeNav.textContent = totalCount;
+  if (badgeNavPage) badgeNavPage.textContent = totalCount;
+  if (badgeFloating) badgeFloating.textContent = totalCount;
+}
+
+function addToCart(title, priceStr, category, location) {
+  const numMatch = (priceStr || "").match(/[\d,]+/);
+  const numericPrice = numMatch ? parseInt(numMatch[0].replace(/,/g, "")) : 100;
+
+  const existingIndex = cart.findIndex(i => i.title === title);
+  if (existingIndex > -1) {
+    cart[existingIndex].quantity += 1;
+  } else {
+    cart.push({
+      id: Date.now(),
+      title,
+      priceStr,
+      price: numericPrice,
+      category: category || "Item",
+      location: location || "Nyandarua",
+      quantity: 1
+    });
+  }
+
+  localStorage.setItem("mkulima_cart", JSON.stringify(cart));
+  updateCartBadges();
+  renderCartPageUI();
+  alert(`🛒 Added "${title}" to your shopping cart!`);
+}
+
+function openCartModal() {
+  renderCartItemsUI();
+  toggleModal("modalShoppingCart", true);
+}
+
+function renderCartPageUI() {
+  const container = document.getElementById("cartPageItemsContainer");
+  const summaryBox = document.getElementById("cartPageSummaryBox");
+  if (!container) return;
+
+  if (cart.length === 0) {
+    container.innerHTML = `
+      <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; text-align: center; padding: 3rem 1.5rem; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);">
+        <span style="font-size: 3.5rem; display: block; margin-bottom: 0.75rem;">🛒</span>
+        <h3 style="font-size: 1.25rem; font-weight: 800; color: #1e293b;">Your Shopping Cart is Empty</h3>
+        <p style="color: #64748b; font-size: 0.88rem; margin-top: 0.35rem; max-width: 400px; margin-left: auto; margin-right: auto;">
+          You haven't added any fodder feeds, potato seeds, or farm equipment yet.
+        </p>
+        <button onclick="switchScreen('screen-fodder')" class="btn btn-primary" style="margin-top: 1.25rem; padding: 0.6rem 1.25rem;">
+          🌾 Explore Fodder Hub
+        </button>
+      </div>
+    `;
+    if (summaryBox) summaryBox.innerHTML = "";
+    return;
+  }
+
+  let totalQty = 0;
+  let totalPrice = 0;
+
+  container.innerHTML = `
+    <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 1.25rem; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);">
+      <h3 style="font-size: 1.05rem; font-weight: 800; color: #0f172a; margin-bottom: 1rem; border-bottom: 1px solid #f1f5f9; padding-bottom: 0.5rem;">
+        📦 Cart Items (${cart.length})
+      </h3>
+      <div style="display: flex; flex-direction: column; gap: 0.85rem;">
+        ${cart.map((item, index) => {
+          const subtotal = item.price * item.quantity;
+          totalQty += item.quantity;
+          totalPrice += subtotal;
+
+          return `
+            <div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; padding: 0.85rem; border: 1px solid #e2e8f0; border-radius: 8px; background: #fafafa; gap: 0.75rem;">
+              <div style="flex: 1; min-width: 180px;">
+                <span class="item-badge badge-protein" style="font-size:0.65rem; margin-bottom:0.2rem;">${item.category}</span>
+                <h4 style="font-size: 0.95rem; font-weight: 800; color: #0f172a; margin: 0.1rem 0;">${item.title}</h4>
+                <p style="font-size: 0.78rem; color: #64748b; margin: 0;">📍 ${item.location} • KSh ${item.price.toLocaleString()} per unit</p>
+              </div>
+
+              <div style="display: flex; align-items: center; gap: 0.5rem;">
+                <div class="cart-qty-controls" style="background: #ffffff; padding: 0.25rem 0.5rem; border-radius: 6px;">
+                  <button onclick="changeCartQty(${index}, -1)" class="btn-qty">-</button>
+                  <span class="cart-qty-val" style="min-width:24px;">${item.quantity}</span>
+                  <button onclick="changeCartQty(${index}, 1)" class="btn-qty">+</button>
+                </div>
+              </div>
+
+              <div style="text-align: right; min-width: 100px;">
+                <div style="font-size: 1.05rem; font-weight: 900; color: #047857;">KSh ${subtotal.toLocaleString()}</div>
+                <button onclick="removeFromCart(${index})" style="background: none; border: none; color: #ef4444; font-weight: 700; font-size: 0.75rem; cursor: pointer; margin-top: 0.2rem;">🗑️ Remove</button>
+              </div>
+            </div>
+          `;
+        }).join('')}
+      </div>
+    </div>
+  `;
+
+  if (summaryBox) {
+    summaryBox.innerHTML = `
+      <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 1.25rem; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); position: sticky; top: 80px;">
+        <h3 style="font-size: 1.05rem; font-weight: 800; color: #0f172a; margin-bottom: 0.85rem; border-bottom: 1px solid #f1f5f9; padding-bottom: 0.5rem;">
+          💳 Order Summary
+        </h3>
+        
+        <div style="display: flex; justify-content: space-between; font-size: 0.88rem; color: #475569; margin-bottom: 0.5rem;">
+          <span>Total Selected Items:</span>
+          <span style="font-weight: 800;">${cart.length} item(s)</span>
+        </div>
+
+        <div style="display: flex; justify-content: space-between; font-size: 0.88rem; color: #475569; margin-bottom: 0.85rem;">
+          <span>Total Quantity:</span>
+          <span style="font-weight: 800;">${totalQty} unit(s)</span>
+        </div>
+
+        <div style="display: flex; justify-content: space-between; font-size: 1.25rem; font-weight: 900; color: #047857; border-top: 2px dashed #cbd5e1; padding-top: 0.85rem; margin-bottom: 1.25rem;">
+          <span>Grand Total:</span>
+          <span>KSh ${totalPrice.toLocaleString()}</span>
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 0.6rem;">
+          <button onclick="checkoutCartMpesa()" class="btn btn-mpesa" style="width: 100%; padding: 0.8rem; font-size: 0.95rem; font-weight: 900; justify-content: center;">
+            💳 Pay KSh ${totalPrice.toLocaleString()} via M-Pesa
+          </button>
+          
+          <button onclick="clearCart()" class="btn btn-secondary" style="width: 100%; padding: 0.5rem; font-size: 0.8rem; justify-content: center;">
+            🗑️ Clear Entire Cart
+          </button>
+        </div>
+      </div>
+    `;
+  }
+}
+
+function renderCartItemsUI() {
+  const container = document.getElementById("cartItemsContainer");
+  const txtTotalItems = document.getElementById("cartTotalItems");
+  const txtTotalPrice = document.getElementById("cartTotalPrice");
+  if (!container) return;
+
+  if (cart.length === 0) {
+    container.innerHTML = `
+      <div style="text-align: center; padding: 2rem 1rem; color: #94a3b8;">
+        <span style="font-size: 2.5rem; display: block; margin-bottom: 0.5rem;">🛒</span>
+        <p style="font-weight: 700;">Your cart is currently empty.</p>
+        <p style="font-size: 0.78rem; margin-top: 0.2rem;">Browse fodder or marketplace listings to add items!</p>
+      </div>
+    `;
+    if (txtTotalItems) txtTotalItems.textContent = "0 items";
+    if (txtTotalPrice) txtTotalPrice.textContent = "KSh 0";
+    return;
+  }
+
+  let totalQty = 0;
+  let totalPrice = 0;
+
+  container.innerHTML = cart.map((item, index) => {
+    const itemSubtotal = item.price * item.quantity;
+    totalQty += item.quantity;
+    totalPrice += itemSubtotal;
+
+    return `
+      <div class="cart-item-row">
+        <div class="cart-item-info">
+          <div class="cart-item-title">${item.title}</div>
+          <div class="cart-item-meta">📍 ${item.location} • KSh ${item.price.toLocaleString()} each</div>
+        </div>
+        <div class="cart-qty-controls">
+          <button onclick="changeCartQty(${index}, -1)" class="btn-qty">-</button>
+          <span class="cart-qty-val">${item.quantity}</span>
+          <button onclick="changeCartQty(${index}, 1)" class="btn-qty">+</button>
+        </div>
+        <div style="font-weight:800; font-size:0.88rem; color:#047857; min-width:70px; text-align:right;">
+          KSh ${itemSubtotal.toLocaleString()}
+        </div>
+        <button onclick="removeFromCart(${index})" class="btn-cart-remove" title="Remove item">🗑️</button>
+      </div>
+    `;
+  }).join('');
+
+  if (txtTotalItems) txtTotalItems.textContent = `${totalQty} item(s)`;
+  if (txtTotalPrice) txtTotalPrice.textContent = `KSh ${totalPrice.toLocaleString()}`;
+}
+
+function changeCartQty(index, delta) {
+  if (cart[index]) {
+    cart[index].quantity += delta;
+    if (cart[index].quantity <= 0) {
+      cart.splice(index, 1);
+    }
+    localStorage.setItem("mkulima_cart", JSON.stringify(cart));
+    updateCartBadges();
+    renderCartItemsUI();
+    renderCartPageUI();
+  }
+}
+
+function removeFromCart(index) {
+  if (cart[index]) {
+    cart.splice(index, 1);
+    localStorage.setItem("mkulima_cart", JSON.stringify(cart));
+    updateCartBadges();
+    renderCartItemsUI();
+    renderCartPageUI();
+  }
+}
+
+function clearCart() {
+  if (cart.length === 0) return;
+  if (confirm("Are you sure you want to clear your shopping cart?")) {
+    cart = [];
+    localStorage.setItem("mkulima_cart", JSON.stringify([]));
+    updateCartBadges();
+    renderCartItemsUI();
+    renderCartPageUI();
+  }
+}
+
+function checkoutCartMpesa() {
+  if (cart.length === 0) {
+    alert("Your cart is empty! Please add items before checking out.");
+    return;
+  }
+
+  const totalAmount = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+  const itemSummary = cart.map(i => `${i.quantity}x ${i.title}`).join(", ");
+
+  toggleModal("modalShoppingCart", false);
+  openMpesaModal(`Cart Total (${itemSummary})`, `KSh ${totalAmount.toLocaleString()}`);
+}
+
+// =============================================================
+// COUNTY ADMIN MODERATION & APPROVAL QUEUE ENGINE
+// =============================================================
+let pendingApprovals = JSON.parse(localStorage.getItem("mkulima_pending_approvals")) || [
+  {
+    id: 101,
+    type: "fodder",
+    title: "Boma Rhodes Hay Bales (30kg)",
+    category: "Energy",
+    price: "KSh 380 / bale",
+    subcounty: "Ndaragua",
+    seller: "John K. Farm",
+    phone: "0712998877",
+    desc: "Freshly baled high-energy Boma Rhodes pasture hay.",
+    timestamp: "Just now"
+  },
+  {
+    id: 102,
+    type: "market",
+    title: "Solar Powered Milk Cooling Tank (500L)",
+    category: "Equipment",
+    price: "KSh 120,000",
+    location: "Ol Kalou",
+    contact: "0722887766",
+    desc: "Direct solar cooling tank for remote dairy farms.",
+    timestamp: "Just now"
+  }
+];
+
+function updateAdminPendingBadge() {
+  const badge = document.getElementById("adminPendingBadge");
+  if (badge) badge.textContent = pendingApprovals.length;
+}
+
+async function openAdminApprovalsModal() {
+  toggleModal("modalAdminApprovals", true);
+  try {
+    const res = await fetch("/api/admin/pending");
+    const json = await res.json();
+    if (json.success && Array.isArray(json.pendingItems) && json.pendingItems.length > 0) {
+      pendingApprovals = json.pendingItems;
+      localStorage.setItem("mkulima_pending_approvals", JSON.stringify(pendingApprovals));
+    }
+  } catch (err) {
+    console.warn("Backend admin pending fetch fallback:", err);
+  }
+  renderAdminPendingListUI();
+}
+
+function renderAdminPendingListUI() {
+  const container = document.getElementById("adminPendingContainer");
+  if (!container) return;
+
+  if (pendingApprovals.length === 0) {
+    container.innerHTML = `
+      <div style="text-align: center; padding: 2rem 1rem; color: #94a3b8; background: #f8fafc; border-radius: 8px;">
+        <span style="font-size: 2rem; display: block; margin-bottom: 0.35rem;">✅</span>
+        <p style="font-weight: 800; color: #1e293b;">No Pending Submissions</p>
+        <p style="font-size: 0.78rem;">All submitted fodder, marketplace, and service listings have been reviewed and approved.</p>
+      </div>
+    `;
+    updateAdminPendingBadge();
+    return;
+  }
+
+  container.innerHTML = pendingApprovals.map((item, idx) => `
+    <div style="background: #ffffff; border: 1px solid #fed7aa; border-radius: 8px; padding: 0.85rem; box-shadow: 0 2px 4px rgba(0,0,0,0.03);">
+      <div class="flex-between" style="margin-bottom: 0.25rem;">
+        <span class="item-badge" style="background:#fff7ed; color:#c2410c; border:1px solid #ffedd5; font-weight:800;">
+          ⏳ ${item.type.toUpperCase()} PENDING APPROVAL
+        </span>
+        <span style="font-size:0.7rem; font-weight:700; color:#94a3b8;">${item.timestamp || 'Recent'}</span>
+      </div>
+
+      <h4 style="font-size: 0.95rem; font-weight: 800; color: #0f172a; margin: 0.2rem 0;">${item.title}</h4>
+      <p style="font-size: 0.78rem; color: #475569; margin-bottom: 0.35rem;">
+        💰 <strong>Price/Rate:</strong> ${item.price || item.rate} • 📍 <strong>Location:</strong> ${item.subcounty || item.location}
+      </p>
+      <p style="font-size: 0.75rem; color: #64748b; background: #f8fafc; padding: 0.4rem 0.6rem; border-radius: 6px; margin-bottom: 0.6rem;">
+        👤 <strong>Submitted By:</strong> ${item.seller || item.provider || 'Farmer'} (📞 ${item.phone || item.contact})<br>
+        📝 ${item.desc || item.description || ''}
+      </p>
+
+      <div style="display: flex; gap: 0.5rem;">
+        <button onclick="approveListing(${idx})" class="btn btn-primary btn-sm" style="flex: 1; background: #16a34a; border-color: #15803d; justify-content: center;">
+          ✅ Approve & Publish Live
+        </button>
+        <button onclick="rejectListing(${idx})" class="btn btn-secondary btn-sm" style="flex: 1; color: #dc2626; border-color: #fca5a5; justify-content: center;">
+          ❌ Reject Submission
+        </button>
+      </div>
+    </div>
+  `).join('');
+
+  updateAdminPendingBadge();
+}
+
+async function approveListing(idx) {
+  const item = pendingApprovals[idx];
+  if (!item) return;
+
+  try {
+    await fetch("/api/admin/approve", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id: item.id })
+    });
+  } catch (err) {
+    console.warn("Backend approve call warning:", err);
+  }
+
+  if (item.type === "fodder") {
+    fallbackFodder.unshift({
+      id: Date.now(),
+      title: item.title,
+      category: item.category,
+      price: item.price,
+      subcounty: item.subcounty,
+      seller: item.seller,
+      phone: item.phone,
+      desc: item.desc
+    });
+    if (typeof db !== "undefined" && db) {
+      await db.from("fodder").insert([{ title: item.title, category: item.category, price: item.price, subcounty: item.subcounty, seller: item.seller, phone: item.phone, description: item.desc }]);
+    }
+    renderFodderItems("all");
+  } else if (item.type === "market") {
+    fallbackMarket.unshift({
+      id: Date.now(),
+      title: item.title,
+      category: item.category,
+      price: item.price,
+      location: item.location,
+      contact: item.contact,
+      desc: item.desc
+    });
+    if (typeof db !== "undefined" && db) {
+      await db.from("marketplace").insert([{ title: item.title, category: item.category, price: item.price, location: item.location, contact: item.contact, description: item.desc }]);
+    }
+    renderMarketItems();
+  } else if (item.type === "service") {
+    fallbackServices.unshift({
+      id: Date.now(),
+      title: item.title,
+      category: item.category,
+      rate: item.rate || item.price,
+      subcounty: item.subcounty,
+      provider: item.provider || item.seller,
+      phone: item.phone,
+      desc: item.desc
+    });
+    if (typeof db !== "undefined" && db) {
+      await db.from("services").insert([{ title: item.title, category: item.category, rate: item.rate || item.price, subcounty: item.subcounty, provider: item.provider || item.seller, phone: item.phone, description: item.desc }]);
+    }
+    renderServiceItems();
+  }
+
+  const approvedTitle = item.title;
+  pendingApprovals.splice(idx, 1);
+  localStorage.setItem("mkulima_pending_approvals", JSON.stringify(pendingApprovals));
+  
+  alert(`✅ Listing "${approvedTitle}" has been APPROVED via Backend API & published live!`);
+  renderAdminPendingListUI();
+}
+
+async function rejectListing(idx) {
+  const item = pendingApprovals[idx];
+  if (!item) return;
+
+  if (confirm(`Are you sure you want to reject the submission "${item.title}"?`)) {
+    try {
+      await fetch("/api/admin/reject", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: item.id })
+      });
+    } catch (err) {
+      console.warn("Backend reject call warning:", err);
+    }
+
+    pendingApprovals.splice(idx, 1);
+    localStorage.setItem("mkulima_pending_approvals", JSON.stringify(pendingApprovals));
+    renderAdminPendingListUI();
+    alert("❌ Listing submission rejected via Backend API.");
+  }
 }

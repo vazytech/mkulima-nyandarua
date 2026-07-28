@@ -901,3 +901,199 @@ body {
     gap: 1.5rem;
   }
 }
+
+/* SHOPPING CART UI STYLES */
+.btn-cart-nav {
+  background: rgba(255, 255, 255, 0.15);
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  padding: 0.45rem 0.85rem;
+  border-radius: var(--radius-full);
+  font-size: 0.82rem;
+  font-weight: 800;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  cursor: pointer;
+  transition: var(--transition-fast);
+  position: relative;
+}
+
+.btn-cart-nav:hover {
+  background: rgba(255, 255, 255, 0.28);
+  transform: translateY(-1px);
+}
+
+.cart-count-badge {
+  background: #f59e0b;
+  color: #0f172a;
+  border-radius: 9999px;
+  padding: 0.15rem 0.45rem;
+  font-size: 0.72rem;
+  font-weight: 900;
+  min-width: 20px;
+  text-align: center;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+/* Floating Cart Button for Mobile */
+.floating-cart-btn {
+  position: fixed;
+  bottom: 5.5rem;
+  right: 1.25rem;
+  z-index: 99;
+  background: linear-gradient(135deg, #10b981 0%, #047857 100%);
+  color: #ffffff;
+  border: none;
+  padding: 0.75rem 1.1rem;
+  border-radius: 9999px;
+  font-weight: 800;
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  box-shadow: 0 10px 25px -5px rgba(16, 185, 129, 0.5);
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.floating-cart-btn:hover {
+  transform: scale(1.06);
+}
+
+/* Cart Items inside Modal */
+.cart-item-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 0.5rem;
+  border-bottom: 1px dashed #e2e8f0;
+  gap: 0.75rem;
+}
+
+.cart-item-info {
+  flex: 1;
+}
+
+.cart-item-title {
+  font-size: 0.88rem;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+.cart-item-meta {
+  font-size: 0.75rem;
+  color: #64748b;
+  margin-top: 0.1rem;
+}
+
+.cart-qty-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  background: #f1f5f9;
+  padding: 0.2rem 0.4rem;
+  border-radius: 6px;
+  border: 1px solid #cbd5e1;
+}
+
+.btn-qty {
+  background: #ffffff;
+  color: #0f172a;
+  border: 1px solid #cbd5e1;
+  width: 24px;
+  height: 24px;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.btn-qty:hover {
+  background: #e2e8f0;
+}
+
+.cart-qty-val {
+  font-size: 0.85rem;
+  font-weight: 800;
+  min-width: 18px;
+  text-align: center;
+}
+
+.btn-cart-remove {
+  background: none;
+  border: none;
+  color: #ef4444;
+  font-size: 1.1rem;
+  cursor: pointer;
+  padding: 0.2rem;
+  transition: transform 0.15s;
+}
+
+.btn-cart-remove:hover {
+  transform: scale(1.2);
+}
+
+/* 3-Button Action Grid for Item Cards */
+.item-card-actions {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.4rem;
+  width: 100%;
+  margin-top: 0.5rem;
+}
+
+.item-card-actions .btn,
+.item-card-actions .btn-cart-add {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 0.38rem 0.4rem;
+  font-size: 0.75rem;
+  font-weight: 800;
+  border-radius: 6px;
+  white-space: nowrap;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+@media (max-width: 480px) {
+  .item-card-actions {
+    gap: 0.25rem;
+  }
+  .item-card-actions .btn,
+  .item-card-actions .btn-cart-add {
+    padding: 0.35rem 0.15rem;
+    font-size: 0.68rem;
+  }
+}
+
+/* Dedicated Cart Page Layout */
+@media (min-width: 768px) {
+  .cart-page-grid {
+    grid-template-columns: 1.8fr 1fr !important;
+    align-items: start;
+  }
+}
+
+.item-card-buttons-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  margin-top: 0.75rem;
+  width: 100%;
+}
+
+.item-card-buttons-stack .btn {
+  width: 100%;
+  justify-content: center;
+  text-align: center;
+  font-weight: 800;
+  padding: 0.5rem;
+  font-size: 0.8rem;
+  box-sizing: border-box;
+}

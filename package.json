@@ -1,7 +1,7 @@
 {
-  "name": "mkulima-nyandarua-pro",
+  "name": "m-mkulima",
   "version": "1.0.0",
-  "description": "M-Mkulima Nyandarua Pro Backend Server with Safaricom Daraja M-Pesa STK Push API",
+  "description": "M-Mkulima Backend Server with Safaricom Daraja M-Pesa STK Push API",
   "main": "server.js",
   "scripts": {
     "start": "node server.js"
