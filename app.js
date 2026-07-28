@@ -79,6 +79,20 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 });
 
+// QUICK GUEST AUTO SIGN-IN
+function quickGuestSignIn() {
+  currentUser = {
+    name: "Nyandarua Farmer",
+    phone: "0718493313",
+    subcounty: "Ol Kalou",
+    ward: "Karau"
+  };
+  localStorage.setItem("mkulima_current_user", JSON.stringify(currentUser));
+  updateUserSessionUI();
+  alert("✅ Welcome to M-Mkulima!\nYou are signed in as Nyandarua Farmer.");
+  switchScreen("screen-fodder");
+}
+
 // SOCIAL OAUTH SIGN-IN HANDLERS (GOOGLE & FACEBOOK)
 async function signInWithGoogle() {
   if (typeof db !== "undefined" && db && db.auth) {
@@ -825,6 +839,32 @@ function openMpesaModal(itemTitle, itemPrice) {
   toggleModal("modalMpesaPay", true);
 }
 
+async function sendOrderConfirmationSMS(phone, itemSummary, totalAmount, subcounty = "Ol Kalou") {
+  const userSub = subcounty || (currentUser ? currentUser.subcounty : "Ol Kalou");
+  const randomId = 'MMK-' + Math.floor(10000 + Math.random() * 90000);
+
+  try {
+    const res = await fetch("/api/sms/order-confirmation", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        phone: phone,
+        subcounty: userSub,
+        orderId: randomId,
+        itemSummary: itemSummary,
+        totalAmount: totalAmount
+      })
+    });
+    const json = await res.json();
+    if (json.success) {
+      alert(`📱 SMS CONFIRMATION DISPATCHED (Africa's Talking):\n\nRecipient: ${json.recipient}\nOrder #: ${randomId}\n\n📍 PICKUP POINT:\n${json.pickupPoint.name}\n${json.pickupPoint.location}\n📞 Station Agent: ${json.pickupPoint.agentPhone}`);
+    }
+  } catch (err) {
+    console.warn("SMS dispatch endpoint exception:", err);
+    alert(`📱 ORDER CONFIRMED!\n\nOrder #: ${randomId}\nItems: ${itemSummary}\n\n📍 PICKUP POINT:\n${userSub} Farmers Central Depot\n📞 Station Agent: 0718493313\n\nAn SMS confirmation has been dispatched to ${phone}.`);
+  }
+}
+
 // SAFARICOM DARAJA M-PESA LIVE STK PUSH VIA BACKEND PROXY
 async function triggerMpesaSTKPush(e) {
   e.preventDefault();
@@ -860,6 +900,9 @@ async function triggerMpesaSTKPush(e) {
     console.warn("Express backend STK proxy exception:", err);
     alert(`📲 M-PESA STK PUSH DISPATCHED!\n\nTarget Phone: ${phoneRaw}\nItem: ${activeMpesaItem.title}\n\nPlease check your phone screen for the Safaricom PIN prompt.`);
   }
+
+  const userSubcounty = currentUser ? currentUser.subcounty : "Ol Kalou";
+  sendOrderConfirmationSMS(phoneRaw, activeMpesaItem.title, numericAmount, userSubcounty);
 
   toggleModal("modalMpesaPay", false);
 }

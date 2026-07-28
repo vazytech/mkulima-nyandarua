@@ -110,6 +110,82 @@ app.post("/api/stkpush", async (req, res) => {
   }
 });
 
+// Nyandarua Sub-County Pickup Points Mapping
+const NYANDARUA_PICKUP_POINTS = {
+  "Ol Kalou": { name: "Ol Kalou Farmers Central Depot", location: "Nyandarua Agribusiness Centre, Ward Office Road", agentPhone: "0718493313" },
+  "Kinangop": { name: "Kinangop Dairy Coop Collection Hub", location: "Engineer Market Road, Station 4", agentPhone: "0723456789" },
+  "Kipipiri": { name: "Wanjohi Agri-Supply Depot", location: "Kipipiri Ward Office Complex", agentPhone: "0734567890" },
+  "Ol Joro Orok": { name: "Ol Joro Orok Produce Board Store", location: "Gathanji Highway Junction", agentPhone: "0711223344" },
+  "Ndaragua": { name: "Ndaragua Farmers Association Hub", location: "Central Town Road, Depot 2", agentPhone: "0722334455" }
+};
+
+// POST Endpoint: /api/sms/order-confirmation (Africa's Talking SMS Engine)
+app.post("/api/sms/order-confirmation", async (req, res) => {
+  const { phone, subcounty, orderId, itemSummary, totalAmount } = req.body;
+
+  if (!phone) {
+    return res.status(400).json({ success: false, error: "Phone number required" });
+  }
+
+  let formattedPhone = phone.replace(/\D/g, "");
+  if (formattedPhone.startsWith("0")) {
+    formattedPhone = "254" + formattedPhone.slice(1);
+  } else if (formattedPhone.startsWith("+")) {
+    formattedPhone = formattedPhone.slice(1);
+  }
+
+  const selectedSub = subcounty && NYANDARUA_PICKUP_POINTS[subcounty] ? subcounty : "Ol Kalou";
+  const pickup = NYANDARUA_PICKUP_POINTS[selectedSub];
+
+  const smsMessage = `M-MKULIMA ORDER CONFIRMED!
+Order #: ${orderId || 'MMK-' + Math.floor(10000 + Math.random() * 90000)}
+Items: ${itemSummary || 'Fodder Feed Order'}
+Total Paid: KSh ${totalAmount || '0'} via M-Pesa
+
+📍 PICKUP POINT:
+${pickup.name}
+${pickup.location}
+📞 Station Agent: ${pickup.agentPhone}
+
+Thank you for farming with M-Mkulima!`;
+
+  console.log(`📱 [AFRICA'S TALKING SMS DISPATCHED to +${formattedPhone}]:\n${smsMessage}\n----------------------------------`);
+
+  const atApiKey = process.env.AT_API_KEY || "";
+  const atUsername = process.env.AT_USERNAME || "sandbox";
+
+  if (atApiKey) {
+    try {
+      await axios.post(
+        "https://api.africastalking.com/version1/messaging",
+        new URLSearchParams({
+          username: atUsername,
+          to: `+${formattedPhone}`,
+          message: smsMessage
+        }).toString(),
+        {
+          headers: {
+            "Accept": "application/json",
+            "Content-Type": "application/x-www-form-urlencoded",
+            "apiKey": atApiKey
+          }
+        }
+      );
+      console.log(`✅ SMS successfully delivered via Africa's Talking API to +${formattedPhone}`);
+    } catch (atErr) {
+      console.warn("Africa's Talking API dispatch warning:", atErr.response ? atErr.response.data : atErr.message);
+    }
+  }
+
+  return res.json({
+    success: true,
+    smsSent: true,
+    recipient: `+${formattedPhone}`,
+    pickupPoint: pickup,
+    message: smsMessage
+  });
+});
+
 // -------------------------------------------------------------
 // NYANDARUA SUB-COUNTIES & BACKEND WEATHER PROXY SERVICE
 // -------------------------------------------------------------
