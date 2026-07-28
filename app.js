@@ -817,7 +817,7 @@ function switchScreen(screenId) {
     screenId = "screen-auth";
   }
 
-  const screens = ["screen-auth", "screen-fodder", "screen-marketplace", "screen-vets", "screen-services"];
+  const screens = ["screen-auth", "screen-fodder", "screen-marketplace", "screen-vets", "screen-services", "screen-orders"];
   screens.forEach(id => {
     const el = document.getElementById(id);
     if (el) {
@@ -833,14 +833,16 @@ function switchScreen(screenId) {
     "screen-fodder": "nav-fodder",
     "screen-marketplace": "nav-market",
     "screen-vets": "nav-vets",
-    "screen-services": "nav-services"
+    "screen-services": "nav-services",
+    "screen-orders": "nav-orders"
   };
 
   const desktopNavMap = {
     "screen-fodder": "desktop-nav-fodder",
     "screen-marketplace": "desktop-nav-market",
     "screen-vets": "desktop-nav-vets",
-    "screen-services": "desktop-nav-services"
+    "screen-services": "desktop-nav-services",
+    "screen-orders": "desktop-nav-orders"
   };
 
   document.querySelectorAll(".nav-item").forEach(btn => btn.classList.remove("active"));
@@ -853,7 +855,108 @@ function switchScreen(screenId) {
 
   if (screenId === "screen-services") {
     renderServiceItems();
+  } else if (screenId === "screen-orders") {
+    renderOrdersPageUI();
   }
+}
+
+// =============================================================
+// BUYER ORDER LIFECYCLE & DELIVERY TRACKING ENGINE
+// =============================================================
+let buyerOrders = JSON.parse(localStorage.getItem("mkulima_orders")) || [
+  {
+    orderId: "MMK-49201",
+    itemsSummary: "1x Silage Bales (Yellow Corn)",
+    totalAmount: "KSh 2,800",
+    subcounty: "Kinangop",
+    pickupPoint: "Kinangop Dairy Coop Collection Hub",
+    agentPhone: "0723456789",
+    paymentStatus: "Paid",
+    deliveryStage: "Ready for Pickup",
+    timestamp: "Today, 4:15 PM"
+  }
+];
+
+function createBuyerOrderRecord(orderData) {
+  buyerOrders.unshift(orderData);
+  localStorage.setItem("mkulima_orders", JSON.stringify(buyerOrders));
+  renderOrdersPageUI();
+}
+
+function renderOrdersPageUI() {
+  const container = document.getElementById("containerOrdersList");
+  if (!container) return;
+
+  if (buyerOrders.length === 0) {
+    container.innerHTML = `
+      <div class="card text-center py-12">
+        <div style="font-size:3rem; margin-bottom:0.5rem;">📦</div>
+        <h3 class="font-extrabold text-slate-800 text-lg">No Orders Placed Yet</h3>
+        <p class="text-xs text-slate-500 mt-1 max-w-sm mx-auto">When you buy fodder, machinery, or agricultural services via M-Pesa, your live pickup and delivery stages will appear here.</p>
+        <button onclick="switchScreen('screen-fodder')" class="btn btn-primary btn-sm mt-4">🌾 Browse Fodder Hub</button>
+      </div>
+    `;
+    return;
+  }
+
+  const stages = ["Order Placed", "M-Pesa Paid", "In Transit", "Ready for Pickup"];
+
+  container.innerHTML = buyerOrders.map(order => {
+    const currentStageIdx = stages.indexOf(order.deliveryStage) !== -1 ? stages.indexOf(order.deliveryStage) : 3;
+
+    return `
+      <div class="card" style="border-left: 4px solid var(--primary-600); position:relative; background:white; padding:1.25rem; border-radius:12px; box-shadow:0 2px 10px rgba(0,0,0,0.05);">
+        <div class="flex-between mb-2">
+          <div>
+            <span class="item-badge badge-protein" style="font-size:0.75rem; padding:0.25rem 0.5rem;">Order #${order.orderId}</span>
+            <span class="text-xs text-slate-500 ml-2">🕒 ${order.timestamp}</span>
+          </div>
+          <span class="price-tag" style="font-size:1.05rem;">${order.totalAmount}</span>
+        </div>
+
+        <div style="margin: 0.5rem 0;">
+          <h4 class="font-extrabold text-slate-900 text-base">${order.itemsSummary}</h4>
+          <p class="text-xs text-slate-600 mt-0.5"><strong>📍 Assigned Depot:</strong> ${order.pickupPoint || 'Ol Kalou Farmers Central Depot'}</p>
+        </div>
+
+        <!-- VISUAL STEPPER BAR -->
+        <div style="margin: 1rem 0; background: #f1f5f9; border-radius: 8px; padding: 0.75rem;">
+          <div style="display:flex; justify-content:space-between; position:relative; font-size:0.72rem; font-weight:700;">
+            ${stages.map((stageName, idx) => {
+              const isCompleted = idx <= currentStageIdx;
+              const isCurrent = idx === currentStageIdx;
+              return `
+                <div style="text-align:center; flex:1; position:relative; z-index:2;">
+                  <div style="width:24px; height:24px; border-radius:50%; background:${isCompleted ? '#047857' : '#cbd5e1'}; color:white; display:flex; align-items:center; justify-content:center; margin:0 auto 0.25rem; font-size:0.7rem; font-weight:800;">
+                    ${isCompleted ? '✓' : idx + 1}
+                  </div>
+                  <span style="color:${isCurrent ? '#047857' : isCompleted ? '#334155' : '#94a3b8'}; font-weight:${isCurrent ? '800' : '600'}; font-size:0.68rem;">
+                    ${stageName}
+                  </span>
+                </div>
+              `;
+            }).join('')}
+          </div>
+        </div>
+
+        <!-- ACTIONS & DEPOT CONTACT -->
+        <div class="flex gap-2 pt-2 border-t" style="margin-top:0.5rem;">
+          <a href="tel:${order.agentPhone || '0718493313'}" class="btn btn-secondary btn-sm" style="flex:1;">
+            📞 Call Station Agent (${order.agentPhone || '0718493313'})
+          </a>
+          <button onclick="resendOrderSMS('${order.orderId}', '${order.itemsSummary}', '${order.totalAmount}', '${order.pickupPoint}')" class="btn btn-primary btn-sm" style="flex:1;">
+            📱 Resend SMS Details
+          </button>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+async function resendOrderSMS(orderId, itemsSummary, totalAmount, pickupPoint) {
+  if (!currentUser) return;
+  alert(`📱 Resending SMS confirmation for Order #${orderId} to ${currentUser.phone}...`);
+  await sendOrderConfirmationSMS(currentUser.phone, itemsSummary, totalAmount, currentUser.subcounty || "Ol Kalou");
 }
 
 // LIVE SEARCH BAR & WARD FILTERING (FODDER)
@@ -1260,11 +1363,42 @@ async function sendOrderConfirmationSMS(phone, itemSummary, totalAmount, subcoun
       })
     });
     const json = await res.json();
-    if (json.success) {
+    let pickupName = `${userSub} Farmers Central Depot`;
+    let agentPhone = "0718493313";
+
+    if (json && json.pickupPoint) {
+      pickupName = json.pickupPoint.name;
+      agentPhone = json.pickupPoint.agentPhone;
+    }
+
+    createBuyerOrderRecord({
+      orderId: randomId,
+      itemsSummary: itemSummary,
+      totalAmount: (typeof totalAmount === 'number') ? `KSh ${totalAmount.toLocaleString()}` : totalAmount,
+      subcounty: userSub,
+      pickupPoint: pickupName,
+      agentPhone: agentPhone,
+      paymentStatus: "Paid",
+      deliveryStage: "Ready for Pickup",
+      timestamp: "Just now"
+    });
+
+    if (json && json.success) {
       alert(`📱 SMS CONFIRMATION DISPATCHED (Africa's Talking):\n\nRecipient: ${json.recipient}\nOrder #: ${randomId}\n\n📍 PICKUP POINT:\n${json.pickupPoint.name}\n${json.pickupPoint.location}\n📞 Station Agent: ${json.pickupPoint.agentPhone}`);
     }
   } catch (err) {
     console.warn("SMS dispatch endpoint exception:", err);
+    createBuyerOrderRecord({
+      orderId: randomId,
+      itemsSummary: itemSummary,
+      totalAmount: (typeof totalAmount === 'number') ? `KSh ${totalAmount.toLocaleString()}` : totalAmount,
+      subcounty: userSub,
+      pickupPoint: `${userSub} Farmers Central Depot`,
+      agentPhone: "0718493313",
+      paymentStatus: "Paid",
+      deliveryStage: "Ready for Pickup",
+      timestamp: "Just now"
+    });
     alert(`📱 ORDER CONFIRMED!\n\nOrder #: ${randomId}\nItems: ${itemSummary}\n\n📍 PICKUP POINT:\n${userSub} Farmers Central Depot\n📞 Station Agent: 0718493313\n\nAn SMS confirmation has been dispatched to ${phone}.`);
   }
 }
