@@ -122,7 +122,39 @@ async function signInWithFacebook() {
 
 let currentSelectedSubcounty = "Ol Kalou";
 
-// NYANDARUA LIVE WEATHER & FARMING TIPS PANEL (Backend Proxy Service)
+const NYANDARUA_SUBCOUNTIES_CLIENT_MAP = {
+  "Ol Kalou": { lat: -0.2718, lon: 36.3789, alt: "Ol Kalou Altitude (2,347m)" },
+  "Kinangop": { lat: -0.6417, lon: 36.6333, alt: "Kinangop Plateau (2,600m)" },
+  "Kipipiri": { lat: -0.3667, lon: 36.5333, alt: "Kipipiri Ridge (2,400m)" },
+  "Ol Joro Orok": { lat: -0.1417, lon: 36.3500, alt: "Ol Joro Orok Basin (2,380m)" },
+  "Ndaragua": { lat: -0.0333, lon: 36.4667, alt: "Ndaragua Slopes (2,250m)" }
+};
+
+function getClientWMOInfo(code) {
+  if (code === 0) return { icon: "☀️", text: "Clear Sky" };
+  if ([1, 2, 3].includes(code)) return { icon: "⛅", text: "Partly Cloudy" };
+  if ([45, 48].includes(code)) return { icon: "🌫️", text: "Foggy & Hazy" };
+  if ([51, 53, 55].includes(code)) return { icon: "🌦️", text: "Light Drizzle" };
+  if ([61, 63, 65].includes(code)) return { icon: "🌧️", text: "Rainy" };
+  if ([80, 81, 82].includes(code)) return { icon: "🌦️", text: "Passing Showers" };
+  if ([95, 96, 99].includes(code)) return { icon: "🌩️", text: "Thunderstorm" };
+  return { icon: "⛅", text: "Overcast" };
+}
+
+function generateClientAgroTip(temp, humidity, rainProb, windSpeed, conditionText, subcounty) {
+  if (rainProb > 50 || conditionText.includes("Rain") || conditionText.includes("Thunderstorm")) {
+    return `🌧️ Rain Advisory (${rainProb}%): High chance of rainfall in ${subcounty}. Protect harvested fodder & delay pesticide spraying.`;
+  }
+  if (temp >= 23) {
+    return `☀️ Warm Advisory (${temp}°C): Provide extra shade & clean water for dairy cattle in ${subcounty} to maintain milk yields.`;
+  }
+  if (temp <= 14) {
+    return `🌬️ Cold Advisory (${temp}°C): Low temperatures in ${subcounty}. Ensure young calves are sheltered from draft & frost.`;
+  }
+  return `💡 Extension Advisory: Ideal weather in ${subcounty} for harvesting Rhodes grass & maize silage compaction.`;
+}
+
+// NYANDARUA LIVE WEATHER & FARMING TIPS PANEL (Universal Dual Proxy: Server + Direct Satellite Fallback)
 async function renderNyandaruaWeather(targetSubcounty = null) {
   const weatherContainer = document.getElementById("weatherPanel");
   if (!weatherContainer) return;
@@ -133,56 +165,103 @@ async function renderNyandaruaWeather(targetSubcounty = null) {
     currentSelectedSubcounty = currentUser.subcounty;
   }
 
+  let data = null;
+
+  // Try 1: Call Express Backend Server Proxy (/api/weather)
   try {
     const res = await fetch(`/api/weather?subcounty=${encodeURIComponent(currentSelectedSubcounty)}`);
-    const data = await res.json();
-
-    const subList = data.subcountiesList || ["Ol Kalou", "Kinangop", "Kipipiri", "Ol Joro Orok", "Ndaragua"];
-    const selectOptions = subList.map(sub => 
-      `<option value="${sub}" ${sub === currentSelectedSubcounty ? "selected" : ""}>📍 ${sub}</option>`
-    ).join("");
-
-    weatherContainer.innerHTML = `
-      <div class="weather-card">
-        <div style="flex:1;">
-          <div class="weather-header" style="display:flex; align-items:center; justify-content:space-between; gap:0.5rem; margin-bottom:0.25rem;">
-            <h4 style="margin:0; font-size:1.05rem; font-weight:800; display:flex; align-items:center; gap:0.3rem;">
-              📍 ${data.subcounty} Climate ${data.icon || '⛅'}
-            </h4>
-            <select class="weather-select" onchange="renderNyandaruaWeather(this.value)" style="background:rgba(255,255,255,0.22); color:#fff; border:1px solid rgba(255,255,255,0.4); border-radius:6px; padding:0.2rem 0.4rem; font-size:0.75rem; font-weight:700; cursor:pointer;">
-              ${selectOptions}
-            </select>
-          </div>
-          <p style="font-size:0.78rem; color:#e0f2fe; margin-top:0.2rem;">
-            ${data.condition} • Humidity: ${data.humidity} • Rain Prob: ${data.rainProb} • Wind: ${data.windSpeed}
-          </p>
-          <p style="font-size:0.73rem; margin-top:0.35rem; color:#fef08a; font-weight:700; background:rgba(0,0,0,0.18); padding:0.35rem 0.55rem; border-radius:6px; border-left:3px solid #fde047;">
-            ${data.tip}
-          </p>
-        </div>
-        <div class="weather-stats" style="text-align:right; flex-shrink:0;">
-          <div class="weather-temp" style="font-size:1.8rem; font-weight:900; line-height:1;">${data.temp}</div>
-          <div class="weather-desc" style="font-size:0.7rem; font-weight:700; color:#bae6fd; margin-top:0.25rem;">${data.alt}</div>
-          <button onclick="renderNyandaruaWeather('${currentSelectedSubcounty}')" style="margin-top:0.4rem; background:rgba(255,255,255,0.25); color:#fff; border:none; padding:0.2rem 0.45rem; border-radius:4px; font-size:0.68rem; font-weight:700; cursor:pointer;">🔄 Refresh</button>
-        </div>
-      </div>
-    `;
+    if (res.ok) {
+      const json = await res.json();
+      if (json.success && !json.fallback) {
+        data = json;
+      }
+    }
   } catch (err) {
-    console.warn("⚠️ Backend weather fetch error:", err);
-    weatherContainer.innerHTML = `
-      <div class="weather-card">
-        <div class="weather-info">
-          <h4>📍 Nyandarua Agro-Climate ⛅</h4>
-          <p>⛅ Partly Cloudy • Humidity: 74% • Rain: 20%</p>
-          <p style="font-size:0.72rem; margin-top:0.35rem; color:#fef08a; font-weight:700;">💡 Extension Advisory: Ideal conditions for harvesting Rhodes grass & silage compaction in Ol Kalou.</p>
-        </div>
-        <div class="weather-stats">
-          <div class="weather-temp">19°C</div>
-          <div class="weather-desc">Ol Kalou Altitude</div>
-        </div>
-      </div>
-    `;
+    console.warn("Backend proxy offline, switching to direct Open-Meteo REST API...");
   }
+
+  // Try 2: Direct Client-Side Open-Meteo Satellite REST API Fetch (Works on GitHub Pages / Live Production!)
+  if (!data) {
+    try {
+      const coords = NYANDARUA_SUBCOUNTIES_CLIENT_MAP[currentSelectedSubcounty] || NYANDARUA_SUBCOUNTIES_CLIENT_MAP["Ol Kalou"];
+      const openMeteoUrl = `https://api.open-meteo.com/v1/forecast?latitude=${coords.lat}&longitude=${coords.lon}&current=temperature_2m,relative_humidity_2m,weather_code,wind_speed_10m&hourly=precipitation_probability&timezone=Africa%2FNairobi`;
+      const omRes = await fetch(openMeteoUrl);
+      const omData = await omRes.json();
+
+      const current = omData.current || {};
+      const temp = Math.round(current.temperature_2m ?? 18);
+      const humidity = Math.round(current.relative_humidity_2m ?? 70);
+      const weatherCode = current.weather_code ?? 1;
+      const windSpeed = Math.round(current.wind_speed_10m ?? 10);
+      const rainProbArray = omData.hourly?.precipitation_probability || [];
+      const rainProb = rainProbArray.length > 0 ? Math.round(rainProbArray[0]) : 15;
+
+      const condInfo = getClientWMOInfo(weatherCode);
+      const tip = generateClientAgroTip(temp, humidity, rainProb, windSpeed, condInfo.text, currentSelectedSubcounty);
+
+      data = {
+        subcounty: currentSelectedSubcounty,
+        alt: coords.alt,
+        temp: `${temp}°C`,
+        condition: `${condInfo.icon} ${condInfo.text}`,
+        icon: condInfo.icon,
+        humidity: `${humidity}%`,
+        rainProb: `${rainProb}%`,
+        windSpeed: `${windSpeed} km/h`,
+        tip: tip,
+        subcountiesList: Object.keys(NYANDARUA_SUBCOUNTIES_CLIENT_MAP)
+      };
+    } catch (omErr) {
+      console.error("Direct Open-Meteo satellite fetch failed:", omErr);
+    }
+  }
+
+  // Fallback 3: Graceful Payload
+  if (!data) {
+    data = {
+      subcounty: currentSelectedSubcounty,
+      alt: "Ol Kalou Altitude (2,347m)",
+      temp: "18°C",
+      condition: "⛅ Partly Cloudy",
+      icon: "⛅",
+      humidity: "72%",
+      rainProb: "15%",
+      windSpeed: "10 km/h",
+      tip: `💡 Extension Advisory: Clear weather in ${currentSelectedSubcounty} for fodder harvesting.`,
+      subcountiesList: Object.keys(NYANDARUA_SUBCOUNTIES_CLIENT_MAP)
+    };
+  }
+
+  const subList = data.subcountiesList || Object.keys(NYANDARUA_SUBCOUNTIES_CLIENT_MAP);
+  const selectOptions = subList.map(sub => 
+    `<option value="${sub}" ${sub === currentSelectedSubcounty ? "selected" : ""}>📍 ${sub}</option>`
+  ).join("");
+
+  weatherContainer.innerHTML = `
+    <div class="weather-card">
+      <div style="flex:1;">
+        <div class="weather-header" style="display:flex; align-items:center; justify-content:space-between; gap:0.5rem; margin-bottom:0.25rem;">
+          <h4 style="margin:0; font-size:1.05rem; font-weight:800; display:flex; align-items:center; gap:0.3rem;">
+            📍 ${data.subcounty} Climate ${data.icon || '⛅'}
+          </h4>
+          <select class="weather-select" onchange="renderNyandaruaWeather(this.value)" style="background:rgba(255,255,255,0.22); color:#fff; border:1px solid rgba(255,255,255,0.4); border-radius:6px; padding:0.2rem 0.4rem; font-size:0.75rem; font-weight:700; cursor:pointer;">
+            ${selectOptions}
+          </select>
+        </div>
+        <p style="font-size:0.78rem; color:#e0f2fe; margin-top:0.2rem;">
+          ${data.condition} • Humidity: ${data.humidity} • Rain Prob: ${data.rainProb} • Wind: ${data.windSpeed}
+        </p>
+        <p style="font-size:0.73rem; margin-top:0.35rem; color:#fef08a; font-weight:700; background:rgba(0,0,0,0.18); padding:0.35rem 0.55rem; border-radius:6px; border-left:3px solid #fde047;">
+          ${data.tip}
+        </p>
+      </div>
+      <div class="weather-stats" style="text-align:right; flex-shrink:0;">
+        <div class="weather-temp" style="font-size:1.8rem; font-weight:900; line-height:1;">${data.temp}</div>
+        <div class="weather-desc" style="font-size:0.7rem; font-weight:700; color:#bae6fd; margin-top:0.25rem;">${data.alt}</div>
+        <button onclick="renderNyandaruaWeather('${currentSelectedSubcounty}')" style="margin-top:0.4rem; background:rgba(255,255,255,0.25); color:#fff; border:none; padding:0.2rem 0.45rem; border-radius:4px; font-size:0.68rem; font-weight:700; cursor:pointer;">🔄 Refresh</button>
+      </div>
+    </div>
+  `;
 }
 
 // Toggle Profile Dropdown Menu in Top Right
