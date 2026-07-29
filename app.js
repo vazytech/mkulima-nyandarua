@@ -823,6 +823,26 @@ function isUserAdmin(user) {
   return user.isAdmin === true || user.role === "admin" || user.phone === "0718493313" || user.phone === "0700000000";
 }
 
+function toggleQuickLocationPopover() {
+  const popover = document.getElementById("popoverLocation");
+  if (popover) {
+    popover.classList.toggle("hidden");
+  }
+}
+
+function selectHeaderSubcounty(subcounty) {
+  if (currentUser) {
+    currentUser.subcounty = subcounty;
+    localStorage.setItem("mkulima_current_user", JSON.stringify(currentUser));
+  }
+  const label = document.getElementById("txtHeaderSubcounty");
+  if (label) label.textContent = formatSubcountyAbbr(subcounty);
+  const popover = document.getElementById("popoverLocation");
+  if (popover) popover.classList.add("hidden");
+  renderNyandaruaWeather(subcounty);
+  showToast(`📍 Active region set to ${subcounty}!`, "success");
+}
+
 function checkActiveUserSession() {
   const badgeLocation = document.getElementById("badgeLocation");
   const profileMenuContainer = document.getElementById("profileMenuContainer");
@@ -834,7 +854,8 @@ function checkActiveUserSession() {
   if (currentUser) {
     ensureFarmerID(currentUser);
     if (badgeLocation) {
-      badgeLocation.textContent = `📍 ${formatSubcountyAbbr(currentUser.subcounty)}`;
+      const label = document.getElementById("txtHeaderSubcounty");
+      if (label) label.textContent = formatSubcountyAbbr(currentUser.subcounty || "Nyandarua");
       badgeLocation.classList.remove("hidden");
     }
     if (profileMenuContainer) {
