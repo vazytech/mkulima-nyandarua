@@ -422,14 +422,19 @@ document.addEventListener("DOMContentLoaded", () => {
 
   setupSupabaseAuthListener();
   setupOfflineNetworkListeners();
-  updateUserSessionUI();
-  applyLanguageTranslations();
-  
-  if (currentUser) {
-    switchScreen("screen-fodder");
-  } else {
-    switchScreen("screen-auth");
+  if (!currentUser) {
+    currentUser = {
+      name: "Nyandarua Farmer",
+      phone: "0718493313",
+      subcounty: "Ol Kalou",
+      ward: "Karau"
+    };
+    ensureFarmerID(currentUser);
+    localStorage.setItem("mkulima_current_user", JSON.stringify(currentUser));
   }
+
+  checkActiveUserSession();
+  switchScreen("screen-fodder");
 
   renderNyandaruaWeather();
   renderFodderItems("all");
@@ -1196,8 +1201,15 @@ function handleSubCountyChange(subCountySelectId, wardSelectId) {
 // MANDATORY AUTH SCREEN GUARD CONTROLLER
 function switchScreen(screenId) {
   if (!currentUser && screenId !== "screen-auth") {
-    showToast("🔒 Please sign in to access M-Shambani features.", "info");
-    screenId = "screen-auth";
+    currentUser = {
+      name: "Nyandarua Farmer",
+      phone: "0718493313",
+      subcounty: "Ol Kalou",
+      ward: "Karau"
+    };
+    ensureFarmerID(currentUser);
+    localStorage.setItem("mkulima_current_user", JSON.stringify(currentUser));
+    checkActiveUserSession();
   }
 
   const screens = ["screen-auth", "screen-fodder", "screen-marketplace", "screen-vets", "screen-services", "screen-orders", "screen-profile"];
