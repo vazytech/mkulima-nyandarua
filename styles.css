@@ -2531,3 +2531,85 @@ body {
   to { opacity: 1; transform: translateY(0) scale(1); }
 }
 
+/* ==========================================================================
+   FINAL POLISH: HOVER ZOOM, TOUCH FILTER SCROLL, HELPLINE FAB & FARM CONTRAST
+   ========================================================================== */
+
+/* 1. E-Commerce Image Hover Zoom Effects */
+.item-card {
+  overflow: hidden;
+}
+
+.item-card img {
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), filter 0.35s ease;
+  will-change: transform;
+}
+
+.item-card:hover img {
+  transform: scale(1.05);
+  filter: brightness(1.03);
+}
+
+/* 2. Mobile Touch Horizontal Filter Bar Scroll */
+.filter-bar {
+  display: flex;
+  gap: 0.5rem;
+  overflow-x: auto;
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: 0.35rem;
+  scrollbar-width: none;
+}
+
+.filter-bar::-webkit-scrollbar {
+  display: none;
+}
+
+.filter-tab {
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+/* 3. Floating 1-Tap Helpline FAB Button (Bottom Left) */
+.floating-helpline-btn {
+  position: fixed;
+  bottom: 5.25rem;
+  left: 1.25rem;
+  background: linear-gradient(135deg, #047857 0%, #064e3b 100%);
+  color: #ffffff;
+  border: 1.5px solid rgba(52, 211, 153, 0.4);
+  padding: 0.55rem 1rem;
+  border-radius: 9999px;
+  font-size: 0.8rem;
+  font-weight: 900;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  box-shadow: 0 8px 24px rgba(4, 120, 87, 0.35);
+  z-index: 998;
+  backdrop-filter: blur(8px);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.floating-helpline-btn:hover {
+  transform: translateY(-2px) scale(1.04);
+  box-shadow: 0 12px 28px rgba(4, 120, 87, 0.45);
+}
+
+/* 4. Outdoor High-Contrast Farm Mode Readability */
+body {
+  color: #0f172a;
+  -webkit-font-smoothing: antialiased;
+}
+
+.item-card-title, h3, h4 {
+  color: #0f172a;
+  font-weight: 800;
+}
+
+.price-tag {
+  font-weight: 900;
+  letter-spacing: -0.01em;
+}
+
