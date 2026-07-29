@@ -17,6 +17,21 @@
     <!-- TOAST NOTIFICATION CONTAINER -->
     <div id="toast-container"></div>
 
+    <!-- PWA INSTALL APP FLOATING BANNER -->
+    <div id="pwaInstallBanner" class="pwa-install-banner hidden">
+        <div class="pwa-install-content">
+            <div class="pwa-icon-box">📲</div>
+            <div>
+                <strong style="font-size:0.85rem; color:#0f172a;">Install M-Shambani App</strong>
+                <p style="font-size:0.75rem; color:#64748b; margin:0;">Add to homescreen for fast 1-tap offline access</p>
+            </div>
+        </div>
+        <div class="pwa-install-actions">
+            <button id="btnPwaInstall" onclick="installPWAApp()" class="btn-pwa-accept">Install</button>
+            <button onclick="dismissPwaBanner()" class="btn-pwa-dismiss">✕</button>
+        </div>
+    </div>
+
     <!-- OFFLINE NETWORK STATUS BANNER -->
     <div id="offlineBanner" class="offline-banner hidden">
         <span>📴 You are currently offline. Showing cached catalog & seller contact numbers.</span>
@@ -33,59 +48,89 @@
 
                 <!-- Desktop Top Navigation Bar (Shown on Laptops/Computers) -->
                 <nav class="desktop-nav-links">
-                    <button class="desktop-nav-link active" id="desktop-nav-fodder" onclick="switchScreen('screen-fodder')">🌾 Fodder Hub</button>
-                    <button class="desktop-nav-link" id="desktop-nav-market" onclick="switchScreen('screen-marketplace')">🛒 Marketplace</button>
-                    <button class="desktop-nav-link" id="desktop-nav-vets" onclick="switchScreen('screen-vets')">🩺 Verified Vets</button>
-                    <button class="desktop-nav-link" id="desktop-nav-services" onclick="switchScreen('screen-services')">🛠️ Agri-Services</button>
-                    <button class="desktop-nav-link" id="desktop-nav-orders" onclick="switchScreen('screen-orders')">📦 My Orders</button>
+                    <button class="desktop-nav-link active" id="desktop-nav-fodder" onclick="switchScreen('screen-fodder')">
+                        <svg class="nav-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.4 19 2c0 8-5 14-8 18z"/><path d="M13 20A7 7 0 0 0 14.2 6.1C8.5 5 7 4.4 5 2c0 8 5 14 8 18z"/></svg>
+                        <span class="nav-btn-text">Fodder Hub</span>
+                    </button>
+                    <button class="desktop-nav-link" id="desktop-nav-market" onclick="switchScreen('screen-marketplace')">
+                        <svg class="nav-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+                        <span class="nav-btn-text">Marketplace</span>
+                    </button>
+                    <button class="desktop-nav-link" id="desktop-nav-vets" onclick="switchScreen('screen-vets')">
+                        <svg class="nav-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M12 8v8"/><path d="M8 12h8"/></svg>
+                        <span class="nav-btn-text">Verified Vets</span>
+                    </button>
+                    <button class="desktop-nav-link" id="desktop-nav-services" onclick="switchScreen('screen-services')">
+                        <svg class="nav-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+                        <span class="nav-btn-text">Agri-Services</span>
+                    </button>
+                    <button class="desktop-nav-link" id="desktop-nav-orders" onclick="switchScreen('screen-orders')">
+                        <svg class="nav-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+                        <span class="nav-btn-text">My Orders</span>
+                    </button>
                 </nav>
             </div>
             
             <div class="header-right-actions">
-                <!-- Swahili / English Language Switcher Button -->
-                <button id="btnLangToggle" onclick="toggleLanguage()" class="btn-cart-nav" style="background: rgba(255, 255, 255, 0.22); border-color: rgba(255, 255, 255, 0.4); margin-right: 0.2rem;">
-                    <span id="txtLangToggleLabel">🇰🇪 Kiswahili</span>
-                </button>
-
-                <span id="badgeLocation" class="location-badge hidden">📍 Nyandarua</span>
+                <!-- Live Region Status Chip -->
+                <div id="badgeLocation" class="location-badge hidden">
+                    <span class="pulse-dot"></span>
+                    <svg class="location-pin-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                    <span>Nyandarua</span>
+                </div>
 
                 <!-- Shopping Cart Header Button -->
-                <button id="btnCartHeader" onclick="openCartModal()" class="btn-cart-nav">
-                    <span>🛒 Cart</span>
+                <button id="btnCartHeader" onclick="openCartModal()" class="btn-cart-nav" title="View Shopping Cart">
+                    <svg class="cart-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+                    <span>Cart</span>
                     <span id="cartCountBadge" class="cart-count-badge">0</span>
                 </button>
 
                 <!-- Logged Out Sign In Button -->
-                <button id="btnAuthHeader" onclick="switchScreen('screen-auth')" class="profile-avatar-btn">🔑 Sign In</button>
+                <button id="btnAuthHeader" onclick="switchScreen('screen-auth')" class="btn-auth-pill">
+                    <svg class="auth-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
+                    <span>Sign In</span>
+                </button>
 
                 <!-- Logged In Account Profile Avatar Badge & Dropdown -->
                 <div id="profileMenuContainer" class="profile-menu-container hidden">
-                    <button id="btnProfileName" onclick="toggleProfileDropdown()" class="profile-avatar-btn">
-                        <div class="avatar-icon-circle">👤</div>
-                        <span id="txtProfileName">Farmer</span>
-                        <span class="dropdown-arrow-icon">▼</span>
+                    <button id="btnProfileName" onclick="toggleProfileDropdown()" class="profile-circle-avatar-btn" title="Account Menu">
+                        <div class="avatar-circle-ring">
+                            <span id="txtProfileInitials" class="avatar-initials-text">F</span>
+                        </div>
+                        <span class="avatar-online-dot"></span>
                     </button>
 
                     <!-- Account Info Dropdown Card -->
                     <div id="profileDropdown" class="profile-dropdown hidden">
                         <div class="profile-dropdown-header">
                             <div class="profile-card-badge">
-                                <div class="avatar-icon-circle" style="width:34px; height:34px; font-size:1.1rem;">👤</div>
+                                <div class="avatar-icon-circle-lg">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                                </div>
                                 <div>
                                     <div id="dropdownUserName" class="profile-dropdown-name">Farmer Name</div>
+                                    <div id="dropdownFarmerId" class="profile-dropdown-farmer-id">ID: NYK-OLK-84920</div>
                                     <div id="dropdownUserPhone" class="profile-dropdown-info">📞 0700000000</div>
                                 </div>
                             </div>
-                            <div id="dropdownUserRegion" class="profile-dropdown-info" style="font-weight:700; color:var(--primary-700);">📍 Ol Kalou Ward</div>
+                            <div id="dropdownUserRegion" class="profile-dropdown-info-badge">📍 Ol Kalou Ward</div>
                         </div>
-                        <button onclick="switchScreen('screen-orders')" class="btn-dropdown-logout" style="background:#f0fdf4; color:#166534; border-top:1px solid #dcfce7; font-weight:800;">
-                            📦 My Orders & Tracking
+                        <button onclick="switchScreen('screen-profile')" class="dropdown-menu-item profile-item" style="background:#f8fafc; color:#047857; border:1px solid #cbd5e1;">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                            <span>My Profile & Settings</span>
                         </button>
-                        <button onclick="openAdminApprovalsModal()" class="btn-dropdown-logout" style="background:#fef3c7; color:#92400e; border-top:1px solid #fde68a; font-weight:800;">
-                            🛡️ Admin Moderation Queue (<span id="adminPendingBadge">2</span>)
+                        <button onclick="switchScreen('screen-orders')" class="dropdown-menu-item orders-item">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+                            <span>My Orders & Tracking</span>
                         </button>
-                        <button onclick="logoutFarmer()" class="btn-dropdown-logout">
-                            🚪 Logout of Account
+                        <button id="btnAdminQueueDropdown" onclick="openAdminApprovalsModal()" class="dropdown-menu-item admin-item hidden">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                            <span>Admin Moderation Queue (<span id="adminPendingBadge">0</span>)</span>
+                        </button>
+                        <button onclick="logoutFarmer()" class="dropdown-menu-item logout-item">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                            <span>Logout of Account</span>
                         </button>
                     </div>
                 </div>
@@ -328,61 +373,208 @@
             <div id="containerOrdersList" style="display: flex; flex-direction: column; gap: 1rem;"></div>
         </main>
 
-        <!-- MODAL 1: M-PESA EXPRESS PAYMENT MODAL -->
+        <!-- SCREEN 7: FARMER PROFILE & ACCOUNT DASHBOARD -->
+        <main id="screen-profile" class="screen hidden">
+            <div class="profile-dashboard-wrapper">
+                <!-- HERO PROFILE CARD BANNER -->
+                <div class="profile-hero-card">
+                    <div class="profile-hero-bg"></div>
+                    <div class="profile-hero-content">
+                        <div class="profile-avatar-large">
+                            <span id="profileAvatarInitials">FK</span>
+                            <span class="verified-badge-check" title="Verified Nyandarua Farmer">✓</span>
+                        </div>
+                        <div class="profile-hero-info">
+                            <div class="profile-hero-top-row">
+                                <h2 id="profileHeroName" class="profile-hero-name">Farmer Name</h2>
+                                <span id="profileHeroFarmerId" class="badge-farmer-id">ID: NYK-OLK-84920</span>
+                                <span class="badge-verified-farmer">Verified Farmer</span>
+                            </div>
+                            <p id="profileHeroPhone" class="profile-hero-phone">📞 0718 493 313</p>
+                            <p id="profileHeroLocation" class="profile-hero-location">📍 Ol Kalou Sub-County • Kanjuiri Ridge Ward</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- FARMER QUICK STATS ROW -->
+                <div class="profile-stats-grid">
+                    <div class="profile-stat-card" onclick="switchScreen('screen-orders')">
+                        <div class="stat-icon-box orders-bg">📦</div>
+                        <div>
+                            <div id="statOrdersCount" class="stat-value">0 Active</div>
+                            <div class="stat-label">Orders & Tracking</div>
+                        </div>
+                    </div>
+                    <div class="profile-stat-card" onclick="openCartModal()">
+                        <div class="stat-icon-box cart-bg">🛒</div>
+                        <div>
+                            <div id="statCartCount" class="stat-value">0 Items</div>
+                            <div class="stat-label">Shopping Cart</div>
+                        </div>
+                    </div>
+                    <div class="profile-stat-card">
+                        <div class="stat-icon-box status-bg">🛡️</div>
+                        <div>
+                            <div id="statFarmerIdValue" class="stat-value">NYK-OLK-84920</div>
+                            <div class="stat-label">County Farmer Reg. ID</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- MAIN ACCOUNT EDIT & PREFERENCES FORM -->
+                <div class="card profile-edit-card">
+                    <div class="flex-between mb-4 border-b pb-3" style="border-bottom:1px solid #e2e8f0; padding-bottom:0.75rem; margin-bottom:1.25rem;">
+                        <div>
+                            <h3 class="card-title">Account & Farm Settings</h3>
+                            <p class="card-subtitle">Manage your contact details, ward location, and account preferences.</p>
+                        </div>
+                        <span class="profile-status-pill">● System Synced</span>
+                    </div>
+
+                    <form id="formUpdateProfile" onsubmit="handleUpdateProfileSubmit(event)">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">Full Name</label>
+                                <input type="text" id="editProfileName" required class="form-input" placeholder="e.g., John Kamau">
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">Phone Number</label>
+                                <input type="tel" id="editProfilePhone" required class="form-input" placeholder="e.g., 0718493313">
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">Sub-County</label>
+                                <select id="editProfileSubCounty" required onchange="handleSubCountyChange('editProfileSubCounty', 'editProfileWard')" class="form-select">
+                                    <option value="">-- Select Sub-County --</option>
+                                    <option value="Ol Kalou">Ol Kalou</option>
+                                    <option value="Ol Joro Orok">Ol Joro Orok</option>
+                                    <option value="Kinangop">Kinangop</option>
+                                    <option value="Kipipiri">Kipipiri</option>
+                                    <option value="Ndaragwa">Ndaragwa</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">Ward</label>
+                                <select id="editProfileWard" required class="form-select">
+                                    <option value="">-- Choose Ward --</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-actions-bar" style="display:flex; gap:0.75rem; margin-top:1.25rem;">
+                            <button type="submit" class="btn btn-primary" style="flex:2; font-size:0.95rem; font-weight:800;">💾 Save Profile Changes</button>
+                            <button type="button" onclick="logoutFarmer()" class="btn btn-secondary" style="flex:1; background:#fef2f2; color:#dc2626; border:1px solid #fecaca; font-weight:800;">🚪 Logout</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </main>
+
+        <!-- MODAL 1: SMARTPAYPESA & MULTI-PAYMENT CHECKOUT MODAL -->
         <div id="modalMpesaPay" class="modal-overlay">
-            <div class="modal-content">
+            <div class="modal-content payment-modal-content">
                 <div style="text-align: center; margin-bottom: 1rem;">
-                    <span style="font-size: 2.2rem; display: inline-block;">📲</span>
-                    <h3 style="font-size: 1.25rem; font-weight: 900; color: var(--mpesa-dark);">M-PESA Express Checkout</h3>
-                    <p id="mpesaItemLabel" style="font-size: 0.8rem; font-weight: 700; color: var(--text-muted); margin-top: 0.2rem;"></p>
+                    <div class="smartpay-logo-badge">
+                        <span style="font-size: 1.4rem;">💳</span>
+                        <span style="font-weight: 900; color: #047857; font-size: 1.1rem; letter-spacing: -0.02em;">SmartPayPesa</span>
+                    </div>
+                    <h3 style="font-size: 1.2rem; font-weight: 900; color: #0f172a; margin-top: 0.4rem;">Select Payment Method</h3>
+                    <p id="mpesaItemLabel" style="font-size: 0.82rem; font-weight: 700; color: var(--text-muted); margin-top: 0.15rem;"></p>
+                    <div class="escrow-trust-badge">
+                        <span>🔒 Protected by M-Shambani Escrow (Funds released to seller on pickup)</span>
+                    </div>
                 </div>
                 
-                <form onsubmit="triggerMpesaSTKPush(event)">
+                <!-- Payment Method Tabs -->
+                <div class="payment-tabs-bar">
+                    <button type="button" id="payTabStk" onclick="switchPaymentTab('stk')" class="payment-tab active">📲 STK Push</button>
+                    <button type="button" id="payTabTill" onclick="switchPaymentTab('till')" class="payment-tab">🟢 Till / Paybill Code</button>
+                </div>
+
+                <!-- METHOD 1: SMARTPAYPESA STK PUSH -->
+                <form id="formPayStk" onsubmit="triggerMpesaSTKPush(event)">
                     <div class="form-group">
-                        <label class="form-label">M-Pesa Phone Number</label>
+                        <label class="form-label">SmartPayPesa M-Pesa Phone Number</label>
                         <input type="tel" id="mpesaPhone" required class="form-input" placeholder="e.g., 0718493313">
-                        <p class="form-hint">An STK Push PIN prompt will pop up on your mobile phone screen.</p>
+                        <p class="form-hint">An automated M-Pesa STK Push PIN prompt will pop up on your phone via SmartPayPesa.</p>
                     </div>
 
                     <div style="display: flex; gap: 0.5rem; margin-top: 1.25rem;">
                         <button type="button" onclick="toggleModal('modalMpesaPay', false)" class="btn btn-secondary" style="flex: 1;">Cancel</button>
-                        <button type="submit" class="btn btn-mpesa" style="flex: 1.5;">Pay Now 📲</button>
+                        <button type="submit" class="btn btn-mpesa" style="flex: 1.5; background: linear-gradient(135deg, #059669 0%, #047857 100%);">Pay with SmartPayPesa 📲</button>
+                    </div>
+                </form>
+
+                <!-- METHOD 2: TILL NUMBER / TRANSACTION CODE VERIFICATION -->
+                <form id="formPayTill" onsubmit="triggerTillCodeVerification(event)" class="hidden">
+                    <div class="till-info-box">
+                        <div class="flex-between mb-1">
+                            <span style="font-size: 0.8rem; color: #475569; font-weight: 700;">SmartPayPesa Till No:</span>
+                            <strong style="font-size: 1.1rem; color: #047857; font-family: monospace;">00000</strong>
+                        </div>
+                        <div class="flex-between">
+                            <span style="font-size: 0.8rem; color: #475569; font-weight: 700;">Account Name:</span>
+                            <strong style="font-size: 0.85rem; color: #0f172a;">M-Shambani Nyandarua</strong>
+                        </div>
+                    </div>
+
+                    <div class="form-group mt-3">
+                        <label class="form-label">M-Pesa Transaction Code</label>
+                        <input type="text" id="mpesaTxCode" required class="form-input" placeholder="e.g., RKT839210X or QHK892341" style="text-transform: uppercase; font-family: monospace; font-weight: 800; letter-spacing: 0.05em;">
+                        <p class="form-hint">Paste the 10-character M-Pesa code received in your Safaricom SMS.</p>
+                    </div>
+
+                    <div style="display: flex; gap: 0.5rem; margin-top: 1.25rem;">
+                        <button type="button" onclick="toggleModal('modalMpesaPay', false)" class="btn btn-secondary" style="flex: 1;">Cancel</button>
+                        <button type="submit" class="btn btn-primary" style="flex: 1.5; font-weight: 800;">Verify & Complete 🟢</button>
                     </div>
                 </form>
             </div>
         </div>
 
-        <!-- MODAL 1B: M-PESA INSTANT VERIFIED RECEIPT MODAL -->
+        <!-- MODAL 1B: SMARTPAYPESA INSTANT VERIFIED ESCROW RECEIPT MODAL -->
         <div id="modalMpesaReceipt" class="modal-overlay">
             <div class="modal-content" style="text-align: center;">
                 <div style="width: 60px; height: 60px; background: #dcfce7; color: #166534; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 2rem; margin: 0 auto 1rem; border: 3px solid #86efac;">
                     ✓
                 </div>
-                <h3 style="font-size: 1.25rem; font-weight: 900; color: #166534;">Payment Confirmed!</h3>
-                <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 1.25rem;">Your M-Pesa transaction was verified and synced with Safaricom Daraja IPN.</p>
+                <h3 style="font-size: 1.25rem; font-weight: 900; color: #166534;">Payment & Escrow Confirmed!</h3>
+                <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 1.25rem;">Verified via SmartPayPesa Gateway. Funds secured in Escrow for Seller Payout upon delivery.</p>
 
-                <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 1rem; text-align: left; font-size: 0.85rem; margin-bottom: 1.25rem;">
+                <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 1rem; text-align: left; font-size: 0.85rem; margin-bottom: 1.25rem;">
                     <div class="flex-between mb-2 pb-2 border-b">
-                        <span class="text-slate-500">M-Pesa Receipt:</span>
+                        <span class="text-slate-500">M-Pesa Transaction Ref:</span>
                         <strong id="receiptCodeVal" style="color: var(--primary-800); font-family: monospace; font-size: 0.95rem;">QHK892341</strong>
                     </div>
                     <div class="flex-between mb-2 pb-2 border-b">
-                        <span class="text-slate-500">Amount Paid:</span>
+                        <span class="text-slate-500">Total Amount Paid:</span>
                         <strong id="receiptAmountVal" style="color: #047857;">KSh 2,800</strong>
                     </div>
                     <div class="flex-between mb-2 pb-2 border-b">
-                        <span class="text-slate-500">Payer Phone:</span>
+                        <span class="text-slate-500">Admin Escrow Cut (5%):</span>
+                        <strong id="receiptAdminFeeVal" style="color: #0284c7;">KSh 140</strong>
+                    </div>
+                    <div class="flex-between mb-2 pb-2 border-b">
+                        <span class="text-slate-500">Seller Net Disbursed (95%):</span>
+                        <strong id="receiptSellerDisburseVal" style="color: #059669;">KSh 2,660</strong>
+                    </div>
+                    <div class="flex-between mb-2 pb-2 border-b">
+                        <span class="text-slate-500">Buyer Phone:</span>
                         <span id="receiptPhoneVal" class="font-bold">0718493313</span>
                     </div>
                     <div class="flex-between">
-                        <span class="text-slate-500">Pickup Station:</span>
+                        <span class="text-slate-500">Pickup Depot:</span>
                         <span id="receiptDepotVal" class="font-bold text-slate-800">Ol Kalou Central Depot</span>
                     </div>
                 </div>
 
                 <div style="display: flex; gap: 0.5rem;">
                     <button onclick="toggleModal('modalMpesaReceipt', false)" class="btn btn-secondary" style="flex: 1;">Close</button>
-                    <button onclick="toggleModal('modalMpesaReceipt', false); switchScreen('screen-orders');" class="btn btn-primary" style="flex: 1.5;">Track Delivery 📦</button>
+                    <button onclick="toggleModal('modalMpesaReceipt', false); switchScreen('screen-orders');" class="btn btn-primary" style="flex: 1.5; font-weight: 800;">Track Order & Disburse 📦</button>
                 </div>
             </div>
         </div>
@@ -694,20 +886,24 @@
         <!-- BOTTOM APP NAVIGATION (MOBILE PHONES) -->
         <nav id="appBottomNav" class="bottom-nav disabled-nav">
             <button id="nav-fodder" onclick="switchScreen('screen-fodder')" class="nav-item active">
-                <span class="icon">🌾</span>
-                <span>Fodder</span>
+                <span class="icon-box"><svg class="nav-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.4 19 2c0 8-5 14-8 18z"/><path d="M13 20A7 7 0 0 0 14.2 6.1C8.5 5 7 4.4 5 2c0 8 5 14 8 18z"/></svg></span>
+                <span class="nav-label">Fodder</span>
             </button>
             <button id="nav-market" onclick="switchScreen('screen-marketplace')" class="nav-item">
-                <span class="icon">🛒</span>
-                <span>Market</span>
+                <span class="icon-box"><svg class="nav-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg></span>
+                <span class="nav-label">Market</span>
             </button>
             <button id="nav-vets" onclick="switchScreen('screen-vets')" class="nav-item">
-                <span class="icon">🩺</span>
-                <span>Vets</span>
+                <span class="icon-box"><svg class="nav-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M12 8v8"/><path d="M8 12h8"/></svg></span>
+                <span class="nav-label">Vets</span>
             </button>
             <button id="nav-services" onclick="switchScreen('screen-services')" class="nav-item">
-                <span class="icon">🛠️</span>
-                <span>Services</span>
+                <span class="icon-box"><svg class="nav-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg></span>
+                <span class="nav-label">Services</span>
+            </button>
+            <button id="nav-orders" onclick="switchScreen('screen-orders')" class="nav-item">
+                <span class="icon-box"><svg class="nav-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg></span>
+                <span class="nav-label">Orders</span>
             </button>
         </nav>
     </div>
