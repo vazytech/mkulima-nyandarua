@@ -964,16 +964,30 @@ function togglePasswordVisibility(inputId, btnId) {
 
 // REGISTERED FARMERS DATABASE REGISTRY
 function getRegisteredFarmers() {
+  const defaultAdmin = { name: "County Admin", phone: "0718493313", password: "Admin123@", isAdmin: true, role: "admin", subcounty: "Ol Kalou", ward: "Karau" };
   const stored = localStorage.getItem("mkulima_registered_farmers");
+  let list = [];
   if (stored) {
-    try { return JSON.parse(stored); } catch (e) {}
+    try { list = JSON.parse(stored); } catch (e) { list = []; }
   }
-  const defaultFarmers = [
-    { name: "John Kamau", phone: "0718493313", password: "Password1@", subcounty: "Ol Kalou", ward: "Karau" },
-    { name: "Mary Wanjiku", phone: "0722000000", password: "Password1@", subcounty: "Kinangop", ward: "Engineer" }
-  ];
-  localStorage.setItem("mkulima_registered_farmers", JSON.stringify(defaultFarmers));
-  return defaultFarmers;
+
+  const adminIdx = list.findIndex(f => f.phone.replace(/\D/g, "") === "0718493313");
+  if (adminIdx === -1) {
+    list.unshift(defaultAdmin);
+    localStorage.setItem("mkulima_registered_farmers", JSON.stringify(list));
+  } else {
+    list[adminIdx].isAdmin = true;
+    list[adminIdx].role = "admin";
+  }
+
+  if (list.length === 0) {
+    list = [
+      defaultAdmin,
+      { name: "Mary Wanjiku", phone: "0722000000", password: "Password1@", subcounty: "Kinangop", ward: "Engineer" }
+    ];
+    localStorage.setItem("mkulima_registered_farmers", JSON.stringify(list));
+  }
+  return list;
 }
 
 function saveRegisteredFarmer(farmerObj) {
@@ -1045,15 +1059,20 @@ async function processFarmerLogin(e) {
     return;
   }
 
+  const isAdminUser = formattedPhone === "0718493313" || matchedFarmer.isAdmin === true || matchedFarmer.role === "admin";
+
   currentUser = {
-    name: matchedFarmer.name,
+    name: isAdminUser ? "County Admin" : matchedFarmer.name,
     phone: matchedFarmer.phone,
-    subcounty: matchedFarmer.subcounty,
-    ward: matchedFarmer.ward
+    subcounty: matchedFarmer.subcounty || "Ol Kalou",
+    ward: matchedFarmer.ward || "Karau",
+    isAdmin: isAdminUser,
+    role: isAdminUser ? "admin" : "farmer"
   };
 
   ensureFarmerID(currentUser);
   localStorage.setItem("mkulima_current_user", JSON.stringify(currentUser));
+  checkActiveUserSession();
   checkActiveUserSession();
   showToast(`✅ Welcome back, ${currentUser.name}!`, "success");
   switchScreen("screen-fodder");
