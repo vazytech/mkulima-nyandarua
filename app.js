@@ -1457,19 +1457,34 @@ function renderOrdersPageUI() {
 
         <!-- ACTIONS & DEPOT CONTACT -->
         <div class="flex gap-2 pt-2 border-t" style="margin-top:0.5rem; flex-wrap:wrap;">
-          <button onclick="printOrderReceipt('${order.orderId}')" class="btn btn-secondary btn-sm" style="flex:1; min-width:130px; font-weight:800;">
+          <button onclick="printOrderReceipt('${order.orderId}')" class="btn btn-secondary btn-sm" style="flex:1; min-width:120px; font-weight:800;">
             📄 Print Receipt
           </button>
-          <button onclick="disburseOrderEscrowPayout('${order.orderId}')" class="btn btn-primary btn-sm" style="flex:1.2; min-width:160px; background:${order.disbursed ? '#475569' : '#047857'}; font-weight:800;">
-            ${order.disbursed ? '✅ Disbursed to Seller' : '✅ Release Payout to Seller'}
+          <button onclick="disburseOrderEscrowPayout('${order.orderId}')" class="btn btn-primary btn-sm" style="flex:1.2; min-width:150px; background:${order.disbursed ? '#475569' : '#047857'}; font-weight:800;">
+            ${order.disbursed ? '✅ Disbursed' : '✅ Release Payout'}
           </button>
-          <a href="tel:${order.agentPhone || '0718493313'}" class="btn btn-secondary btn-sm" style="flex:1; min-width:130px;">
-            📞 Call Station Agent
+          <a href="tel:${order.agentPhone || '0718493313'}" class="btn btn-secondary btn-sm" style="flex:1; min-width:120px;">
+            📞 Call Depot
           </a>
+          <button onclick="deleteBuyerOrder('${order.orderId}')" class="btn btn-secondary btn-sm" style="background:#fef2f2; color:#dc2626; border:1px solid #fecaca; font-weight:800; min-width:100px;" title="Cancel & Delete Order">
+            🗑️ Delete
+          </button>
         </div>
       </div>
     `;
   }).join('');
+}
+
+function deleteBuyerOrder(orderId) {
+  if (confirm(`🗑️ Are you sure you want to cancel and delete Order #${orderId} from your history?`)) {
+    const idx = buyerOrders.findIndex(o => o.orderId === orderId);
+    if (idx > -1) {
+      buyerOrders.splice(idx, 1);
+      localStorage.setItem("mkulima_buyer_orders", JSON.stringify(buyerOrders));
+      renderOrdersPageUI();
+      showToast(`🗑️ Order #${orderId} deleted successfully.`, "info");
+    }
+  }
 }
 
 function openEmergencyVetModal(vetName, vetPhone, subcounty) {
