@@ -1778,10 +1778,18 @@ async function renderVetList(searchQuery = "") {
           <h3 class="font-extrabold text-slate-900 text-base" style="font-size: 1.05rem;">${vet.name}</h3>
           <p class="text-xs text-slate-600 mt-1" style="line-height: 1.4;"><strong>Utaalamu:</strong> ${displaySpec}</p>
         </div>
-        <div class="flex gap-2 mt-3 pt-2 border-t" style="flex-wrap: wrap;">
-          <a href="tel:${vet.phone}" class="btn btn-secondary btn-sm" style="flex:1; border-radius:0.75rem; font-weight:800; justify-content:center; min-height:38px;">📞 Call Vet</a>
-          <button onclick="openEmergencyVetModal('${String(vet.name).replace(/'/g, "\\'")}', '${vet.phone}', '${vet.subcounty}')" class="btn btn-primary btn-sm" style="flex:1.3; background:linear-gradient(135deg, #dc2626 0%, #b91c1c 100%); border-radius:0.75rem; font-weight:900; justify-content:center; min-height:38px;">🚨 Emergency</button>
-          <a href="https://wa.me/254${vet.phone.replace(/\D/g,'').replace(/^0/,'')}?text=Jambo%20Dr.%20${encodeURIComponent(vet.name)},%20I%20need%20veterinary%20assistance%20in%20${encodeURIComponent(vet.subcounty)}." target="_blank" class="btn btn-secondary btn-sm" style="flex:1; background:#10b981; color:white; border-radius:0.75rem; font-weight:800; justify-content:center; min-height:38px;">💬 WhatsApp</a>
+        <div class="vet-actions-grid" style="margin-top:0.75rem; padding-top:0.65rem; border-top:1px solid #e2e8f0; display:flex; flex-direction:column; gap:0.45rem;">
+          <div style="display:flex; gap:0.45rem;">
+            <a href="tel:${vet.phone}" class="btn btn-secondary btn-sm" style="flex:1; border-radius:0.65rem; font-weight:800; justify-content:center; padding:0.5rem 0.6rem; font-size:0.78rem; text-decoration:none; display:inline-flex; align-items:center;">
+              📞 Call Officer
+            </a>
+            <a href="https://wa.me/254${vet.phone.replace(/\D/g,'').replace(/^0/,'')}?text=Jambo%20Dr.%20${encodeURIComponent(vet.name)},%20I%20need%20veterinary%20assistance%20in%20${encodeURIComponent(vet.subcounty)}." target="_blank" class="btn" style="flex:1; background:#10b981; color:#ffffff; border-radius:0.65rem; font-weight:800; justify-content:center; padding:0.5rem 0.6rem; font-size:0.78rem; border:none; text-decoration:none; display:inline-flex; align-items:center;">
+              💬 WhatsApp
+            </a>
+          </div>
+          <button onclick="openEmergencyVetModal('${String(vet.name).replace(/'/g, "\\'")}', '${vet.phone}', '${vet.subcounty}')" class="btn" style="width:100%; background:linear-gradient(135deg, #dc2626 0%, #991b1b 100%); color:#ffffff; border-radius:0.65rem; font-weight:900; justify-content:center; padding:0.55rem; font-size:0.8rem; border:none; box-shadow:0 2px 6px rgba(220,38,38,0.25); cursor:pointer;">
+            🚨 Emergency Dispatch Alert
+          </button>
         </div>
       </div>
     `;
