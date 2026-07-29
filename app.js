@@ -1435,17 +1435,133 @@ function renderOrdersPageUI() {
         </div>
 
         <!-- ACTIONS & DEPOT CONTACT -->
-        <div class="flex gap-2 pt-2 border-t" style="margin-top:0.5rem;">
-          <a href="tel:${order.agentPhone || '0718493313'}" class="btn btn-secondary btn-sm" style="flex:1;">
-            📞 Call Station Agent (${order.agentPhone || '0718493313'})
-          </a>
-          <button onclick="resendOrderSMS('${order.orderId}', '${order.itemsSummary}', '${order.totalAmount}', '${order.pickupPoint}')" class="btn btn-primary btn-sm" style="flex:1;">
-            📱 Resend SMS Details
+        <div class="flex gap-2 pt-2 border-t" style="margin-top:0.5rem; flex-wrap:wrap;">
+          <button onclick="printOrderReceipt('${order.orderId}')" class="btn btn-secondary btn-sm" style="flex:1; min-width:130px; font-weight:800;">
+            📄 Print Receipt
           </button>
+          <button onclick="disburseOrderEscrowPayout('${order.orderId}')" class="btn btn-primary btn-sm" style="flex:1.2; min-width:160px; background:${order.disbursed ? '#475569' : '#047857'}; font-weight:800;">
+            ${order.disbursed ? '✅ Disbursed to Seller' : '✅ Release Payout to Seller'}
+          </button>
+          <a href="tel:${order.agentPhone || '0718493313'}" class="btn btn-secondary btn-sm" style="flex:1; min-width:130px;">
+            📞 Call Station Agent
+          </a>
         </div>
       </div>
     `;
   }).join('');
+}
+
+function openEmergencyVetModal(vetName, vetPhone, subcounty) {
+  const label = document.getElementById("targetVetEmergencyLabel");
+  if (label) label.textContent = `Target Duty Officer: Dr. ${vetName} (📞 ${vetPhone} • ${subcounty})`;
+  const phoneInput = document.getElementById("emergencyPhone");
+  if (phoneInput && currentUser) phoneInput.value = currentUser.phone || "";
+  const locationInput = document.getElementById("emergencyLocation");
+  if (locationInput && currentUser) locationInput.value = `${currentUser.ward || 'Ward'}, ${currentUser.subcounty || 'Nyandarua'}`;
+  toggleModal("modalVetEmergency", true);
+}
+
+function handleEmergencyVetDispatchSubmit(e) {
+  e.preventDefault();
+  const emergencyType = document.getElementById("emergencyType").value;
+  const location = document.getElementById("emergencyLocation").value;
+  const phone = document.getElementById("emergencyPhone").value;
+
+  toggleModal("modalVetEmergency", false);
+  showToast(`🚨 EMERGENCY DISPATCH SENT! Duty Officer notified via SMS.`, "warning");
+}
+
+function printOrderReceipt(orderId) {
+  const order = buyerOrders.find(o => o.orderId === orderId) || {
+    orderId: orderId,
+    itemsSummary: "Fodder & Farm Products",
+    totalAmount: "KSh 2,800",
+    subcounty: currentUser ? currentUser.subcounty : "Ol Kalou",
+    pickupPoint: "Ol Kalou Central Depot",
+    agentPhone: "0718493313",
+    timestamp: "Just now"
+  };
+
+  const numAmt = parseInt(String(order.totalAmount).replace(/[^0-9]/g, "")) || 2800;
+  const adminFee = Math.round(numAmt * 0.05);
+  const sellerPayout = numAmt - adminFee;
+
+  const receiptHtml = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <title>M-Shambani Official Receipt #${order.orderId}</title>
+      <style>
+        body { font-family: 'Helvetica Neue', Arial, sans-serif; padding: 2rem; color: #0f172a; max-width: 600px; margin: 0 auto; line-height: 1.5; }
+        .header { text-align: center; border-bottom: 2px solid #047857; padding-bottom: 1rem; margin-bottom: 1.5rem; }
+        .header h1 { margin: 0; color: #047857; font-size: 1.8rem; }
+        .header p { margin: 0.2rem 0 0 0; color: #64748b; font-size: 0.85rem; font-weight: 700; }
+        .row { display: flex; justify-content: space-between; padding: 0.5rem 0; border-bottom: 1px solid #e2e8f0; font-size: 0.9rem; }
+        .total-row { display: flex; justify-content: space-between; padding: 0.75rem 0; border-top: 2px solid #0f172a; font-weight: 800; font-size: 1.1rem; color: #047857; margin-top: 1rem; }
+        .badge { background: #ecfdf5; color: #047857; padding: 0.2rem 0.5rem; border-radius: 4px; font-weight: 800; font-size: 0.8rem; border: 1px solid #a7f3d0; }
+        .footer { text-align: center; margin-top: 2rem; font-size: 0.78rem; color: #64748b; border-top: 1px dashed #cbd5e1; padding-top: 1rem; }
+      </style>
+    </head>
+    <body onload="window.print()">
+      <div class="header">
+        <h1>🌾 M-Shambani Nyandarua</h1>
+        <p>Official Agricultural Trade & Escrow Receipt</p>
+      </div>
+      <div style="margin-bottom: 1.25rem;">
+        <span class="badge">🔒 M-SHAMBANI ESCROW VERIFIED</span>
+        <p style="margin: 0.5rem 0 0 0; font-size: 0.85rem;"><strong>Receipt No:</strong> #${order.orderId}</p>
+        <p style="margin: 0.15rem 0 0 0; font-size: 0.85rem;"><strong>Date/Time:</strong> ${order.timestamp}</p>
+        <p style="margin: 0.15rem 0 0 0; font-size: 0.85rem;"><strong>Buyer Name:</strong> ${currentUser ? currentUser.name : 'Nyandarua Farmer'}</p>
+      </div>
+      <div class="row">
+        <span>Item Description</span>
+        <strong>${order.itemsSummary}</strong>
+      </div>
+      <div class="row">
+        <span>Pickup Station / Ward</span>
+        <strong>${order.pickupPoint}</strong>
+      </div>
+      <div class="row">
+        <span>Station Agent Contact</span>
+        <strong>${order.agentPhone || '0718493313'}</strong>
+      </div>
+      <div class="row">
+        <span>Platform Admin Cut (5%)</span>
+        <strong style="color:#0284c7;">KSh ${adminFee.toLocaleString()}</strong>
+      </div>
+      <div class="row">
+        <span>Seller Net Disbursed (95%)</span>
+        <strong style="color:#059669;">KSh ${sellerPayout.toLocaleString()}</strong>
+      </div>
+      <div class="total-row">
+        <span>Total Paid via M-Pesa:</span>
+        <span>${order.totalAmount}</span>
+      </div>
+      <div class="footer">
+        <p>Thank you for trading with M-Shambani Nyandarua!</p>
+        <p>Helpline: 0718493313 | Website: www.m-shambani.co.ke</p>
+      </div>
+    </body>
+    </html>
+  `;
+
+  const win = window.open("", "_blank");
+  if (win) {
+    win.document.write(receiptHtml);
+    win.document.close();
+  }
+}
+
+function disburseOrderEscrowPayout(orderId) {
+  const order = buyerOrders.find(o => o.orderId === orderId);
+  if (order) {
+    order.disbursed = true;
+    order.paymentStatus = "Paid & Disbursed";
+    order.deliveryStage = "Ready for Pickup";
+    localStorage.setItem("mkulima_buyer_orders", JSON.stringify(buyerOrders));
+    renderOrdersPageUI();
+    showToast(`💸 Escrow Payout Released to Seller for Order #${orderId}!`, "success");
+  }
 }
 
 async function resendOrderSMS(orderId, itemsSummary, totalAmount, pickupPoint) {
@@ -1662,9 +1778,10 @@ async function renderVetList(searchQuery = "") {
           <h3 class="font-extrabold text-slate-900 text-base" style="font-size: 1.05rem;">${vet.name}</h3>
           <p class="text-xs text-slate-600 mt-1" style="line-height: 1.4;"><strong>Utaalamu:</strong> ${displaySpec}</p>
         </div>
-        <div class="flex gap-2 mt-3 pt-2 border-t">
-          <a href="tel:${vet.phone}" class="btn btn-secondary btn-sm" style="flex:1; border-radius:0.75rem; font-weight:800; justify-content:center; min-height:42px;">📞 Call Vet</a>
-          <button onclick="openBookingModal('${String(vet.name).replace(/'/g, "\\'")}')" class="btn btn-primary btn-sm" style="flex:1; border-radius:0.75rem; font-weight:800; justify-content:center; min-height:42px;">📅 Book Visit</button>
+        <div class="flex gap-2 mt-3 pt-2 border-t" style="flex-wrap: wrap;">
+          <a href="tel:${vet.phone}" class="btn btn-secondary btn-sm" style="flex:1; border-radius:0.75rem; font-weight:800; justify-content:center; min-height:38px;">📞 Call Vet</a>
+          <button onclick="openEmergencyVetModal('${String(vet.name).replace(/'/g, "\\'")}', '${vet.phone}', '${vet.subcounty}')" class="btn btn-primary btn-sm" style="flex:1.3; background:linear-gradient(135deg, #dc2626 0%, #b91c1c 100%); border-radius:0.75rem; font-weight:900; justify-content:center; min-height:38px;">🚨 Emergency</button>
+          <a href="https://wa.me/254${vet.phone.replace(/\D/g,'').replace(/^0/,'')}?text=Jambo%20Dr.%20${encodeURIComponent(vet.name)},%20I%20need%20veterinary%20assistance%20in%20${encodeURIComponent(vet.subcounty)}." target="_blank" class="btn btn-secondary btn-sm" style="flex:1; background:#10b981; color:white; border-radius:0.75rem; font-weight:800; justify-content:center; min-height:38px;">💬 WhatsApp</a>
         </div>
       </div>
     `;

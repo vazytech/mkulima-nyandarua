@@ -579,6 +579,45 @@
             </div>
         </div>
 
+        <!-- MODAL: EMERGENCY VET DISPATCH -->
+        <div id="modalVetEmergency" class="modal-overlay">
+            <div class="modal-content" style="border-top: 5px solid #dc2626;">
+                <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.25rem;">
+                    <span style="font-size: 1.5rem;">🚨</span>
+                    <h3 style="font-size: 1.15rem; font-weight: 900; color: #991b1b; margin: 0;">Emergency Vet Dispatch</h3>
+                </div>
+                <p id="targetVetEmergencyLabel" style="font-size: 0.78rem; font-weight: 800; color: #dc2626; margin-bottom: 1rem;"></p>
+
+                <form onsubmit="handleEmergencyVetDispatchSubmit(event)">
+                    <div class="form-group">
+                        <label class="form-label">Nature of Livestock Emergency</label>
+                        <select id="emergencyType" required class="form-select" style="border-color: #fca5a5; font-weight: 800; color: #991b1b;">
+                            <option value="Difficult Calf Delivery (Dystocia)">🐄 Difficult Calf Delivery (Dystocia)</option>
+                            <option value="Acute Bloat & Gas Poisoning">🧪 Acute Bloat & Gas Poisoning</option>
+                            <option value="Severe Milk Fever & Downer Cow">🌡️ Severe Milk Fever & Downer Cow</option>
+                            <option value="Accidental Trauma & Severe Bleeding">🩺 Accidental Trauma & Injury</option>
+                            <option value="Urgent AI & Heat Cycle">💉 Urgent AI Cycle</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Your Exact Farm Location / Landmark</label>
+                        <input type="text" id="emergencyLocation" required class="form-input" placeholder="e.g., Near Karau Primary, Ol Kalou">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Contact Phone Number</label>
+                        <input type="tel" id="emergencyPhone" required class="form-input" placeholder="0718493313">
+                    </div>
+
+                    <div style="display: flex; gap: 0.5rem; margin-top: 1.25rem;">
+                        <button type="button" onclick="toggleModal('modalVetEmergency', false)" class="btn btn-secondary" style="flex: 1;">Cancel</button>
+                        <button type="submit" class="btn btn-primary" style="flex: 1.8; background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%); font-weight: 900;">Dispatch Emergency Alert 🚨</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
         <!-- MODAL 2: SCHEDULE VET VISIT -->
         <div id="modalVetBooking" class="modal-overlay">
             <div class="modal-content">
