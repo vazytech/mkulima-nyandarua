@@ -613,6 +613,10 @@ app.post("/api/admin/reject", (req, res) => {
   res.json({ success: true, message: `Rejected "${rejectedItem.title}".`, rejectedItem });
 });
 
-app.listen(PORT, () => {
-  console.log(`🌾 M-Mkulima Backend Server running on http://localhost:${PORT}`);
-});
+if (require.main === module) {
+  app.listen(PORT, () => {
+    console.log(`🌾 M-Mkulima Backend Server running on http://localhost:${PORT}`);
+  });
+}
+
+module.exports = app;
