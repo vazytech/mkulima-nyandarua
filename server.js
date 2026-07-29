@@ -28,6 +28,16 @@ app.use(cors());
 app.use(express.json());
 app.use(express.static(__dirname));
 
+// Serve index.html for root GET / requests
+app.get("/", (req, res) => {
+  const indexPath = path.join(__dirname, "index.html");
+  if (fs.existsSync(indexPath)) {
+    res.sendFile(indexPath);
+  } else {
+    res.status(404).send("Index file not found");
+  }
+});
+
 // Safaricom Daraja STK Push Credentials
 const SHORTCODE = process.env.MPESA_SHORTCODE || "174379";
 const PASSKEY = process.env.MPESA_PASSKEY || "bfb279f9aa9bdbcf158e97dd71a467cd2e0c893059b10f78e6b72ada1ed2c919";
