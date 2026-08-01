@@ -941,9 +941,36 @@
         </div>
 
         <!-- Floating 1-Tap Helpline FAB Button -->
-        <a id="floatingHelplineBtn" href="tel:0718493313" class="floating-helpline-btn" title="Call Nyandarua Station Agent">
-            <span>📞 Helpline</span>
-        </a>
+        <button id="floatingHelplineBtn" onclick="toggleModal('modalHelplineChoice', true)" class="floating-helpline-btn" title="Nyandarua Farmers Helpline">
+            <svg class="nav-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" style="width:18px; height:18px;"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+            <span>Helpline</span>
+        </button>
+
+        <!-- NYANDARUA HELPLINE CHOICE MODAL -->
+        <div id="modalHelplineChoice" class="modal-overlay">
+            <div class="modal-content" style="max-width: 420px; text-align: center; padding: 1.5rem;">
+                <div class="flex-between mb-3" style="border-bottom: 1px solid #e2e8f0; padding-bottom: 0.5rem;">
+                    <div>
+                        <h3 style="font-size: 1.05rem; font-weight: 900; color: #047857; margin: 0; display:flex; align-items:center; gap:0.35rem;">
+                            📞 Nyandarua Farmers Helpline
+                        </h3>
+                        <p style="font-size: 0.72rem; color: #64748b; margin: 0.15rem 0 0 0; font-weight: 700;">24/7 Agent Support & Emergency Assistance</p>
+                    </div>
+                    <button onclick="toggleModal('modalHelplineChoice', false)" class="btn-close" style="background:none; border:none; font-size:1.2rem; cursor:pointer;">✕</button>
+                </div>
+                <div style="display: flex; flex-direction: column; gap: 0.75rem; margin-top: 1rem;">
+                    <a href="tel:0718493313" class="btn btn-primary" style="padding: 0.75rem; font-weight: 800; display: flex; align-items: center; justify-content: center; gap: 0.5rem; text-decoration: none;">
+                        📞 Call Central Station Agent (0718493313)
+                    </a>
+                    <a href="https://wa.me/254718493313?text=Jambo,%20I%20need%20assistance%20from%20Nyandarua%20M-Shambani%20Helpline." target="_blank" class="btn" style="padding: 0.75rem; font-weight: 800; display: flex; align-items: center; justify-content: center; gap: 0.5rem; background: #10b981; color: #fff; text-decoration: none; border-radius: 0.75rem;">
+                        💬 WhatsApp Direct Agent Support
+                    </a>
+                    <button onclick="toggleModal('modalHelplineChoice', false); toggleModal('modalVetEmergency', true);" class="btn" style="padding: 0.75rem; font-weight: 800; display: flex; align-items: center; justify-content: center; gap: 0.5rem; background: #dc2626; color: #fff; border-radius: 0.75rem;">
+                        🚑 Dispatch 24/7 Emergency Vet
+                    </button>
+                </div>
+            </div>
+        </div>
 
         <!-- Floating Quick-Post Action Button -->
         <button id="fabPostItem" onclick="toggleModal('modalQuickPostChoice', true)" class="fab-post-btn" title="Post Product or Service">
