@@ -394,50 +394,50 @@ body {
   position: relative;
   display: flex;
   align-items: center;
+  justify-content: center;
 }
 
 .cart-icon-svg {
-  width: 17px;
-  height: 17px;
+  width: 19px;
+  height: 19px;
   stroke: #ffffff;
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  transform-origin: center bottom;
+}
+
+.btn-cart-nav:hover .cart-icon-svg {
+  animation: basketSway 0.6s ease-in-out infinite alternate;
+}
+
+@keyframes basketSway {
+  0% { transform: rotate(-8deg) scale(1.08); }
+  100% { transform: rotate(8deg) scale(1.08); }
 }
 
 .cart-count-badge {
   position: absolute;
-  top: -8px;
-  right: -9px;
-  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  top: -9px;
+  right: -10px;
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
   color: #ffffff;
-  font-size: 0.65rem;
+  font-size: 0.68rem;
   font-weight: 900;
-  min-width: 18px;
-  height: 18px;
+  min-width: 19px;
+  height: 19px;
   border-radius: 9999px;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 0 0.2rem;
+  padding: 0 0.25rem;
   border: 1.5px solid #064e3b;
-  box-shadow: 0 2px 6px rgba(220, 38, 38, 0.4);
-  animation: badgeBounce 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  box-shadow: 0 2px 8px rgba(217, 119, 6, 0.5);
+  animation: badgeBounce 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
 @keyframes badgeBounce {
-  0% { transform: scale(0.4); }
+  0% { transform: scale(0.3); opacity: 0; }
   70% { transform: scale(1.25); }
-  100% { transform: scale(1); }
-}
-
-.cart-count-badge {
-  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
-  color: #ffffff;
-  border-radius: 9999px;
-  padding: 0.15rem 0.5rem;
-  font-size: 0.7rem;
-  font-weight: 900;
-  min-width: 20px;
-  text-align: center;
-  box-shadow: 0 2px 6px rgba(217, 119, 6, 0.4);
+  100% { transform: scale(1); opacity: 1; }
 }
 
 /* Auth Sign In Pill */
@@ -2612,4 +2612,114 @@ body {
   font-weight: 900;
   letter-spacing: -0.01em;
 }
+
+/* ==========================================================================
+   ULTRA-PREMIUM AESTHETICS & MICRO-INTERACTION ENGINE
+   ========================================================================== */
+
+/* Glassmorphism & Shimmer Cards */
+.item-card {
+  position: relative;
+  background: var(--bg-card);
+  border: 1px solid rgba(226, 232, 240, 0.8);
+  border-radius: 1.25rem;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.item-card::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, #10b981, #f59e0b, #0284c7);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  border-top-left-radius: 1.25rem;
+  border-top-right-radius: 1.25rem;
+}
+
+.item-card:hover::after {
+  opacity: 1;
+}
+
+.item-card:hover {
+  transform: translateY(-4px);
+  border-color: rgba(16, 185, 129, 0.4);
+  box-shadow: 0 16px 32px -8px rgba(6, 78, 59, 0.12), 0 6px 12px -2px rgba(0, 0, 0, 0.04);
+}
+
+/* Vibrant Primary Buttons with Gradient Glow */
+.btn-primary {
+  background: linear-gradient(135deg, #059669 0%, #047857 100%) !important;
+  color: #ffffff !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  box-shadow: 0 4px 14px rgba(5, 150, 105, 0.35) !important;
+  transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+.btn-primary:hover {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
+  transform: translateY(-2px) scale(1.02) !important;
+  box-shadow: 0 8px 20px rgba(5, 150, 105, 0.45) !important;
+}
+
+.btn-primary:active {
+  transform: translateY(0) scale(0.97) !important;
+}
+
+/* Safaricom M-Pesa Dedicated Checkout Button */
+.btn-mpesa-checkout {
+  background: linear-gradient(135deg, #25a83e 0%, #1b802e 100%) !important;
+  color: #ffffff !important;
+  font-weight: 900 !important;
+  border: 1px solid rgba(255, 255, 255, 0.25) !important;
+  box-shadow: 0 4px 16px rgba(37, 168, 62, 0.38) !important;
+  transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+.btn-mpesa-checkout:hover {
+  background: linear-gradient(135deg, #2ecb4b 0%, #25a83e 100%) !important;
+  transform: translateY(-2px) scale(1.02) !important;
+  box-shadow: 0 8px 24px rgba(37, 168, 62, 0.5) !important;
+}
+
+/* Modal Overlay Glassmorphic Backdrop */
+.modal-overlay {
+  background: rgba(15, 23, 42, 0.65) !important;
+  backdrop-filter: blur(10px) !important;
+  -webkit-backdrop-filter: blur(10px) !important;
+  animation: overlayFade 0.25s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+@keyframes overlayFade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.modal-content {
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.35), 0 0 0 1px rgba(255, 255, 255, 0.15) !important;
+  border-radius: 1.5rem !important;
+}
+
+/* Custom Sleek Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #059669;
+}
+
 

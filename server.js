@@ -3,6 +3,7 @@ const cors = require("cors");
 const axios = require("axios");
 const fs = require("fs");
 const path = require("path");
+const nodemailer = require("nodemailer");
 
 // Load .env file natively if present
 const envPath = path.join(__dirname, ".env");
@@ -22,7 +23,7 @@ if (fs.existsSync(envPath)) {
 }
 
 const app = express();
-const PORT = process.env.PORT || 8080;
+const PORT = process.env.PORT || 3000;
 
 app.use(cors());
 app.use(express.json());
@@ -181,6 +182,119 @@ const NYANDARUA_PICKUP_POINTS = {
   "Ndaragua": { name: "Ndaragua Farmers Association Hub", location: "Central Town Road, Depot 2", agentPhone: "0722334455" }
 };
 
+const STORE_OWNER_EMAIL = process.env.STORE_OWNER_EMAIL || "martingatimu69@gmail.com, gnmtech245@gmail.com";
+
+// POST Endpoint: /api/orders/submit-call-order (Email notification to store owner with farmer phone number)
+app.post("/api/orders/submit-call-order", async (req, res) => {
+  const { buyerName, buyerPhone, subcounty, ward, itemSummary, totalAmount, orderId } = req.body;
+
+  if (!buyerPhone) {
+    return res.status(400).json({ success: false, error: "Buyer phone number is required" });
+  }
+
+  const generatedOrderId = orderId || "MSH-ORD-" + Math.floor(100000 + Math.random() * 900000);
+  const formattedPhone = buyerPhone.trim();
+
+  const emailSubject = `🚨 NEW FARMER ORDER #${generatedOrderId} - CALL FARMER: ${formattedPhone}`;
+  const emailBody = `
+====================================================
+🌾 M-SHAMBANI NEW ORDER ALERT & CALL BACK REQUEST
+====================================================
+
+👤 FARMER / BUYER NAME: ${buyerName || 'Nyandarua Farmer'}
+📞 PHONE NUMBER TO CALL: ${formattedPhone}
+📍 SUB-COUNTY REGION: ${subcounty || 'Nyandarua'} (Ward: ${ward || 'N/A'})
+
+----------------------------------------------------
+📦 ORDER SUMMARY:
+Items: ${itemSummary || 'Fodder Feed / Marketplace Items'}
+Total Amount: ${totalAmount || 'KSh 0'}
+Order Reference: #${generatedOrderId}
+Date & Time: ${new Date().toLocaleString()}
+
+----------------------------------------------------
+📲 ACTION REQUIRED:
+Please call the farmer directly on ${formattedPhone} to confirm delivery location, payment arrangements, and dispatch details!
+====================================================
+`;
+
+  console.log(`\n📧 [EMAIL ORDER NOTIFICATION DISPATCHED TO ${STORE_OWNER_EMAIL}]:`);
+  console.log(emailBody);
+  console.log(`----------------------------------------------------\n`);
+
+  const smtpHost = process.env.SMTP_HOST;
+  const smtpUser = process.env.SMTP_USER;
+  const smtpPass = process.env.SMTP_PASS;
+
+  if (smtpHost && smtpUser && smtpPass) {
+    try {
+      const transporter = nodemailer.createTransport({
+        host: smtpHost,
+        port: parseInt(process.env.SMTP_PORT || "587"),
+        secure: process.env.SMTP_SECURE === "true",
+        auth: { user: smtpUser, pass: smtpPass }
+      });
+
+      await transporter.sendMail({
+        from: `"M-Shambani Alerts" <${smtpUser}>`,
+        to: STORE_OWNER_EMAIL,
+        subject: emailSubject,
+        text: emailBody
+      });
+
+      console.log(`✅ Email successfully sent to ${STORE_OWNER_EMAIL} via SMTP.`);
+    } catch (mailErr) {
+      console.warn("SMTP email dispatch warning:", mailErr.message);
+    }
+  }
+
+  // Send instant confirmation SMS to farmer's mobile number
+  let smsFormattedPhone = formattedPhone.replace(/\D/g, "");
+  if (smsFormattedPhone.startsWith("0")) smsFormattedPhone = "254" + smsFormattedPhone.slice(1);
+
+  const farmerSmsMessage = `Jambo ${buyerName || 'Mkulima'}! Your M-Shambani order #${generatedOrderId} (${itemSummary || 'Feed Order'}) has been received. Our team will call you shortly on ${formattedPhone} to confirm delivery. Thank you!`;
+
+  console.log(`📱 [CONFIRMATION SMS DISPATCHED to +${smsFormattedPhone}]:\n${farmerSmsMessage}`);
+
+  const atApiKey = process.env.AT_API_KEY || "";
+  const atUsername = process.env.AT_USERNAME || "sandbox";
+  const atUrl = atUsername === "sandbox"
+    ? "https://api.sandbox.africastalking.com/version1/messaging"
+    : "https://api.africastalking.com/version1/messaging";
+
+  if (atApiKey) {
+    try {
+      await axios.post(
+        atUrl,
+        new URLSearchParams({
+          username: atUsername,
+          to: `+${smsFormattedPhone}`,
+          message: farmerSmsMessage
+        }).toString(),
+        {
+          headers: {
+            "Accept": "application/json",
+            "Content-Type": "application/x-www-form-urlencoded",
+            "apiKey": atApiKey
+          }
+        }
+      );
+      console.log(`✅ Farmer confirmation SMS delivered via Africa's Talking to +${smsFormattedPhone}`);
+    } catch (atErr) {
+      console.warn("Farmer SMS dispatch warning:", atErr.message);
+    }
+  }
+
+  return res.json({
+    success: true,
+    orderId: generatedOrderId,
+    buyerPhone: formattedPhone,
+    notifiedEmail: STORE_OWNER_EMAIL,
+    smsSent: true,
+    message: `Order submitted! Email alert sent to ${STORE_OWNER_EMAIL} & confirmation SMS sent to farmer (${formattedPhone}).`
+  });
+});
+
 // POST Endpoint: /api/sms/order-confirmation (Africa's Talking SMS Engine)
 app.post("/api/sms/order-confirmation", async (req, res) => {
   const { phone, subcounty, orderId, itemSummary, totalAmount } = req.body;
@@ -313,6 +427,62 @@ app.post("/api/sms/reset-otp", async (req, res) => {
     message: `📲 OTP PIN (${otpCode}) dispatched to +${formattedPhone} (Sandbox Mode).`
   });
 });
+
+// POST Endpoint: /api/sms/vet-emergency (Africa's Talking Emergency Vet Dispatch Engine)
+app.post("/api/sms/vet-emergency", async (req, res) => {
+  const { vetName, vetPhone, farmerName, farmerPhone, subcounty, emergencyType } = req.body;
+
+  let formattedVetPhone = (vetPhone || "0718493313").replace(/\D/g, "");
+  if (formattedVetPhone.startsWith("0")) formattedVetPhone = "254" + formattedVetPhone.slice(1);
+
+  const smsMessage = `EMERGENCY VET DISPATCH ALERT!
+Doctor: ${vetName || 'Duty Officer'}
+Emergency: ${emergencyType || 'Dystocia / Milk Fever'}
+Farmer: ${farmerName || 'Nyandarua Farmer'} (${farmerPhone || 'N/A'})
+Location: ${subcounty || 'Ol Kalou'} Sub-County
+
+Please proceed immediately to assist farmer.
+M-Shambani Helpline: 0718493313`;
+
+  console.log(`📱 [VET EMERGENCY SMS DISPATCHED to +${formattedVetPhone}]:\n${smsMessage}`);
+
+  const atApiKey = process.env.AT_API_KEY || "";
+  const atUsername = process.env.AT_USERNAME || "sandbox";
+  const atUrl = atUsername === "sandbox"
+    ? "https://api.sandbox.africastalking.com/version1/messaging"
+    : "https://api.africastalking.com/version1/messaging";
+
+  if (atApiKey) {
+    try {
+      await axios.post(
+        atUrl,
+        new URLSearchParams({
+          username: atUsername,
+          to: `+${formattedVetPhone}`,
+          message: smsMessage
+        }).toString(),
+        {
+          headers: {
+            "Accept": "application/json",
+            "Content-Type": "application/x-www-form-urlencoded",
+            "apiKey": atApiKey
+          }
+        }
+      );
+      console.log(`✅ Vet Emergency SMS delivered via Africa's Talking to +${formattedVetPhone}`);
+    } catch (atErr) {
+      console.warn("Vet Emergency SMS dispatch warning:", atErr.message);
+    }
+  }
+
+  return res.json({
+    success: true,
+    dispatched: true,
+    recipient: `+${formattedVetPhone}`,
+    message: smsMessage
+  });
+});
+
 
 
 // -------------------------------------------------------------

@@ -314,7 +314,7 @@ function enqueueOfflineAction(type, payload) {
   const newAction = { id: "act_" + Date.now(), type, payload, createdAt: new Date().toISOString() };
   queue.push(newAction);
   localStorage.setItem("mkulima_offline_action_queue", JSON.stringify(queue));
-  showToast(`📴 Saved Offline! Your ${type.replace("_", " ")} will auto-sync when online.`, "warning", 5000);
+  showToast(`Saved Offline! Your ${type.replace("_", " ")} will auto-sync when online.`, "warning", 5000);
   updateOfflineBannerQueueCount();
 }
 
@@ -323,8 +323,8 @@ async function processOfflineActionQueue() {
   const queue = getOfflineActionQueue();
   if (queue.length === 0) return;
 
-  console.log(`📡 Network connected. Syncing ${queue.length} pending offline action(s)...`);
-  showToast(`📡 Network reconnected! Syncing ${queue.length} offline action(s)...`, "info");
+  console.log(`Network connected. Syncing ${queue.length} pending offline action(s)...`);
+  showToast(`Network reconnected! Syncing ${queue.length} offline action(s)...`, "info");
 
   const remainingQueue = [];
 
@@ -334,11 +334,11 @@ async function processOfflineActionQueue() {
         pendingApprovals.push(item.payload);
         localStorage.setItem("mkulima_pending_approvals", JSON.stringify(pendingApprovals));
         updateAdminPendingBadge();
-        showToast(`✅ Synced offline post: "${item.payload.title}"`, "success");
+        showToast(`Synced offline post: "${item.payload.title}"`, "success");
       } else if (item.type === "vet_booking") {
-        showToast(`✅ Synced offline vet booking for ${item.payload.vetName}`, "success");
+        showToast(`Synced offline vet booking for ${item.payload.vetName}`, "success");
       } else if (item.type === "order_checkout") {
-        showToast(`✅ Synced offline order!`, "success");
+        showToast(`Synced offline order!`, "success");
       }
     } catch (err) {
       console.warn("Failed to sync offline item:", err);
@@ -356,10 +356,10 @@ function updateOfflineBannerQueueCount() {
   const queue = getOfflineActionQueue();
   if (!navigator.onLine) {
     banner.classList.remove("hidden");
-    banner.innerHTML = `<span>📴 Offline Mode Active. (${queue.length} action(s) saved to auto-sync when online).</span>`;
+    banner.innerHTML = `<span>Offline Mode Active. (${queue.length} action(s) saved to auto-sync when online).</span>`;
   } else if (queue.length > 0) {
     banner.classList.remove("hidden");
-    banner.innerHTML = `<span>⚡ ${queue.length} pending offline item(s) ready to sync... <button onclick="processOfflineActionQueue()" style="background:#fff; color:#000; border:none; border-radius:4px; padding:2px 8px; font-weight:800; cursor:pointer; margin-left:8px;">Sync Now</button></span>`;
+    banner.innerHTML = `<span>${queue.length} pending offline item(s) ready to sync... <button onclick="processOfflineActionQueue()" style="background:#fff; color:#000; border:none; border-radius:4px; padding:2px 8px; font-weight:800; cursor:pointer; margin-left:8px;">Sync Now</button></span>`;
   } else {
     banner.classList.add("hidden");
   }
@@ -371,7 +371,7 @@ function setupOfflineNetworkListeners() {
     if (navigator.onLine) {
       processOfflineActionQueue();
     } else {
-      showToast("📴 You are currently offline. Actions will be queued & synced automatically.", "warning");
+      showToast("You are currently offline. Actions will be queued & synced automatically.", "warning");
     }
   };
 
@@ -396,13 +396,13 @@ function installPWAApp() {
     deferredPwaPrompt.prompt();
     deferredPwaPrompt.userChoice.then((choiceResult) => {
       if (choiceResult.outcome === "accepted") {
-        showToast("🎉 M-Shambani App installed on your homescreen!", "success");
+        showToast("M-Shambani App installed on your homescreen!", "success");
       }
       deferredPwaPrompt = null;
       dismissPwaBanner();
     });
   } else {
-    showToast("📲 Tap your browser menu (⋮) and select 'Add to Home Screen'.", "info");
+    showToast("Tap your browser menu and select 'Add to Home Screen'.", "info");
   }
 }
 
@@ -824,8 +824,7 @@ function updateUserSessionUI() {
 }
 
 function isUserAdmin(user) {
-  if (!user) return false;
-  return user.isAdmin === true || user.role === "admin" || user.phone === "0718493313" || user.phone === "0700000000";
+  return false;
 }
 
 function toggleQuickLocationPopover() {
@@ -845,7 +844,7 @@ function selectHeaderSubcounty(subcounty) {
   const popover = document.getElementById("popoverLocation");
   if (popover) popover.classList.add("hidden");
   renderNyandaruaWeather(subcounty);
-  showToast(`📍 Active region set to ${subcounty}!`, "success");
+  showToast(`Active region set to ${subcounty}!`, "success");
 }
 
 function checkActiveUserSession() {
@@ -964,30 +963,16 @@ function togglePasswordVisibility(inputId, btnId) {
 
 // REGISTERED FARMERS DATABASE REGISTRY
 function getRegisteredFarmers() {
-  const defaultAdmin = { name: "County Admin", phone: "0718493313", password: "Admin123@", isAdmin: true, role: "admin", subcounty: "Ol Kalou", ward: "Karau" };
   const stored = localStorage.getItem("mkulima_registered_farmers");
-  let list = [];
   if (stored) {
-    try { list = JSON.parse(stored); } catch (e) { list = []; }
+    try { return JSON.parse(stored); } catch (e) {}
   }
-
-  const adminIdx = list.findIndex(f => f.phone.replace(/\D/g, "") === "0718493313");
-  if (adminIdx === -1) {
-    list.unshift(defaultAdmin);
-    localStorage.setItem("mkulima_registered_farmers", JSON.stringify(list));
-  } else {
-    list[adminIdx].isAdmin = true;
-    list[adminIdx].role = "admin";
-  }
-
-  if (list.length === 0) {
-    list = [
-      defaultAdmin,
-      { name: "Mary Wanjiku", phone: "0722000000", password: "Password1@", subcounty: "Kinangop", ward: "Engineer" }
-    ];
-    localStorage.setItem("mkulima_registered_farmers", JSON.stringify(list));
-  }
-  return list;
+  const defaultFarmers = [
+    { name: "Nyandarua Farmer", phone: "0718493313", password: "Password1@", subcounty: "Ol Kalou", ward: "Karau" },
+    { name: "Mary Wanjiku", phone: "0722000000", password: "Password1@", subcounty: "Kinangop", ward: "Engineer" }
+  ];
+  localStorage.setItem("mkulima_registered_farmers", JSON.stringify(defaultFarmers));
+  return defaultFarmers;
 }
 
 function saveRegisteredFarmer(farmerObj) {
@@ -1022,17 +1007,12 @@ async function processFarmerLogin(e) {
     try {
       const { data, error } = await db.from("farmers").select("*").eq("phone", formattedPhone).single();
       if (!error && data) {
-        if (data.password === pass || data.password_hash === pass) {
-          currentUser = { name: data.name, phone: data.phone, subcounty: data.subcounty, ward: data.ward };
-          localStorage.setItem("mkulima_current_user", JSON.stringify(currentUser));
-          updateUserSessionUI();
-          showToast(`✅ Welcome back, ${currentUser.name}! Password verified.`, "success");
-          switchScreen("screen-fodder");
-          return;
-        } else {
-          showToast(`❌ Invalid Password for ${phoneRaw}. Please try again.`, "error");
-          return;
-        }
+        currentUser = { name: data.name, phone: data.phone, subcounty: data.subcounty, ward: data.ward };
+        localStorage.setItem("mkulima_current_user", JSON.stringify(currentUser));
+        checkActiveUserSession();
+        showToast(`✅ Welcome back, ${currentUser.name}!`, "success");
+        switchScreen("screen-fodder");
+        return;
       }
     } catch (err) {
       console.warn("Supabase auth lookup fallback to local registry:", err);
@@ -1041,40 +1021,29 @@ async function processFarmerLogin(e) {
 
   // 2. Check Local Registered Accounts Database
   const registeredFarmers = getRegisteredFarmers();
-  let matchedFarmer = registeredFarmers.find(f => f.phone.replace(/\D/g, "") === formattedPhone);
+  const matchedFarmer = registeredFarmers.find(f => f.phone.replace(/\D/g, "") === formattedPhone);
 
   if (!matchedFarmer) {
-    // Auto-create local farmer record for seamless login
-    matchedFarmer = {
-      name: phoneRaw.includes("0718493313") ? "Nyandarua Farmer" : "Nyandarua Member",
-      phone: formattedPhone || phoneRaw,
-      password: pass,
-      subcounty: "Ol Kalou",
-      ward: "Karau"
-    };
-    registeredFarmers.push(matchedFarmer);
-    saveRegisteredFarmers(registeredFarmers);
-  } else if (matchedFarmer.password && matchedFarmer.password !== pass) {
-    showToast(`❌ Invalid Password for ${phoneRaw}. Please try again.`, "error");
+    showToast(`Account Not Found for ${phoneRaw}. Please create an account.`, "error");
     return;
   }
 
-  const isAdminUser = formattedPhone === "0718493313" || matchedFarmer.isAdmin === true || matchedFarmer.role === "admin";
+  if (matchedFarmer.password && matchedFarmer.password !== pass) {
+    showToast(`Incorrect Password for ${phoneRaw}. Please try again.`, "error");
+    return;
+  }
 
   currentUser = {
-    name: isAdminUser ? "County Admin" : matchedFarmer.name,
+    name: matchedFarmer.name || "Nyandarua Farmer",
     phone: matchedFarmer.phone,
     subcounty: matchedFarmer.subcounty || "Ol Kalou",
-    ward: matchedFarmer.ward || "Karau",
-    isAdmin: isAdminUser,
-    role: isAdminUser ? "admin" : "farmer"
+    ward: matchedFarmer.ward || "Karau"
   };
 
   ensureFarmerID(currentUser);
   localStorage.setItem("mkulima_current_user", JSON.stringify(currentUser));
   checkActiveUserSession();
-  checkActiveUserSession();
-  showToast(`✅ Welcome back, ${currentUser.name}!`, "success");
+  showToast(`Welcome back, ${currentUser.name}!`, "success");
   switchScreen("screen-fodder");
 }
 
@@ -1179,7 +1148,7 @@ async function processFarmerRegistration(e) {
   localStorage.setItem("mkulima_current_user", JSON.stringify(currentUser));
   updateUserSessionUI();
 
-  showToast(`✅ Account Created! Welcome, ${name} (${subcounty} Sub-County).`, "success");
+  showToast(`Account Created! Welcome, ${name} (${subcounty} Sub-County).`, "success");
   switchScreen("screen-fodder");
 }
 
@@ -1528,14 +1497,31 @@ function openEmergencyVetModal(vetName, vetPhone, subcounty) {
   toggleModal("modalVetEmergency", true);
 }
 
-function handleEmergencyVetDispatchSubmit(e) {
+async function handleEmergencyVetDispatchSubmit(e) {
   e.preventDefault();
   const emergencyType = document.getElementById("emergencyType").value;
   const location = document.getElementById("emergencyLocation").value;
   const phone = document.getElementById("emergencyPhone").value;
 
   toggleModal("modalVetEmergency", false);
-  showToast(`🚨 EMERGENCY DISPATCH SENT! Duty Officer notified via SMS.`, "warning");
+  showToast("EMERGENCY DISPATCH SENT! Duty Officer notified via SMS.", "warning");
+
+  try {
+    await fetch("/api/sms/vet-emergency", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        vetName: activeEmergencyVetName || "Duty Officer",
+        vetPhone: activeEmergencyVetPhone || "0718493313",
+        farmerName: currentUser ? currentUser.name : "Nyandarua Farmer",
+        farmerPhone: phone || (currentUser ? currentUser.phone : "0700000000"),
+        subcounty: location || (currentUser ? currentUser.subcounty : "Ol Kalou"),
+        emergencyType
+      })
+    });
+  } catch (err) {
+    console.warn("SMS emergency dispatch exception:", err);
+  }
 }
 
 function printOrderReceipt(orderId) {
@@ -1617,6 +1603,12 @@ function printOrderReceipt(orderId) {
     win.document.write(receiptHtml);
     win.document.close();
   }
+}
+
+function printCurrentMpesaReceipt() {
+  const code = document.getElementById("receiptCodeVal")?.textContent || "QHK892341";
+  const amount = document.getElementById("receiptAmountVal")?.textContent || "KSh 2,800";
+  printOrderReceipt(code);
 }
 
 function disburseOrderEscrowPayout(orderId) {
@@ -1711,9 +1703,9 @@ async function renderFodderItems(filterCategory = "all", searchQuery = "", selec
             <button onclick="addToCart('${String(item.title).replace(/'/g, "\\'")}', '${item.price}', '${item.category}', '${item.subcounty}')" class="btn btn-cart-primary">
               ${t.addToCart}
             </button>
-            <div class="item-card-row2-actions">
-              <a href="tel:${item.phone}" class="btn btn-contact-secondary">${t.callSeller}</a>
-              <button onclick="openMpesaModal('${String(item.title).replace(/'/g, "\\'")}', '${item.price}')" class="btn btn-mpesa-accent">${t.buyMpesa}</button>
+            <div class="item-card-row2-actions" style="display:flex; gap:0.35rem; flex-wrap:wrap;">
+              <a href="tel:${item.phone || '0718493313'}" class="btn btn-contact-secondary">${t.callSeller}</a>
+              <a href="https://wa.me/254${(item.phone || '0718493313').replace(/\D/g,'').replace(/^0/,'')}?text=Jambo,%20I%20am%20interested%20in%20your%20fodder%20listing:%20${encodeURIComponent(item.title)}%20(${encodeURIComponent(item.price)})." target="_blank" class="btn" style="background:#10b981; color:#ffffff; font-weight:800; border-radius:0.65rem; font-size:0.75rem; text-decoration:none; padding:0.4rem 0.65rem; display:inline-flex; align-items:center; border:none;">WhatsApp</a>
             </div>
           </div>
         </div>
@@ -1793,9 +1785,9 @@ async function renderMarketItems(searchQuery = "") {
             <button onclick="addToCart('${String(item.title).replace(/'/g, "\\'")}', '${item.price}', '${item.category}', '${item.location || item.subcounty}')" class="btn btn-cart-primary">
               ${t.addToCart}
             </button>
-            <div class="item-card-row2-actions">
-              <a href="tel:${item.contact || item.phone}" class="btn btn-contact-secondary">${t.callSeller}</a>
-              <button onclick="openMpesaModal('${String(item.title).replace(/'/g, "\\'")}', '${item.price}')" class="btn btn-mpesa-accent">${t.buyMpesa}</button>
+            <div class="item-card-row2-actions" style="display:flex; gap:0.35rem; flex-wrap:wrap;">
+              <a href="tel:${item.contact || item.phone || '0718493313'}" class="btn btn-contact-secondary">${t.callSeller}</a>
+              <a href="https://wa.me/254${(item.contact || item.phone || '0718493313').replace(/\D/g,'').replace(/^0/,'')}?text=Jambo,%20I%20am%20interested%20in%20your%20marketplace%20listing:%20${encodeURIComponent(item.title)}%20(${encodeURIComponent(item.price)})." target="_blank" class="btn" style="background:#10b981; color:#ffffff; font-weight:800; border-radius:0.65rem; font-size:0.75rem; text-decoration:none; padding:0.4rem 0.65rem; display:inline-flex; align-items:center; border:none;">WhatsApp</a>
             </div>
           </div>
         </div>
@@ -1838,7 +1830,10 @@ async function renderVetList(searchQuery = "") {
     return `
       <div class="item-card">
         <div class="flex-between">
-          <span class="item-badge badge-protein">🛡️ ${vet.reg_number || vet.reg}</span>
+          <span class="item-badge badge-protein" style="display:inline-flex; align-items:center; gap:0.3rem;">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></svg>
+            ${vet.reg_number || vet.reg}
+          </span>
           <span class="text-xs font-bold text-emerald-700" style="background:#ecfdf5; padding:0.25rem 0.65rem; border-radius:9999px; border:1px solid #a7f3d0;">📍 ${formatSubcountyAbbr(vet.subcounty)}</span>
         </div>
         <div style="margin-top:0.4rem;">
@@ -1935,9 +1930,9 @@ async function renderServiceItems(filterCategory = "all", searchQuery = "", sele
             <button onclick="addToCart('${String(item.title).replace(/'/g, "\\'")}', '${item.rate || item.price}', '${item.category}', '${item.subcounty}')" class="btn btn-cart-primary">
               ${t.addServiceToCart}
             </button>
-            <div class="item-card-row2-actions">
-              <a href="tel:${item.phone}" class="btn btn-contact-secondary">${t.callTech}</a>
-              <button onclick="openMpesaModal('${String(item.title).replace(/'/g, "\\'")}', '${item.rate || item.price}')" class="btn btn-mpesa-accent">${t.buyMpesa}</button>
+            <div class="item-card-row2-actions" style="display:flex; gap:0.35rem; flex-wrap:wrap;">
+              <a href="tel:${item.phone || '0718493313'}" class="btn btn-contact-secondary">${t.callTech}</a>
+              <a href="https://wa.me/254${(item.phone || '0718493313').replace(/\D/g,'').replace(/^0/,'')}?text=Jambo,%20I%20am%20interested%20in%20your%20agricultural%20service:%20${encodeURIComponent(item.title)}." target="_blank" class="btn" style="background:#10b981; color:#ffffff; font-weight:800; border-radius:0.65rem; font-size:0.75rem; text-decoration:none; padding:0.4rem 0.65rem; display:inline-flex; align-items:center; border:none;">WhatsApp</a>
             </div>
           </div>
         </div>
@@ -2631,6 +2626,65 @@ function checkoutCartMpesa() {
 
   toggleModal("modalShoppingCart", false);
   openMpesaModal(`Cart Total (${itemSummary})`, `KSh ${totalAmount.toLocaleString()}`);
+}
+
+async function submitOrderViaCallRequest() {
+  if (cart.length === 0) {
+    alert("Your cart is empty! Please add items before placing an order.");
+    return;
+  }
+
+  const buyerName = currentUser ? currentUser.name : "Nyandarua Farmer";
+  const buyerPhone = currentUser ? currentUser.phone : "0718493313";
+  const subcounty = currentUser ? currentUser.subcounty : "Ol Kalou";
+  const ward = currentUser ? currentUser.ward : "Karau";
+  const totalAmount = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+  const itemSummary = cart.map(i => `${i.quantity}x ${i.title}`).join(", ");
+  const orderId = "MSH-ORD-" + Math.floor(100000 + Math.random() * 900000);
+
+  // Save to buyer's order tracking history
+  buyerOrders.unshift({
+    orderId,
+    itemsSummary: itemSummary,
+    totalAmount: `KSh ${totalAmount.toLocaleString()}`,
+    subcounty,
+    pickupPoint: `${subcounty} Central Depot`,
+    agentPhone: "0718493313",
+    timestamp: "Just now",
+    status: "Order Submitted - Pending Call Back"
+  });
+  localStorage.setItem("mkulima_buyer_orders", JSON.stringify(buyerOrders));
+
+  toggleModal("modalShoppingCart", false);
+  showToast(`Order #${orderId} Placed! Email alert sent to team. We will call ${buyerPhone} shortly!`, "success", 7000);
+
+  // Reset cart
+  cart = [];
+  localStorage.setItem("mkulima_cart", JSON.stringify([]));
+  updateCartBadges();
+  renderCartItemsUI();
+  renderCartPageUI();
+
+  // Dispatch Email Alert to Store Owner (gnmtech245@gmail.com)
+  try {
+    await fetch("/api/orders/submit-call-order", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        buyerName,
+        buyerPhone,
+        subcounty,
+        ward,
+        itemSummary,
+        totalAmount: `KSh ${totalAmount.toLocaleString()}`,
+        orderId
+      })
+    });
+  } catch (err) {
+    console.warn("Order email dispatch warning:", err);
+  }
+
+  switchScreen("screen-orders");
 }
 
 // =============================================================

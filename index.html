@@ -42,7 +42,7 @@
         <header class="app-header">
             <div class="header-brand">
                 <div>
-                    <h1>🌾 M-Shambani</h1>
+                    <h1>M-Shambani</h1>
                     <p>Nyandarua Agricultural Portal</p>
                 </div>
 
@@ -83,22 +83,22 @@
                 <!-- Quick Location Switcher Popover Card -->
                 <div id="popoverLocation" class="location-popover-card hidden">
                     <div class="popover-header">
-                        <span>📍 Switch Sub-County</span>
+                        <span>Switch Sub-County</span>
                         <button onclick="toggleQuickLocationPopover()" class="popover-close-btn">✕</button>
                     </div>
                     <div class="popover-subcounty-grid">
-                        <button onclick="selectHeaderSubcounty('Ol Kalou')" class="popover-sub-btn">📍 Ol Kalou</button>
-                        <button onclick="selectHeaderSubcounty('Kinangop')" class="popover-sub-btn">📍 Kinangop</button>
-                        <button onclick="selectHeaderSubcounty('Ol Joro Orok')" class="popover-sub-btn">📍 Ol Joro Orok</button>
-                        <button onclick="selectHeaderSubcounty('Kipipiri')" class="popover-sub-btn">📍 Kipipiri</button>
-                        <button onclick="selectHeaderSubcounty('Ndaragua')" class="popover-sub-btn">📍 Ndaragua</button>
+                        <button onclick="selectHeaderSubcounty('Ol Kalou')" class="popover-sub-btn">Ol Kalou</button>
+                        <button onclick="selectHeaderSubcounty('Kinangop')" class="popover-sub-btn">Kinangop</button>
+                        <button onclick="selectHeaderSubcounty('Ol Joro Orok')" class="popover-sub-btn">Ol Joro Orok</button>
+                        <button onclick="selectHeaderSubcounty('Kipipiri')" class="popover-sub-btn">Kipipiri</button>
+                        <button onclick="selectHeaderSubcounty('Ndaragua')" class="popover-sub-btn">Ndaragua</button>
                     </div>
                 </div>
 
                 <!-- Premium Shopping Cart Pill Button -->
                 <button id="btnCartHeader" onclick="openCartModal()" class="btn-cart-nav btn-cart-nav-premium" title="View Shopping Cart">
                     <div class="cart-icon-wrapper">
-                        <svg class="cart-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+                        <svg class="cart-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l1 11a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2l1-11H6z"/><path d="M9 9V6a3 3 0 0 1 6 0v3"/></svg>
                         <span id="cartCountBadge" class="cart-count-badge">0</span>
                     </div>
                     <span class="cart-btn-label">Cart</span>
@@ -129,10 +129,10 @@
                                 <div>
                                     <div id="dropdownUserName" class="profile-dropdown-name">Farmer Name</div>
                                     <div id="dropdownFarmerId" class="profile-dropdown-farmer-id">ID: NYK-OLK-84920</div>
-                                    <div id="dropdownUserPhone" class="profile-dropdown-info">📞 0700000000</div>
+                                    <div id="dropdownUserPhone" class="profile-dropdown-info">0700000000</div>
                                 </div>
                             </div>
-                            <div id="dropdownUserRegion" class="profile-dropdown-info-badge">📍 Ol Kalou Ward</div>
+                            <div id="dropdownUserRegion" class="profile-dropdown-info-badge">Ol Kalou Ward</div>
                         </div>
                         <button onclick="switchScreen('screen-profile')" class="dropdown-menu-item profile-item" style="background:#f8fafc; color:#047857; border:1px solid #cbd5e1;">
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
@@ -141,10 +141,6 @@
                         <button onclick="switchScreen('screen-orders')" class="dropdown-menu-item orders-item">
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
                             <span>My Orders & Tracking</span>
-                        </button>
-                        <button id="btnAdminQueueDropdown" onclick="openAdminApprovalsModal()" class="dropdown-menu-item admin-item hidden">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-                            <span>Admin Moderation Queue (<span id="adminPendingBadge">0</span>)</span>
                         </button>
                         <button onclick="logoutFarmer()" class="dropdown-menu-item logout-item">
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
@@ -167,8 +163,8 @@
 
                     <!-- Auth Mode Switcher Tabs -->
                     <div class="auth-toggle-bar">
-                        <button id="tabAuthLogin" onclick="switchAuthTab('login')" class="auth-toggle-btn active">🔑 Sign In</button>
-                        <button id="tabAuthRegister" onclick="switchAuthTab('register')" class="auth-toggle-btn">📝 Register</button>
+                        <button id="tabAuthLogin" onclick="switchAuthTab('login')" class="auth-toggle-btn active">Sign In</button>
+                        <button id="tabAuthRegister" onclick="switchAuthTab('register')" class="auth-toggle-btn">Register Account</button>
                     </div>
 
                     <!-- FORM A: LOGIN FORM -->
@@ -253,10 +249,10 @@
             <div id="weatherPanel"></div>
 
             <div class="support-banner">
-                <p>📞 Support & Systems Help Desk:</p>
-                <div class="support-actions">
-                    <a href="tel:+254718493313" class="btn-call">📞 Call Support</a>
-                    <a href="mailto:gnmtech245@gmail.com" class="btn-email">✉️ Email Tech</a>
+                <p>Support & Systems Help Desk:</p>
+                <div class="flex-center gap-2 mt-2">
+                    <a href="tel:+254718493313" class="btn-call">Call Support</a>
+                    <a href="mailto:gnmtech245@gmail.com" class="btn-email">Email Tech</a>
                 </div>
             </div>
 
@@ -342,7 +338,7 @@
         <main id="screen-services" class="screen hidden">
             <div class="flex-between" style="margin-bottom: 1.25rem;">
                 <div>
-                    <h2 class="card-title">🛠️ Nyandarua Agricultural Services Hub</h2>
+                    <h2 class="card-title">Nyandarua Agricultural Services Hub</h2>
                     <p class="card-subtitle">Hire verified technicians for Silage Compaction, Biogas Systems, Manure Management & Machinery.</p>
                 </div>
                 <button onclick="toggleModal('modalServiceUpload', true)" class="btn btn-primary btn-sm">+ Post a Service</button>
@@ -408,8 +404,8 @@
                                 <span id="profileHeroFarmerId" class="badge-farmer-id">ID: NYK-OLK-84920</span>
                                 <span class="badge-verified-farmer">Verified Farmer</span>
                             </div>
-                            <p id="profileHeroPhone" class="profile-hero-phone">📞 0718 493 313</p>
-                            <p id="profileHeroLocation" class="profile-hero-location">📍 Ol Kalou Sub-County • Kanjuiri Ridge Ward</p>
+                            <p id="profileHeroPhone" class="profile-hero-phone">0718 493 313</p>
+                            <p id="profileHeroLocation" class="profile-hero-location">Ol Kalou Sub-County • Kanjuiri Ridge Ward</p>
                         </div>
                     </div>
                 </div>
@@ -417,21 +413,27 @@
                 <!-- FARMER QUICK STATS ROW -->
                 <div class="profile-stats-grid">
                     <div class="profile-stat-card" onclick="switchScreen('screen-orders')">
-                        <div class="stat-icon-box orders-bg">📦</div>
+                        <div class="stat-icon-box orders-bg">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" width="20" height="20"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+                        </div>
                         <div>
                             <div id="statOrdersCount" class="stat-value">0 Active</div>
                             <div class="stat-label">Orders & Tracking</div>
                         </div>
                     </div>
                     <div class="profile-stat-card" onclick="openCartModal()">
-                        <div class="stat-icon-box cart-bg">🛒</div>
+                        <div class="stat-icon-box cart-bg">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" width="20" height="20"><path d="M6 9l1 11a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2l1-11H6z"/><path d="M9 9V6a3 3 0 0 1 6 0v3"/></svg>
+                        </div>
                         <div>
                             <div id="statCartCount" class="stat-value">0 Items</div>
                             <div class="stat-label">Shopping Cart</div>
                         </div>
                     </div>
                     <div class="profile-stat-card">
-                        <div class="stat-icon-box status-bg">🛡️</div>
+                        <div class="stat-icon-box status-bg">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="#0284c7" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" width="20" height="20"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></svg>
+                        </div>
                         <div>
                             <div id="statFarmerIdValue" class="stat-value">NYK-OLK-84920</div>
                             <div class="stat-label">County Farmer Reg. ID</div>
@@ -548,7 +550,7 @@
 
                     <div style="display: flex; gap: 0.5rem; margin-top: 1.25rem;">
                         <button type="button" onclick="toggleModal('modalMpesaPay', false)" class="btn btn-secondary" style="flex: 1;">Cancel</button>
-                        <button type="submit" class="btn btn-primary" style="flex: 1.5; font-weight: 800;">Verify & Complete 🟢</button>
+                        <button type="submit" class="btn btn-primary" style="flex: 1.5; font-weight: 800;">Verify & Complete</button>
                     </div>
                 </form>
             </div>
@@ -590,8 +592,9 @@
                     </div>
                 </div>
 
-                <div style="display: flex; gap: 0.5rem;">
+                <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
                     <button onclick="toggleModal('modalMpesaReceipt', false)" class="btn btn-secondary" style="flex: 1;">Close</button>
+                    <button onclick="printCurrentMpesaReceipt()" class="btn btn-secondary" style="flex: 1; font-weight: 800; border-color: #047857; color: #047857;">Print Receipt</button>
                     <button onclick="toggleModal('modalMpesaReceipt', false); switchScreen('screen-orders');" class="btn btn-primary" style="flex: 1.5; font-weight: 800;">Track Order & Disburse 📦</button>
                 </div>
             </div>
@@ -837,36 +840,14 @@
             </div>
         </div>
 
-        <!-- MODAL 8: ADMIN APPROVALS CONTROL PANEL -->
-        <div id="modalAdminApprovals" class="modal-overlay">
-            <div class="modal-content" style="max-width: 600px;">
-                <div class="flex-between mb-3 border-b pb-2">
-                    <h3 class="card-title" style="margin: 0; color: #92400e; display: flex; align-items: center; gap: 0.4rem;">
-                        🛡️ County Admin Moderation Queue
-                    </h3>
-                    <button type="button" onclick="toggleModal('modalAdminApprovals', false)" class="close-modal-btn" style="background: none; border: none; font-size: 1.25rem; font-weight: 800; cursor: pointer; color: var(--text-muted);">✕</button>
-                </div>
 
-                <p style="font-size: 0.78rem; color: #64748b; margin-bottom: 0.85rem;">
-                    Review farmer and service provider submissions. Approved items are published live to the public marketplace.
-                </p>
-
-                <div id="adminPendingContainer" style="max-height: 340px; overflow-y: auto; display: flex; flex-direction: column; gap: 0.75rem;">
-                    <!-- Pending items rendered dynamically -->
-                </div>
-
-                <div style="margin-top: 1.25rem; display: flex; justify-content: flex-end;">
-                    <button type="button" onclick="toggleModal('modalAdminApprovals', false)" class="btn btn-secondary">Close Panel</button>
-                </div>
-            </div>
-        </div>
 
         <!-- MODAL 6: SHOPPING CART & MPESA CHECKOUT MODAL -->
         <div id="modalShoppingCart" class="modal-overlay">
             <div class="modal-content" style="max-width: 520px;">
                 <div class="flex-between mb-3 border-b pb-2">
-                    <h3 class="card-title" style="margin: 0; display: flex; align-items: center; gap: 0.4rem;">
-                        🛒 Your Shopping Cart
+                    <h3 class="card-title" style="margin: 0; display: flex; align-items: center; gap: 0.5rem;">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="var(--primary-color)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" width="22" height="22"><path d="M6 9l1 11a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2l1-11H6z"/><path d="M9 9V6a3 3 0 0 1 6 0v3"/></svg> Your Shopping Cart
                     </h3>
                     <button type="button" onclick="toggleModal('modalShoppingCart', false)" class="close-modal-btn" style="background: none; border: none; font-size: 1.25rem; font-weight: 800; cursor: pointer; color: var(--text-muted);">✕</button>
                 </div>
@@ -886,9 +867,9 @@
                     </div>
                 </div>
 
-                <div style="display: flex; gap: 0.5rem;">
-                    <button type="button" onclick="clearCart()" class="btn btn-secondary" style="flex: 1;">🗑️ Clear</button>
-                    <button type="button" onclick="checkoutCartMpesa()" class="btn btn-mpesa" style="flex: 2; font-weight: 900;">💳 Pay Cart via M-Pesa</button>
+                <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                    <button type="button" onclick="clearCart()" class="btn btn-secondary" style="flex: 1; min-width: 90px;">Clear</button>
+                    <button type="button" onclick="submitOrderViaCallRequest()" class="btn btn-primary" style="flex: 2; font-weight: 900; background: linear-gradient(135deg, #059669 0%, #047857 100%);">Place Order & Call Back Request</button>
                 </div>
             </div>
         </div>

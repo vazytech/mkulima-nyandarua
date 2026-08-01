@@ -4,11 +4,13 @@
   "description": "M-Mkulima Backend Server with Safaricom Daraja M-Pesa STK Push API",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js"
+    "start": "node server.js",
+    "admin": "node admin-cli.js"
   },
   "dependencies": {
     "axios": "^1.18.1",
     "cors": "^2.8.6",
-    "express": "^4.22.2"
+    "express": "^4.22.2",
+    "nodemailer": "^9.0.3"
   }
 }
