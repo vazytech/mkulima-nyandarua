@@ -1,5 +1,5 @@
 /*
-  M-MKULIMA NYANDARUA DATABASE MIGRATION SCRIPT
+  M-MKULIMA NYANDARUA DATABASE MIGRATION SCRIPT (IDEMPOTENT & SAFE TO RE-RUN)
   Run this script in Supabase SQL Editor
 */
 
@@ -118,6 +118,7 @@ CREATE TABLE IF NOT EXISTS public.pending_approvals (
     created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
+-- ENABLE ROW LEVEL SECURITY
 ALTER TABLE public.farmers ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.fodder ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.marketplace ENABLE ROW LEVEL SECURITY;
@@ -127,25 +128,41 @@ ALTER TABLE public.chemicals ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.orders ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.pending_approvals ENABLE ROW LEVEL SECURITY;
 
+-- RE-CREATABLE RLS POLICIES (DROP IF EXISTS BEFORE CREATING)
+DROP POLICY IF EXISTS "Allow public read access on farmers" ON public.farmers;
+DROP POLICY IF EXISTS "Allow public insert access on farmers" ON public.farmers;
 CREATE POLICY "Allow public read access on farmers" ON public.farmers FOR SELECT USING (true);
 CREATE POLICY "Allow public insert access on farmers" ON public.farmers FOR INSERT WITH CHECK (true);
 
+DROP POLICY IF EXISTS "Allow public read access on fodder" ON public.fodder;
+DROP POLICY IF EXISTS "Allow public insert access on fodder" ON public.fodder;
 CREATE POLICY "Allow public read access on fodder" ON public.fodder FOR SELECT USING (true);
 CREATE POLICY "Allow public insert access on fodder" ON public.fodder FOR INSERT WITH CHECK (true);
 
+DROP POLICY IF EXISTS "Allow public read access on marketplace" ON public.marketplace;
+DROP POLICY IF EXISTS "Allow public insert access on marketplace" ON public.marketplace;
 CREATE POLICY "Allow public read access on marketplace" ON public.marketplace FOR SELECT USING (true);
 CREATE POLICY "Allow public insert access on marketplace" ON public.marketplace FOR INSERT WITH CHECK (true);
 
+DROP POLICY IF EXISTS "Allow public read access on vets" ON public.vets;
 CREATE POLICY "Allow public read access on vets" ON public.vets FOR SELECT USING (true);
 
+DROP POLICY IF EXISTS "Allow public read access on services" ON public.services;
+DROP POLICY IF EXISTS "Allow public insert access on services" ON public.services;
 CREATE POLICY "Allow public read access on services" ON public.services FOR SELECT USING (true);
 CREATE POLICY "Allow public insert access on services" ON public.services FOR INSERT WITH CHECK (true);
 
+DROP POLICY IF EXISTS "Allow public read access on chemicals" ON public.chemicals;
+DROP POLICY IF EXISTS "Allow public insert access on chemicals" ON public.chemicals;
 CREATE POLICY "Allow public read access on chemicals" ON public.chemicals FOR SELECT USING (true);
 CREATE POLICY "Allow public insert access on chemicals" ON public.chemicals FOR INSERT WITH CHECK (true);
 
+DROP POLICY IF EXISTS "Allow public read access on orders" ON public.orders;
+DROP POLICY IF EXISTS "Allow public insert access on orders" ON public.orders;
 CREATE POLICY "Allow public read access on orders" ON public.orders FOR SELECT USING (true);
 CREATE POLICY "Allow public insert access on orders" ON public.orders FOR INSERT WITH CHECK (true);
 
+DROP POLICY IF EXISTS "Allow public read access on pending_approvals" ON public.pending_approvals;
+DROP POLICY IF EXISTS "Allow public insert access on pending_approvals" ON public.pending_approvals;
 CREATE POLICY "Allow public read access on pending_approvals" ON public.pending_approvals FOR SELECT USING (true);
 CREATE POLICY "Allow public insert access on pending_approvals" ON public.pending_approvals FOR INSERT WITH CHECK (true);
