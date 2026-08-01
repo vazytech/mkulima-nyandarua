@@ -83,6 +83,15 @@ let fallbackServices = [
   { id: 5, title: "Tractor Tillage & Potato Harvester Rental", title_sw: "Kukodi Trakta ya Kulima na Kuvuna Viazi", category: "Machinery", category_sw: "Mashine", rate: "KSh 3,200 / acre", subcounty: "Ndaragwa", provider: "Kinangop Tractor Services", phone: "0712345678", desc: "Disc plowing, harrowing, and potato ridge harvester machinery rental.", desc_sw: "Kulima, kurutubisha na kuvuna viazi kwa kutumia mashine za trakta." }
 ];
 
+let fallbackChemicals = [
+  { id: 1, title: "High Yield 24% Dairy Meal Concentrate (50kg)", price: "KSh 2,850", category: "Concentrate", subcounty: "Ol Kalou", contact: "0718493313", desc: "Premium high-protein dairy meal enriched with calcium, bypass fats, and essential minerals to boost daily milk production by up to 30%." },
+  { id: 2, title: "Ridomil Gold Potato Blight Fungicide (1Kg)", price: "KSh 3,200", category: "Fungicide", subcounty: "Kinangop", contact: "0722334455", desc: "Systemic fungicide specifically formulated to prevent and cure Late Blight (Mbalaka) on potatoes and tomatoes during heavy rainfall." },
+  { id: 3, title: "High-Cal Milk Fever Mineral Lick Block (10kg)", price: "KSh 1,450", category: "Concentrate", subcounty: "Ol Joro Orok", contact: "0711223344", desc: "Hardened mineral salt lick containing phosphorus, calcium, zinc, and cobalt for lactating cows and pregnant heifers." },
+  { id: 4, title: "Selective Maize Weedicide - Stellar Star (1L)", price: "KSh 2,600", category: "Weedicide", subcounty: "Kipipiri", contact: "0734567890", desc: "Post-emergence selective herbicide for controlling broadleaf weeds and annual grasses in maize fields without harming crops." },
+  { id: 5, title: "Easy-Gro High Nitrogen Foliar Fertilizer (1L)", price: "KSh 1,150", category: "Foliar", subcounty: "Ndaragua", contact: "0723456789", desc: "Liquid nitrogen and trace elements booster for spraying cabbage, potatoes, carrots, and young maize crops for rapid vegetative growth." },
+  { id: 6, title: "Cattle & Calf Dewormer - Albendazole 10% (1L)", price: "KSh 1,600", category: "Concentrate", subcounty: "Ol Kalou", contact: "0718493313", desc: "Broad-spectrum oral drench for controlling liver flukes, roundworms, tapeworms, and lungworms in dairy cattle, sheep, and goats." }
+];
+
 // Active Session User State
 let currentUser = JSON.parse(localStorage.getItem("mkulima_current_user")) || null;
 let activeMpesaItem = { title: "", price: "" };
@@ -1200,7 +1209,7 @@ function switchScreen(screenId) {
     checkActiveUserSession();
   }
 
-  const screens = ["screen-auth", "screen-fodder", "screen-marketplace", "screen-vets", "screen-services", "screen-orders", "screen-profile"];
+  const screens = ["screen-auth", "screen-fodder", "screen-marketplace", "screen-vets", "screen-services", "screen-chemicals", "screen-orders", "screen-profile"];
   screens.forEach(id => {
     const el = document.getElementById(id);
     if (el) {
@@ -1217,6 +1226,7 @@ function switchScreen(screenId) {
     "screen-marketplace": "nav-market",
     "screen-vets": "nav-vets",
     "screen-services": "nav-services",
+    "screen-chemicals": "nav-chemicals",
     "screen-orders": "nav-orders"
   };
 
@@ -1225,6 +1235,7 @@ function switchScreen(screenId) {
     "screen-marketplace": "desktop-nav-market",
     "screen-vets": "desktop-nav-vets",
     "screen-services": "desktop-nav-services",
+    "screen-chemicals": "desktop-nav-chemicals",
     "screen-orders": "desktop-nav-orders"
   };
 
@@ -1238,6 +1249,8 @@ function switchScreen(screenId) {
 
   if (screenId === "screen-services") {
     renderServiceItems();
+  } else if (screenId === "screen-chemicals") {
+    renderChemicalItems();
   } else if (screenId === "screen-orders") {
     renderOrdersPageUI();
   } else if (screenId === "screen-profile") {
@@ -1957,6 +1970,103 @@ function handleServiceSearchChange() {
   const regionSelect = document.getElementById("filterServiceRegion");
   renderServiceItems(category === "All" ? "all" : category, searchInput ? searchInput.value : "", regionSelect ? regionSelect.value : "");
 }
+
+// AGRICULTURAL CHEMICALS & CONCENTRATES HUB FUNCTIONS
+async function renderChemicalItems(filterCategory = "all", searchQuery = "", selectedSubcounty = "") {
+  const container = document.getElementById("containerChemicalsList");
+  if (!container) return;
+
+  let items = fallbackChemicals;
+
+  if (typeof db !== "undefined" && db) {
+    try {
+      let query = db.from("chemicals").select("*").order("id", { ascending: true });
+      if (filterCategory !== "all") {
+        query = query.eq("category", filterCategory);
+      }
+      const { data, error } = await query;
+      if (!error && data && data.length > 0) {
+        items = data;
+        localStorage.setItem("mkulima_cached_chemicals", JSON.stringify(items));
+      }
+    } catch (err) {
+      console.warn("Supabase chemicals fetch fallback:", err);
+      items = JSON.parse(localStorage.getItem("mkulima_cached_chemicals")) || fallbackChemicals;
+    }
+  } else {
+    items = JSON.parse(localStorage.getItem("mkulima_cached_chemicals")) || fallbackChemicals;
+  }
+
+  if (searchQuery) {
+    const q = searchQuery.toLowerCase();
+    items = items.filter(item => item.title.toLowerCase().includes(q) || (item.desc || item.description || '').toLowerCase().includes(q));
+  }
+
+  if (selectedSubcounty) {
+    items = items.filter(item => item.subcounty === selectedSubcounty);
+  }
+
+  if (filterCategory !== "all") {
+    items = items.filter(item => item.category === filterCategory);
+  }
+
+  const t = TRANSLATIONS[currentLanguage] || TRANSLATIONS.en;
+
+  container.innerHTML = items.map(item => `
+    <div class="item-card">
+      <div class="flex-between">
+        <span class="item-badge badge-protein">${item.category}</span>
+        <span class="price-tag">${item.price}</span>
+      </div>
+      <div style="margin-top:0.4rem;">
+        <h3 class="font-extrabold text-slate-900 text-base" style="font-size: 1rem; line-height: 1.3;">${item.title}</h3>
+        <p class="text-xs text-slate-500 mt-2" style="line-height: 1.4;">${item.desc || item.description || ''}</p>
+      </div>
+      <div class="mt-2 pt-2 border-t text-xs text-slate-600">
+        <div class="flex-between mb-2">
+          <span style="font-weight:700;">📍 ${formatSubcountyAbbr(item.subcounty)}</span>
+          <span style="font-weight:800; color:var(--primary-700);">✓ KEPHIS Certified</span>
+        </div>
+        <div class="item-card-action-bar">
+          <button onclick="addToCart('${String(item.title).replace(/'/g, "\\'")}', '${item.price}', '${item.category}', '${item.subcounty}')" class="btn btn-cart-primary">
+            + Add to Cart
+          </button>
+          <div class="item-card-row2-actions" style="display:flex; gap:0.35rem; flex-wrap:wrap;">
+            <a href="tel:${item.contact || '0718493313'}" class="btn btn-contact-secondary">${t.callSeller}</a>
+            <a href="https://wa.me/254${(item.contact || '0718493313').replace(/\D/g,'').replace(/^0/,'')}?text=Jambo,%20I%20am%20interested%20in%20your%20chemical/concentrate%20listing:%20${encodeURIComponent(item.title)}%20(${encodeURIComponent(item.price)})." target="_blank" class="btn" style="background:#10b981; color:#ffffff; font-weight:800; border-radius:0.65rem; font-size:0.75rem; text-decoration:none; padding:0.4rem 0.65rem; display:inline-flex; align-items:center; border:none;">WhatsApp</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function handleChemicalSearchChange() {
+  const searchInput = document.getElementById("searchChemicalInput");
+  const regionSelect = document.getElementById("filterChemicalRegion");
+  const activeTab = document.querySelector(".filter-bar .filter-tab.active[id^='tab-chem-']");
+  let cat = "all";
+  if (activeTab && activeTab.id) {
+    cat = activeTab.id.replace("tab-chem-", "");
+    if (cat === "all") cat = "all";
+    else if (cat === "concentrate") cat = "Concentrate";
+    else if (cat === "fungicide") cat = "Fungicide";
+    else if (cat === "weedicide") cat = "Weedicide";
+    else if (cat === "foliar") cat = "Foliar";
+  }
+  renderChemicalItems(cat, searchInput ? searchInput.value : "", regionSelect ? regionSelect.value : "");
+}
+
+function filterChemicalsDisplay(cat) {
+  document.querySelectorAll(".filter-tab[id^='tab-chem-']").forEach(t => t.classList.remove("active"));
+  const tabEl = document.getElementById(`tab-chem-${cat.toLowerCase()}`);
+  if (tabEl) tabEl.classList.add("active");
+
+  const searchInput = document.getElementById("searchChemicalInput");
+  const regionSelect = document.getElementById("filterChemicalRegion");
+  renderChemicalItems(cat, searchInput ? searchInput.value : "", regionSelect ? regionSelect.value : "");
+}
+
 
 async function handlePostService(event) {
   event.preventDefault();
