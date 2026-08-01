@@ -2822,4 +2822,38 @@ body {
   box-shadow: 0 2px 4px rgba(4, 120, 87, 0.2);
 }
 
+/* Floating Quick Post Action Button */
+.fab-post-btn {
+  position: fixed;
+  bottom: 4.8rem;
+  right: 1rem;
+  z-index: 990;
+  background: linear-gradient(135deg, #059669 0%, #047857 100%);
+  color: #ffffff;
+  border: none;
+  border-radius: 9999px;
+  padding: 0.65rem 1.1rem;
+  font-size: 0.82rem;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  box-shadow: 0 10px 25px -5px rgba(5, 150, 105, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.2);
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.fab-post-btn:hover {
+  transform: translateY(-3px) scale(1.03);
+  box-shadow: 0 15px 30px -5px rgba(5, 150, 105, 0.6);
+}
+
+@media (max-width: 767px) {
+  .fab-post-btn {
+    bottom: 5.2rem;
+    right: 0.75rem;
+    padding: 0.6rem 0.9rem;
+  }
+}
+
 
