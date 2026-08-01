@@ -229,22 +229,22 @@ Please call the farmer directly on ${formattedPhone} to confirm delivery locatio
   if (smtpHost && smtpUser && smtpPass) {
     try {
       const transporter = nodemailer.createTransport({
-        host: smtpHost,
-        port: parseInt(process.env.SMTP_PORT || "587"),
-        secure: process.env.SMTP_SECURE === "true",
+        service: "gmail",
         auth: { user: smtpUser, pass: smtpPass }
       });
 
-      await transporter.sendMail({
+      const recipientList = STORE_OWNER_EMAIL.split(",").map(e => e.trim()).filter(Boolean);
+
+      const info = await transporter.sendMail({
         from: `"M-Shambani Alerts" <${smtpUser}>`,
-        to: STORE_OWNER_EMAIL,
+        to: recipientList,
         subject: emailSubject,
         text: emailBody
       });
 
-      console.log(`✅ Email successfully sent to ${STORE_OWNER_EMAIL} via SMTP.`);
+      console.log(`✅ Email successfully sent. MessageID: ${info.messageId} to ${recipientList.join(", ")}`);
     } catch (mailErr) {
-      console.warn("SMTP email dispatch warning:", mailErr.message);
+      console.error("❌ SMTP email dispatch error:", mailErr.message);
     }
   }
 
