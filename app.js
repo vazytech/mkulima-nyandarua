@@ -2512,9 +2512,18 @@ function updateCartBadges() {
   const badgeNav = document.getElementById("cartCountBadge");
   const badgeNavPage = document.getElementById("cartCountBadgeNav");
   const badgeFloating = document.getElementById("floatingCartBadge");
-  if (badgeNav) badgeNav.textContent = totalCount;
-  if (badgeNavPage) badgeNavPage.textContent = totalCount;
-  if (badgeFloating) badgeFloating.textContent = totalCount;
+
+  [badgeNav, badgeNavPage, badgeFloating].forEach(badge => {
+    if (badge) {
+      if (totalCount > 0) {
+        badge.textContent = totalCount;
+        badge.style.display = "flex";
+      } else {
+        badge.textContent = "";
+        badge.style.display = "none";
+      }
+    }
+  });
 }
 
 function addToCart(title, priceStr, category, location) {
