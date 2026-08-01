@@ -83,14 +83,7 @@ let fallbackServices = [
   { id: 5, title: "Tractor Tillage & Potato Harvester Rental", title_sw: "Kukodi Trakta ya Kulima na Kuvuna Viazi", category: "Machinery", category_sw: "Mashine", rate: "KSh 3,200 / acre", subcounty: "Ndaragwa", provider: "Kinangop Tractor Services", phone: "0712345678", desc: "Disc plowing, harrowing, and potato ridge harvester machinery rental.", desc_sw: "Kulima, kurutubisha na kuvuna viazi kwa kutumia mashine za trakta." }
 ];
 
-let fallbackChemicals = [
-  { id: 1, title: "High Yield 24% Dairy Meal Concentrate (50kg)", price: "KSh 2,850", category: "Concentrate", subcounty: "Ol Kalou", contact: "0718493313", desc: "Premium high-protein dairy meal enriched with calcium, bypass fats, and essential minerals to boost daily milk production by up to 30%." },
-  { id: 2, title: "Ridomil Gold Potato Blight Fungicide (1Kg)", price: "KSh 3,200", category: "Fungicide", subcounty: "Kinangop", contact: "0722334455", desc: "Systemic fungicide specifically formulated to prevent and cure Late Blight (Mbalaka) on potatoes and tomatoes during heavy rainfall." },
-  { id: 3, title: "High-Cal Milk Fever Mineral Lick Block (10kg)", price: "KSh 1,450", category: "Concentrate", subcounty: "Ol Joro Orok", contact: "0711223344", desc: "Hardened mineral salt lick containing phosphorus, calcium, zinc, and cobalt for lactating cows and pregnant heifers." },
-  { id: 4, title: "Selective Maize Weedicide - Stellar Star (1L)", price: "KSh 2,600", category: "Weedicide", subcounty: "Kipipiri", contact: "0734567890", desc: "Post-emergence selective herbicide for controlling broadleaf weeds and annual grasses in maize fields without harming crops." },
-  { id: 5, title: "Easy-Gro High Nitrogen Foliar Fertilizer (1L)", price: "KSh 1,150", category: "Foliar", subcounty: "Ndaragua", contact: "0723456789", desc: "Liquid nitrogen and trace elements booster for spraying cabbage, potatoes, carrots, and young maize crops for rapid vegetative growth." },
-  { id: 6, title: "Cattle & Calf Dewormer - Albendazole 10% (1L)", price: "KSh 1,600", category: "Concentrate", subcounty: "Ol Kalou", contact: "0718493313", desc: "Broad-spectrum oral drench for controlling liver flukes, roundworms, tapeworms, and lungworms in dairy cattle, sheep, and goats." }
-];
+let fallbackChemicals = [];
 
 // Active Session User State
 let currentUser = JSON.parse(localStorage.getItem("mkulima_current_user")) || null;
@@ -2008,6 +2001,17 @@ async function renderChemicalItems(filterCategory = "all", searchQuery = "", sel
 
   if (filterCategory !== "all") {
     items = items.filter(item => item.category === filterCategory);
+  }
+
+  if (items.length === 0) {
+    container.innerHTML = `
+      <div class="empty-state-card" style="grid-column: 1 / -1; text-align: center; padding: 3rem 1rem; background: #ffffff; border: 1px dashed #cbd5e1; border-radius: 16px;">
+        <div style="font-size: 2.5rem; margin-bottom: 0.5rem;">🧪</div>
+        <h3 style="font-size: 1.1rem; font-weight: 800; color: #0f172a; margin-bottom: 0.35rem;">No Agri-Chemicals & Concentrates Listed Yet</h3>
+        <p style="font-size: 0.82rem; color: #64748b; max-width: 420px; margin: 0 auto;">Certified agro-chemicals, concentrates, and mineral supplements will appear here once added to the database.</p>
+      </div>
+    `;
+    return;
   }
 
   const t = TRANSLATIONS[currentLanguage] || TRANSLATIONS.en;
