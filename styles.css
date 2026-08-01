@@ -2185,22 +2185,31 @@ body {
 /* AGRIBOT FLOATING BUTTON & CHAT MODAL STYLES */
 .floating-agribot-btn {
   position: fixed;
-  bottom: 5.25rem;
-  right: 1.25rem;
+  bottom: 4.8rem;
+  left: 1.25rem;
+  right: auto;
   z-index: 99;
   background: linear-gradient(135deg, #047857 0%, #065f46 100%);
   color: #ffffff;
   border: 1px solid rgba(255, 255, 255, 0.25);
-  padding: 0.7rem 1.1rem;
+  padding: 0.65rem 1.1rem;
   border-radius: 9999px;
   font-weight: 800;
-  font-size: 0.88rem;
+  font-size: 0.82rem;
   display: flex;
   align-items: center;
   gap: 0.45rem;
   box-shadow: 0 10px 25px -5px rgba(4, 120, 87, 0.5);
   cursor: pointer;
   transition: all 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@media (max-width: 767px) {
+  .floating-agribot-btn {
+    bottom: 5.2rem;
+    left: 0.75rem;
+    padding: 0.6rem 0.9rem;
+  }
 }
 
 .floating-agribot-btn:hover {
