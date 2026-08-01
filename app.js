@@ -75,13 +75,7 @@ let fallbackVets = [
   { id: 3, name: "Dr. Peter M. Mwangi", reg_number: "KVB/REG/2018/112", subcounty: "Ol Joro Orok", phone: "0733112233", specialization: "Calf Rearing & Clinical Nutrition", spec_sw: "Ufugaji wa Ndama na Lishe Bora ya Mifugo" }
 ];
 
-let fallbackServices = [
-  { id: 1, title: "Maize & Rhodes Grass Silage Compaction", title_sw: "Shindilio na Utengenezaji wa Silage ya Mahindi", category: "Silage", category_sw: "Silage", rate: "KSh 1,800 / acre", subcounty: "Ol Kalou", provider: "Nyandarua Forage Pros", phone: "0718493313", desc: "Motorized silage chopper, compaction tractor, and high-density bale wrapping.", desc_sw: "Kukata mahindi kwa mashine, kushindilia kwa trakta na kufunga bale kwa plasiya." },
-  { id: 2, title: "Biogas Plant Installation & Dung Digester", title_sw: "Ujenzi na Ufungaji wa Mtambo wa Biogas", category: "Biogas", category_sw: "Biogas", rate: "KSh 45,000 / system", subcounty: "Kinangop", provider: "BioEnergy Nyandarua Techs", phone: "0722112233", desc: "Fixed-dome 10m³ biogas construction, cow dung digester, and gas piping setup.", desc_sw: "Ujenzi wa mtambo wa biogas mita 10³, digester ya samadi, na mabomba ya gesi." },
-  { id: 3, title: "Organic Manure Treatment & Slurry Application", title_sw: "Uchakataji wa Mbolea ya Samadi na Kupanda", category: "Manure", category_sw: "Samadi", rate: "KSh 3,500 / ton", subcounty: "Kipipiri", provider: "SoilEnrich Organics", phone: "0733445566", desc: "Decomposed cow dung & poultry manure slurry treatment for high potato yields.", desc_sw: "Samadi ya ng'ombe na kuku iliyooza vizuri kwa ajili ya mavuno mengi ya viazi." },
-  { id: 4, title: "High-Grade AI Breeding & Sexed Semen Straws", title_sw: "Huduma ya AI ya Mbegu za Jinsia (Sexed Straws)", category: "AI", category_sw: "Mbegu AI", rate: "KSh 2,500 / straw", subcounty: "Ol Joro Orok", provider: "Nyandarua AI Breeders", phone: "0720998877", desc: "Sexed Friesian & Ayrshire semen straws with pregnancy detection tracking.", desc_sw: "Mbegu za jinsia ya kike za Friesian na Ayrshire na upimaji wa mimba." },
-  { id: 5, title: "Tractor Tillage & Potato Harvester Rental", title_sw: "Kukodi Trakta ya Kulima na Kuvuna Viazi", category: "Machinery", category_sw: "Mashine", rate: "KSh 3,200 / acre", subcounty: "Ndaragwa", provider: "Kinangop Tractor Services", phone: "0712345678", desc: "Disc plowing, harrowing, and potato ridge harvester machinery rental.", desc_sw: "Kulima, kurutubisha na kuvuna viazi kwa kutumia mashine za trakta." }
-];
+let fallbackServices = [];
 
 let fallbackChemicals = [];
 
@@ -1905,7 +1899,14 @@ async function renderServiceItems(filterCategory = "all", searchQuery = "", sele
   }
 
   if (items.length === 0) {
-    container.innerHTML = '<p class="text-center text-slate-400 text-xs py-8" style="grid-column:1/-1;">No agricultural services found matching your search.</p>';
+    container.innerHTML = `
+      <div class="empty-state-card" style="grid-column: 1 / -1; text-align: center; padding: 3rem 1rem; background: #ffffff; border: 1px dashed #cbd5e1; border-radius: 16px;">
+        <div style="font-size: 2.5rem; margin-bottom: 0.5rem;">🛠️</div>
+        <h3 style="font-size: 1.1rem; font-weight: 800; color: #0f172a; margin-bottom: 0.35rem;">No Agri-Services Listed Yet</h3>
+        <p style="font-size: 0.82rem; color: #64748b; max-width: 420px; margin: 0 auto;">Verified agricultural services (silage compaction, biogas installation, manure treatment, AI breeding) will appear here once listed.</p>
+        <button onclick="toggleModal('modalServiceUpload', true)" class="btn btn-primary btn-sm" style="margin-top: 0.75rem; font-weight: 800;">+ Post New Service</button>
+      </div>
+    `;
     return;
   }
 
