@@ -2634,10 +2634,19 @@ async function submitOrderViaCallRequest() {
     return;
   }
 
-  const buyerName = currentUser ? currentUser.name : "Nyandarua Farmer";
-  const buyerPhone = currentUser ? currentUser.phone : "0718493313";
-  const subcounty = currentUser ? currentUser.subcounty : "Ol Kalou";
-  const ward = currentUser ? currentUser.ward : "Karau";
+  const activeUser = JSON.parse(localStorage.getItem("mkulima_current_user")) || currentUser;
+  
+  if (!activeUser || !activeUser.phone) {
+    showToast("Please sign in or register your account so we can call your registered phone number.", "warning", 6000);
+    toggleModal("modalShoppingCart", false);
+    toggleModal("modalAuth", true);
+    return;
+  }
+
+  const buyerName = activeUser.name || "Nyandarua Farmer";
+  const buyerPhone = activeUser.phone; // Registered account phone number!
+  const subcounty = activeUser.subcounty || "Ol Kalou";
+  const ward = activeUser.ward || "Karau";
   const totalAmount = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
   const itemSummary = cart.map(i => `${i.quantity}x ${i.title}`).join(", ");
   const orderId = "MSH-ORD-" + Math.floor(100000 + Math.random() * 900000);
@@ -2649,14 +2658,14 @@ async function submitOrderViaCallRequest() {
     totalAmount: `KSh ${totalAmount.toLocaleString()}`,
     subcounty,
     pickupPoint: `${subcounty} Central Depot`,
-    agentPhone: "0718493313",
+    agentPhone: buyerPhone,
     timestamp: "Just now",
     status: "Order Submitted - Pending Call Back"
   });
   localStorage.setItem("mkulima_buyer_orders", JSON.stringify(buyerOrders));
 
   toggleModal("modalShoppingCart", false);
-  showToast(`Order #${orderId} Placed! Email alert sent to team. We will call ${buyerPhone} shortly!`, "success", 7000);
+  showToast(`Order #${orderId} Placed! Email alert sent to team. We will call your registered phone (${buyerPhone}) shortly!`, "success", 7000);
 
   // Reset cart
   cart = [];
@@ -2665,7 +2674,7 @@ async function submitOrderViaCallRequest() {
   renderCartItemsUI();
   renderCartPageUI();
 
-  // Dispatch Email Alert to Store Owner (gnmtech245@gmail.com)
+  // Dispatch Email Alert to Store Owner (martingatimu69@gmail.com) with registered phone number
   try {
     await fetch("/api/orders/submit-call-order", {
       method: "POST",
