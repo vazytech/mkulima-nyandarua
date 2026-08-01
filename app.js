@@ -1245,6 +1245,36 @@ function switchScreen(screenId) {
   }
 }
 
+// NYANDARUA 5 SUB-COUNTIES QUICK FILTER CHIPS
+function quickFilterSubcounty(subcounty) {
+  document.querySelectorAll(".chip-subcounty").forEach(chip => chip.classList.remove("active"));
+  
+  if (!subcounty) {
+    const allChip = document.getElementById("chip-sub-all");
+    if (allChip) allChip.classList.add("active");
+  } else {
+    const chipId = "chip-sub-" + subcounty.toLowerCase().replace(/\s+/g, "");
+    const chip = document.getElementById(chipId);
+    if (chip) chip.classList.add("active");
+  }
+
+  // Update regional dropdown filters across active screens
+  const fodderRegion = document.getElementById("filterFodderRegion");
+  const marketRegion = document.getElementById("filterMarketRegion");
+  const vetRegion = document.getElementById("filterVetRegion");
+  const serviceRegion = document.getElementById("filterServiceRegion");
+  const chemicalRegion = document.getElementById("filterChemicalRegion");
+
+  if (fodderRegion) { fodderRegion.value = subcounty; handleFodderSearchChange(); }
+  if (marketRegion) { marketRegion.value = subcounty; handleMarketSearchChange(); }
+  if (vetRegion) { vetRegion.value = subcounty; handleVetSearchChange(); }
+  if (serviceRegion) { serviceRegion.value = subcounty; handleServiceSearchChange(); }
+  if (chemicalRegion) { chemicalRegion.value = subcounty; handleChemicalSearchChange(); }
+
+  const regionName = subcounty || "All Nyandarua";
+  showToast(`Filtered catalog by Region: ${regionName}`, "info", 3000);
+}
+
 // FARMER REGISTRATION ID GENERATOR & ENFORCER
 function generateFarmerID(subcounty = "Ol Kalou") {
   const abbrMap = {

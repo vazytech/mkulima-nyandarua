@@ -37,7 +37,31 @@
         <span>📴 You are currently offline. Showing cached catalog & seller contact numbers.</span>
     </div>
 
+    <!-- NYANDARUA LIVE MARKET PRICE TICKER & WEATHER ALERT BAR -->
+    <div class="nyandarua-ticker-bar">
+        <div class="ticker-content">
+            <span class="ticker-badge">📍 NYANDARUA LIVE</span>
+            <span class="ticker-item">🥔 Shangi Potato: <strong>KSh 2,200/50kg</strong></span>
+            <span class="ticker-item">🥛 Milk (Kinangop Coop): <strong>KSh 52/L</strong></span>
+            <span class="ticker-item">🌾 Lucerne Bale: <strong>KSh 450/bale</strong></span>
+            <span class="ticker-item">🌽 Maize Silage: <strong>KSh 2,800/bale</strong></span>
+            <span class="ticker-item">🌤️ Ol Kalou Today: <strong>18°C 🌧️ High Blight Risk</strong></span>
+            <span class="ticker-item">🐄 High Protein Dairy Meal: <strong>KSh 2,850/50kg</strong></span>
+        </div>
+    </div>
+
     <div class="app-container">
+        <!-- SUB-COUNTY QUICK FILTER CHIPS -->
+        <div class="subcounty-quick-filter">
+            <span class="filter-label">Region:</span>
+            <button onclick="quickFilterSubcounty('')" class="chip-subcounty active" id="chip-sub-all">All Nyandarua</button>
+            <button onclick="quickFilterSubcounty('Ol Kalou')" class="chip-subcounty" id="chip-sub-olkalou">Ol Kalou</button>
+            <button onclick="quickFilterSubcounty('Kinangop')" class="chip-subcounty" id="chip-sub-kinangop">Kinangop</button>
+            <button onclick="quickFilterSubcounty('Kipipiri')" class="chip-subcounty" id="chip-sub-kipipiri">Kipipiri</button>
+            <button onclick="quickFilterSubcounty('Ol Joro Orok')" class="chip-subcounty" id="chip-sub-oljoroorok">Ol Joro Orok</button>
+            <button onclick="quickFilterSubcounty('Ndaragua')" class="chip-subcounty" id="chip-sub-ndaragua">Ndaragua</button>
+        </div>
+
         <!-- RESPONSIVE HEADER WITH DESKTOP NAV & PROFILE DROPDOWN -->
         <header class="app-header">
             <div class="header-brand">
