@@ -1,5 +1,5 @@
 /*
-  M-MKULIMA NYANDARUA DATABASE MIGRATION SCRIPT (IDEMPOTENT & SAFE TO RE-RUN)
+  M-MKULIMA NYANDARUA DATABASE MIGRATION SCRIPT (BULLETPROOF & IDEMPOTENT)
   Run this script in Supabase SQL Editor
 */
 
@@ -151,7 +151,7 @@ CREATE TABLE IF NOT EXISTS public.mpesa_transactions (
     created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
--- ENABLE ROW LEVEL SECURITY
+-- ENABLE ROW LEVEL SECURITY ON ALL TABLES
 ALTER TABLE public.farmers ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.fodder ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.marketplace ENABLE ROW LEVEL SECURITY;
@@ -163,51 +163,83 @@ ALTER TABLE public.pending_approvals ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.vet_emergencies ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.mpesa_transactions ENABLE ROW LEVEL SECURITY;
 
--- RE-CREATABLE RLS POLICIES (DROP IF EXISTS BEFORE CREATING)
-DROP POLICY IF EXISTS "Allow public read access on farmers" ON public.farmers;
-DROP POLICY IF EXISTS "Allow public insert access on farmers" ON public.farmers;
-CREATE POLICY "Allow public read access on farmers" ON public.farmers FOR SELECT USING (true);
-CREATE POLICY "Allow public insert access on farmers" ON public.farmers FOR INSERT WITH CHECK (true);
+-- SAFE POLICY CREATION BLOCK (CHECK PG_POLICIES BEFORE CREATING TO PREVENT DUPLICATE ERROR 42710)
+DO $$ 
+BEGIN
+    -- Farmers Policies
+    IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE tablename = 'farmers' AND policyname = 'Allow public read access on farmers') THEN
+        CREATE POLICY "Allow public read access on farmers" ON public.farmers FOR SELECT USING (true);
+    END IF;
+    IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE tablename = 'farmers' AND policyname = 'Allow public insert access on farmers') THEN
+        CREATE POLICY "Allow public insert access on farmers" ON public.farmers FOR INSERT WITH CHECK (true);
+    END IF;
 
-DROP POLICY IF EXISTS "Allow public read access on fodder" ON public.fodder;
-DROP POLICY IF EXISTS "Allow public insert access on fodder" ON public.fodder;
-CREATE POLICY "Allow public read access on fodder" ON public.fodder FOR SELECT USING (true);
-CREATE POLICY "Allow public insert access on fodder" ON public.fodder FOR INSERT WITH CHECK (true);
+    -- Fodder Policies
+    IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE tablename = 'fodder' AND policyname = 'Allow public read access on fodder') THEN
+        CREATE POLICY "Allow public read access on fodder" ON public.fodder FOR SELECT USING (true);
+    END IF;
+    IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE tablename = 'fodder' AND policyname = 'Allow public insert access on fodder') THEN
+        CREATE POLICY "Allow public insert access on fodder" ON public.fodder FOR INSERT WITH CHECK (true);
+    END IF;
 
-DROP POLICY IF EXISTS "Allow public read access on marketplace" ON public.marketplace;
-DROP POLICY IF EXISTS "Allow public insert access on marketplace" ON public.marketplace;
-CREATE POLICY "Allow public read access on marketplace" ON public.marketplace FOR SELECT USING (true);
-CREATE POLICY "Allow public insert access on marketplace" ON public.marketplace FOR INSERT WITH CHECK (true);
+    -- Marketplace Policies
+    IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE tablename = 'marketplace' AND policyname = 'Allow public read access on marketplace') THEN
+        CREATE POLICY "Allow public read access on marketplace" ON public.marketplace FOR SELECT USING (true);
+    END IF;
+    IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE tablename = 'marketplace' AND policyname = 'Allow public insert access on marketplace') THEN
+        CREATE POLICY "Allow public insert access on marketplace" ON public.marketplace FOR INSERT WITH CHECK (true);
+    END IF;
 
-DROP POLICY IF EXISTS "Allow public read access on vets" ON public.vets;
-CREATE POLICY "Allow public read access on vets" ON public.vets FOR SELECT USING (true);
+    -- Vets Policies
+    IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE tablename = 'vets' AND policyname = 'Allow public read access on vets') THEN
+        CREATE POLICY "Allow public read access on vets" ON public.vets FOR SELECT USING (true);
+    END IF;
 
-DROP POLICY IF EXISTS "Allow public read access on services" ON public.services;
-DROP POLICY IF EXISTS "Allow public insert access on services" ON public.services;
-CREATE POLICY "Allow public read access on services" ON public.services FOR SELECT USING (true);
-CREATE POLICY "Allow public insert access on services" ON public.services FOR INSERT WITH CHECK (true);
+    -- Services Policies
+    IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE tablename = 'services' AND policyname = 'Allow public read access on services') THEN
+        CREATE POLICY "Allow public read access on services" ON public.services FOR SELECT USING (true);
+    END IF;
+    IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE tablename = 'services' AND policyname = 'Allow public insert access on services') THEN
+        CREATE POLICY "Allow public insert access on services" ON public.services FOR INSERT WITH CHECK (true);
+    END IF;
 
-DROP POLICY IF EXISTS "Allow public read access on chemicals" ON public.chemicals;
-DROP POLICY IF EXISTS "Allow public insert access on chemicals" ON public.chemicals;
-CREATE POLICY "Allow public read access on chemicals" ON public.chemicals FOR SELECT USING (true);
-CREATE POLICY "Allow public insert access on chemicals" ON public.chemicals FOR INSERT WITH CHECK (true);
+    -- Chemicals Policies
+    IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE tablename = 'chemicals' AND policyname = 'Allow public read access on chemicals') THEN
+        CREATE POLICY "Allow public read access on chemicals" ON public.chemicals FOR SELECT USING (true);
+    END IF;
+    IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE tablename = 'chemicals' AND policyname = 'Allow public insert access on chemicals') THEN
+        CREATE POLICY "Allow public insert access on chemicals" ON public.chemicals FOR INSERT WITH CHECK (true);
+    END IF;
 
-DROP POLICY IF EXISTS "Allow public read access on orders" ON public.orders;
-DROP POLICY IF EXISTS "Allow public insert access on orders" ON public.orders;
-CREATE POLICY "Allow public read access on orders" ON public.orders FOR SELECT USING (true);
-CREATE POLICY "Allow public insert access on orders" ON public.orders FOR INSERT WITH CHECK (true);
+    -- Orders Policies
+    IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE tablename = 'orders' AND policyname = 'Allow public read access on orders') THEN
+        CREATE POLICY "Allow public read access on orders" ON public.orders FOR SELECT USING (true);
+    END IF;
+    IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE tablename = 'orders' AND policyname = 'Allow public insert access on orders') THEN
+        CREATE POLICY "Allow public insert access on orders" ON public.orders FOR INSERT WITH CHECK (true);
+    END IF;
 
-DROP POLICY IF EXISTS "Allow public read access on pending_approvals" ON public.pending_approvals;
-DROP POLICY IF EXISTS "Allow public insert access on pending_approvals" ON public.pending_approvals;
-CREATE POLICY "Allow public read access on pending_approvals" ON public.pending_approvals FOR SELECT USING (true);
-CREATE POLICY "Allow public insert access on pending_approvals" ON public.pending_approvals FOR INSERT WITH CHECK (true);
+    -- Pending Approvals Policies
+    IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE tablename = 'pending_approvals' AND policyname = 'Allow public read access on pending_approvals') THEN
+        CREATE POLICY "Allow public read access on pending_approvals" ON public.pending_approvals FOR SELECT USING (true);
+    END IF;
+    IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE tablename = 'pending_approvals' AND policyname = 'Allow public insert access on pending_approvals') THEN
+        CREATE POLICY "Allow public insert access on pending_approvals" ON public.pending_approvals FOR INSERT WITH CHECK (true);
+    END IF;
 
-DROP POLICY IF EXISTS "Allow public read access on vet_emergencies" ON public.vet_emergencies;
-DROP POLICY IF EXISTS "Allow public insert access on vet_emergencies" ON public.vet_emergencies;
-CREATE POLICY "Allow public read access on vet_emergencies" ON public.vet_emergencies FOR SELECT USING (true);
-CREATE POLICY "Allow public insert access on vet_emergencies" ON public.vet_emergencies FOR INSERT WITH CHECK (true);
+    -- Vet Emergencies Policies
+    IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE tablename = 'vet_emergencies' AND policyname = 'Allow public read access on vet_emergencies') THEN
+        CREATE POLICY "Allow public read access on vet_emergencies" ON public.vet_emergencies FOR SELECT USING (true);
+    END IF;
+    IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE tablename = 'vet_emergencies' AND policyname = 'Allow public insert access on vet_emergencies') THEN
+        CREATE POLICY "Allow public insert access on vet_emergencies" ON public.vet_emergencies FOR INSERT WITH CHECK (true);
+    END IF;
 
-DROP POLICY IF EXISTS "Allow public read access on mpesa_transactions" ON public.mpesa_transactions;
-DROP POLICY IF EXISTS "Allow public insert access on mpesa_transactions" ON public.mpesa_transactions;
-CREATE POLICY "Allow public read access on mpesa_transactions" ON public.mpesa_transactions FOR SELECT USING (true);
-CREATE POLICY "Allow public insert access on mpesa_transactions" ON public.mpesa_transactions FOR INSERT WITH CHECK (true);
+    -- Mpesa Transactions Policies
+    IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE tablename = 'mpesa_transactions' AND policyname = 'Allow public read access on mpesa_transactions') THEN
+        CREATE POLICY "Allow public read access on mpesa_transactions" ON public.mpesa_transactions FOR SELECT USING (true);
+    END IF;
+    IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE tablename = 'mpesa_transactions' AND policyname = 'Allow public insert access on mpesa_transactions') THEN
+        CREATE POLICY "Allow public insert access on mpesa_transactions" ON public.mpesa_transactions FOR INSERT WITH CHECK (true);
+    END IF;
+END $$;
